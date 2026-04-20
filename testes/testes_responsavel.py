@@ -44,8 +44,31 @@ def testar_setters_validos():
     assert r.numero == 456
     assert r.email == "joao@email.com"
 
+def testar_listagem():
+    Responsavel.limpar_lista_testes()
+    r1 = Responsavel("A", "52998224725", "1", "1", 1, "a@email.com")
+    r2 = Responsavel("B", "11144477735", "2", "2", 2, "b@email.com")
+
+    lista = Responsavel.listar_responsaveis()
+
+    assert len(lista) == 2
+    assert lista[0] == r1
+    assert lista[1] == r2
+
+def testar_exclusao():
+    Responsavel.limpar_lista_testes()
+    r1 = Responsavel("A", "52998224725", "1", "1", 1, "a@email.com")
+    r2 = Responsavel("B", "11144477735", "2", "2", 2, "b@email.com")
+
+    Responsavel.remover_responsavel(r1)
+
+    lista = Responsavel.listar_responsaveis()
+
+    assert len(lista) == 1
+    assert lista[0] == r2
 
 def testar_erros():
+    Responsavel.limpar_lista_testes()
     r = Responsavel(
         "Victor",
         "529.982.247-25",
@@ -108,7 +131,12 @@ def testar_erros():
         assert False, "email deveria falhar com tipo inválido"
     except ValueError:
         pass
-
+        Responsavel.remover_responsavel(r)
+    try:
+        Responsavel.remover_responsavel(r)
+        assert False, "Deveria falhar ao remover inexistente"
+    except ValueError:
+        pass
 
 def rodar_testes():
     print("Rodando testes...")
@@ -122,6 +150,11 @@ def rodar_testes():
     testar_erros()
     print("erros OK")
 
+    testar_listagem()
+    print("listagem OK")
+
+    testar_exclusao()
+    print("exclusão OK")
 
 if __name__ == "__main__":
     rodar_testes()

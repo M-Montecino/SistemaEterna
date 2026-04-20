@@ -1,6 +1,8 @@
 from utils.funcoesAuxiliares import validar_cpf, validar_email
 
 class Responsavel:
+    __responsaveis = []
+
     def __init__(self,
         nome: str,
         cpf: str,
@@ -9,12 +11,15 @@ class Responsavel:
         numero: int,
         email: str
     ) -> None:
-        self.__nome = nome
-        self.__cpf = cpf
-        self.__telefone = telefone
-        self.__cep = cep
-        self.__numero = numero
-        self.__email = email
+        self.nome = nome
+        self.cpf = cpf
+        self.telefone = telefone
+        self.cep = cep
+        self.numero = numero
+        self.email = email
+
+        Responsavel.__responsaveis.append(self)
+
 
     @property
     def nome(self) -> str:
@@ -81,3 +86,18 @@ class Responsavel:
             self.__email = email
         else:
             raise ValueError("E-mail inválido")
+
+    @classmethod
+    def listar_responsaveis(cls):
+        return cls.__responsaveis
+
+    @classmethod
+    def remover_responsavel(cls, responsavel):
+        if responsavel in cls.__responsaveis:
+            cls.__responsaveis.remove(responsavel)
+        else:
+            raise ValueError("Responsável não encontrado")
+
+    @classmethod
+    def limpar_lista_testes(cls):
+        cls.__responsaveis.clear()
