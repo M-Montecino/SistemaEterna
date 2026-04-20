@@ -11,25 +11,22 @@ class Tumulo:
             setor: str,
             numero: int,
             tipo: TipoTumulo,
-            capaciadade: int,
+            capacidade: int,
         ):
+
+        if not isinstance(codigo, int) or codigo < 0:
+            raise ValueError("Código deve ser um inteiro")
+
         self.__codigo = codigo
-        self.__setor = setor
-        self.__numero = numero
-        self.__tipo = tipo
-        self.__capacidade = capaciadade
-        self.__lotado = False
+        self.setor = setor
+        self.numero = numero
+        self.tipo = tipo
+        self.capacidade = capacidade
+        self.lotado = False
 
     @property
     def codigo(self) -> int:
         return self.__codigo
-    
-    @codigo.setter
-    def codigo(self, codigo: int):
-        if isinstance(codigo, int) and codigo > 0:
-            self.__codigo = codigo
-        else:
-            raise ValueError("Tipo de código inválido")
 
     @property
     def setor(self) -> str:
@@ -38,7 +35,7 @@ class Tumulo:
     @setor.setter
     def setor(self, setor: str):
         if isinstance(setor, str):
-            self.__setor = setor.strip()
+            self.__setor = setor.strip().upper()
         else:
             raise ValueError("Tipo de setor inválido")
 
