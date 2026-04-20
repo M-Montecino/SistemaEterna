@@ -81,6 +81,53 @@ def testar_erros():
     except ValueError:
         pass
 
+def testar_fluxo_crud():
+    registros = []
+
+    t1 = Tumulo(1, "A", 10, TipoTumulo.Cova, 3)
+    t2 = Tumulo(2, "B", 20, TipoTumulo.Cripta, 5)
+    t3 = Tumulo(3, "C", 30, TipoTumulo.Gaveteiro, 2)
+    registros.extend([t1, t2, t3])
+    
+    assert len(registros) == 3
+
+    print("\nListagem Inicial:")
+    for t in registros:
+        print(f"ID: {t.codigo} | Setor: {t.setor} | Tipo: {t.tipo.name} | Capacidade: {t.capacidade} | Lotado: {t.lotado}")
+
+    codigo_para_excluir = 2
+    registros = [t for t in registros if t.codigo != codigo_para_excluir]
+    
+    assert len(registros) == 2
+    assert all(t.codigo != 2 for t in registros)
+
+    print("\nListagem após exclusão:")
+    for t in registros:
+        print(f"ID: {t.codigo} | Setor: {t.setor} | Tipo: {t.tipo.name} | Capacidade: {t.capacidade} | Lotado: {t.lotado}")
+
+    t_para_alterar = next(t for t in registros if t.codigo == 3)
+    t_para_alterar.setor = "Z"
+    t_para_alterar.numero = 99
+    t_para_alterar.tipo = TipoTumulo.Cripta
+
+    assert t_para_alterar.setor == "Z"
+    assert t_para_alterar.numero == 99
+    assert t_para_alterar.tipo == TipoTumulo.Cripta
+
+    print("\nListagem após alteração do ID 3:")
+    for t in registros:
+        print(f"ID: {t.codigo} | Setor: {t.setor} | Num: {t.numero} | Tipo: {t.tipo.name} | Capacidade: {t.capacidade} | Lotado: {t.lotado}")
+
+    t4 = Tumulo(4, "D", 40, TipoTumulo.Cova, 1)
+    registros.append(t4)
+
+    assert len(registros) == 3
+    assert registros[-1].codigo == 4
+
+    print("\nListagem Final:")
+    for t in registros:
+        print(f"ID: {t.codigo} | Setor: {t.setor} | Tipo: {t.tipo.name} | Capacidade: {t.capacidade} | Lotado: {t.lotado}")
+
 def rodar_testes():
     print("Rodando testes...")
 
@@ -92,6 +139,10 @@ def rodar_testes():
 
     testar_erros()
     print("erros OK")
+
+    testar_fluxo_crud()
+    print("fluxo CRUD OK")
+
 
 if __name__ == "__main__":
     rodar_testes()
