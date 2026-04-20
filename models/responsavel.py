@@ -1,7 +1,7 @@
-from utils.funcoesAuxiliares import validar_cpf, validar_email
+from utils.funcoesAuxiliares import *
+import re
 
 class Responsavel:
-    __responsaveis = []
 
     def __init__(self,
         nome: str,
@@ -11,14 +11,15 @@ class Responsavel:
         numero: int,
         email: str
     ) -> None:
+        if not (isinstance(cpf, str) and validar_cpf(cpf)):
+            raise ValueError("CPF inválido")
+
         self.nome = nome
-        self.cpf = cpf
+        self.__cpf = re.sub(r'\D', '', cpf)
         self.telefone = telefone
         self.cep = cep
         self.numero = numero
         self.email = email
-
-        Responsavel.__responsaveis.append(self)
 
 
     @property
@@ -34,34 +35,31 @@ class Responsavel:
 
     @property
     def cpf(self) -> str:
-        return self.__cpf
-
-    @cpf.setter
-    def cpf(self, cpf: str) -> None:
-        if isinstance(cpf, str) and validar_cpf(cpf):
-            self.__cpf = cpf
-        else:
-            raise ValueError("CPF inválido")
+        c = self.__cpf 
+        return f"{c[:3]}.{c[3:6]}.{c[6:9]}-{c[9:]}"
 
     @property
     def telefone(self) -> str:
-        return self.__telefone
+        t = self.__telefone
+        return f"{t[:2]} {t[2:7]}-{t[7:]}"
 
     @telefone.setter
     def telefone(self, telefone: str) -> None:
-        if isinstance(telefone, str):
-            self.__telefone = telefone
+        if isinstance(telefone, str) and validar_telefone(telefone):
+            self.__telefone = re.sub(r'\D', '', telefone)
         else:
             raise ValueError("Tipo de telefone inválido")
 
     @property
     def cep(self) -> str:
-        return self.__cep
+        cep = self.__cep
+        return f"{cep[:5]}-{cep[5:]}"
+
 
     @cep.setter
     def cep(self, cep: str) -> None:
-        if isinstance(cep, str):
-            self.__cep = cep
+        if isinstance(cep, str) and validar_cep(cep):
+            self.__cep = re.sub(r'\D', '', cep)
         else:
             raise ValueError("Tipo de CEP inválido")
 
@@ -86,18 +84,3 @@ class Responsavel:
             self.__email = email
         else:
             raise ValueError("E-mail inválido")
-
-    @classmethod
-    def listar_responsaveis(cls):
-        return cls.__responsaveis
-
-    @classmethod
-    def remover_responsavel(cls, responsavel):
-        if responsavel in cls.__responsaveis:
-            cls.__responsaveis.remove(responsavel)
-        else:
-            raise ValueError("Responsável não encontrado")
-
-    @classmethod
-    def limpar_lista_testes(cls):
-        cls.__responsaveis.clear()

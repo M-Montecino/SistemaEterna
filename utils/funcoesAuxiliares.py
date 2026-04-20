@@ -22,3 +22,11 @@ def validar_cpf(cpf: str) -> bool:
 def validar_email(email: str) -> bool:
     padrao = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(padrao, email) is not None  #se for válido seguindo o padrão == true
+
+def validar_cep(cep: str) -> bool:
+    cep = re.sub(r'\D', '', cep)
+    return len(cep) == 8
+
+def validar_telefone(telefone: str) -> bool:
+    telefone = re.sub(r'\D', '', telefone)
+    return len(telefone) == 11
