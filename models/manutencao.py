@@ -8,11 +8,11 @@ class TipoServico(Enum):
 
 class Manutencao:
     def __init__(self, codigo, tumulo, tipo_servico, data, cpf_responsavel):
-        self.codigo = codigo
-        self.tumulo = tumulo
-        self.tipo_servico = tipo_servico
-        self.data = data
-        self.cpf_responsavel = cpf_responsavel
+        self.__codigo = codigo
+        self.__tumulo = tumulo
+        self.__tipo_servico = tipo_servico
+        self.__data = data
+        self.__cpf_responsavel = cpf_responsavel
 
     @property
     def codigo(self) -> int:

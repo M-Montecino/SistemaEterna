@@ -1,7 +1,9 @@
 #este arquivo será excluido posteriormente
+import sys
+sys.path.append('.')
 
 from datetime import datetime
-from manutencao import Manutencao, TipoServico
+from models.manutencao import Manutencao, TipoServico
 
 m = Manutencao(
     codigo=1,
