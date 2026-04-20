@@ -18,13 +18,6 @@ class Manutencao:
     def codigo(self) -> int:
         return self.__codigo
 
-    @codigo.setter
-    def codigo(self, codigo: int):
-        if isinstance(codigo, int):
-            self.__codigo = codigo
-        else:
-            raise ValueError("Tipo de código inválido")
-
     #Sem checagem porque não existe a classe Tumulo ainda
     @property
     def tumulo(self):
