@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from models.tumulo import Tumulo
 
 class TipoServico(Enum):
     Limpeza = 1
@@ -18,14 +19,16 @@ class Manutencao:
     def codigo(self) -> int:
         return self.__codigo
 
-    #Sem checagem porque não existe a classe Tumulo ainda
     @property
-    def tumulo(self):
+    def tumulo(self) -> Tumulo:
         return self.__tumulo
 
     @tumulo.setter
-    def tumulo(self, tumulo):
-        self.__tumulo = tumulo
+    def tumulo(self, tumulo: Tumulo):
+        if isinstance(tumulo, Tumulo):
+            self.__tumulo = tumulo
+        else:
+            raise ValueError("Tipo de túmulo inválido")
 
     @property
     def tipo_servico(self) -> TipoServico:
