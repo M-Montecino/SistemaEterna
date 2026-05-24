@@ -2,8 +2,13 @@ import tkinter as tk
 from tkinter import messagebox
 
 class TelaMenu:
-    def __init__(self):
-        self.__root = tk.Tk()
+    def __init__(self, master=None):
+        if master is None:
+            self.__root = tk.Tk()
+        else:
+            self.__root = tk.Toplevel(master)
+            self.__root.transient(master)
+
         self.__root.title("Sistema Eterna")
         self.__root.geometry("320x520")
         self.__root.resizable(False, False)
@@ -25,6 +30,7 @@ class TelaMenu:
             ("Responsável", 4),
             ("Usuário", 5),
             ("Exumação", 6),
+            ("Logout", 7),
             ("Encerrar Sistema", 0)
         ]
 
@@ -43,6 +49,10 @@ class TelaMenu:
         self.__opcao = valor
         self.__root.quit()
 
+    def __fechar_janela(self):
+        self.__opcao = 0
+        self.__root.quit()
+
     def tela_opcoes(self):
         self.__opcao = None
 
@@ -52,10 +62,6 @@ class TelaMenu:
             self.__opcao = 0
 
         return self.__opcao
-
-    def __fechar_janela(self):
-        self.__opcao = 0
-        self.__root.quit()
 
     @property
     def root(self):
