@@ -4,9 +4,7 @@ class ControladorGeral:
     def __init__(self):
         self.__controlador_manutencao = None
         self.__controlador_tumulo = None
-        self.__controlador_falecido = None
         self.__controlador_sepultamento = None
-        self.__controlador_concessao = None
         self.__controlador_responsavel = None
         self.__controlador_usuario = None
         self.__controlador_exumacao = None
@@ -21,16 +19,8 @@ class ControladorGeral:
         return self.__controlador_tumulo
     
     @property
-    def controlador_falecido(self):
-        return self.__controlador_falecido
-    
-    @property
     def controlador_sepultamento(self):
         return self.__controlador_sepultamento
-    
-    @property
-    def controlador_concessao(self):
-        return self.__controlador_concessao
     
     @property
     def controlador_responsavel(self):
@@ -75,18 +65,6 @@ class ControladorGeral:
                 return
         self.__controlador_tumulo.abre_tela()
 
-    def abre_falecido(self):
-        if self.__controlador_falecido is None:
-            try:
-                from controllers.controlador_falecido import ControladorFalecido
-                self.__controlador_falecido = ControladorFalecido(self)
-            except ModuleNotFoundError:
-                self.__tela_menu.mostra_mensagem(
-                    "Função Falecido ainda não está implementada."
-                )
-                return
-        self.__controlador_falecido.abre_tela()
-
     def abre_sepultamento(self):
         if self.__controlador_sepultamento is None:
             try:
@@ -98,18 +76,6 @@ class ControladorGeral:
                 )
                 return
         self.__controlador_sepultamento.abre_tela()
-
-    def abre_concessao(self):
-        if self.__controlador_concessao is None:
-            try:
-                from controllers.controlador_concessao import ControladorConcessao
-                self.__controlador_concessao = ControladorConcessao(self)
-            except ModuleNotFoundError:
-                self.__tela_menu.mostra_mensagem(
-                    "Função Concessão ainda não está implementada."
-                )
-                return
-        self.__controlador_concessao.abre_tela()
 
     def abre_responsavel(self):
         if self.__controlador_responsavel is None:
@@ -155,12 +121,10 @@ class ControladorGeral:
         lista_opcoes = {
             1: self.abre_manutencao,
             2: self.abre_tumulo,
-            3: self.abre_falecido,
-            4: self.abre_sepultamento,
-            5: self.abre_concessao,
-            6: self.abre_responsavel,
-            7: self.abre_usuario,
-            8: self.abre_exumacao,
+            3: self.abre_sepultamento,
+            4: self.abre_responsavel,
+            5: self.abre_usuario,
+            6: self.abre_exumacao,
             0: self.encerra_sistema
         }
 

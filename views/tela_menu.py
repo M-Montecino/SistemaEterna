@@ -21,12 +21,10 @@ class TelaMenu:
         botoes = [
             ("Manutenção", 1),
             ("Túmulo", 2),
-            ("Falecido", 3),
-            ("Sepultamento", 4),
-            ("Concessão", 5),
-            ("Responsável", 6),
-            ("Usuário", 7),
-            ("Exumação", 8),
+            ("Sepultamento", 3),
+            ("Responsável", 4),
+            ("Usuário", 5),
+            ("Exumação", 6),
             ("Encerrar Sistema", 0)
         ]
 

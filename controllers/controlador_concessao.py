@@ -1,2 +1,0 @@
-class ControladorConcessao:
-    pass

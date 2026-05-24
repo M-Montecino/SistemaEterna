@@ -4,9 +4,9 @@ from models.pagamento import Pagamento, TipoPagamento
 from models.responsavel import Responsavel 
 
 class StatusConcessao(Enum):
-    Ativa = 1
-    Carencia = 2
-    Vencida = 3
+    ATIVA = 1
+    CARENCIA = 2
+    VENCIDA = 3
 
 class Concessao:
     def __init__(self, valor, data_pagamento, tipo_pagamento, responsavel, responsavel2, data_inicio, data_fim, status):
