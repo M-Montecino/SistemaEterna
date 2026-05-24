@@ -3,9 +3,9 @@ from enum import Enum
 from models.tumulo import Tumulo
 
 class TipoServico(Enum):
-    Limpeza = 1
-    Reparo = 2
-    Outro = 3
+    LIMPEZA = 1
+    REPARO = 2
+    OUTRO = 3
 
 class Manutencao:
     def __init__(self, codigo, tumulo, tipo_servico, data, cpf_responsavel):

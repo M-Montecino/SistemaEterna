@@ -28,9 +28,31 @@ class ControladorManutencao:
         if codigo > 999999:
             raise ValueError("Código muito grande.")
 
-    def __validar_tipo_servico(self, tipo_servico):
-        if not isinstance(tipo_servico, TipoServico):
-            raise ValueError("Tipo de serviço inválido.")
+    def __converter_tipo_servico(self, tipo_servico):
+        if isinstance(tipo_servico, TipoServico):
+            return tipo_servico
+
+        if isinstance(tipo_servico, str):
+            texto = tipo_servico.strip()
+            if texto.isdigit():
+                try:
+                    return TipoServico(int(texto))
+                except ValueError:
+                    pass
+
+            texto_normalizado = texto.strip().upper()
+            try:
+                return TipoServico[texto_normalizado]
+            except KeyError:
+                raise ValueError("Tipo de serviço inválido.")
+
+        if isinstance(tipo_servico, int):
+            try:
+                return TipoServico(tipo_servico)
+            except ValueError:
+                pass
+
+        raise ValueError("Tipo de serviço inválido.")
 
     def __validar_data(self, data: datetime):
         if not isinstance(data, datetime):
@@ -56,7 +78,7 @@ class ControladorManutencao:
         
     def __validar_dados_manutencao(self, dados):
         self.__validar_codigo(dados['codigo'])
-        self.__validar_tipo_servico(dados['tipo_servico'])
+        dados['tipo_servico'] = self.__converter_tipo_servico(dados['tipo_servico'])
         self.__validar_data(dados['data'])
         self.__validar_cpf(dados['cpf_responsavel'])
 
@@ -75,7 +97,7 @@ class ControladorManutencao:
             dados_manutencao = self.__tela_manutencao.pega_dados_manutencao()
             self.__validar_dados_manutencao(dados_manutencao)
 
-            if self.auxiliar_busca_manutencao(dados_manutencao['codigo']):
+            if self.__auxiliar_busca_manutencao(dados_manutencao['codigo']):
                 self.__tela_manutencao.mostra_mensagem(
                     "Código já cadastrado."
                 )
@@ -120,11 +142,7 @@ class ControladorManutencao:
                 manutencao.tumulo = nova_manutencao['tumulo']
 
             if nova_manutencao['tipo_servico'] is not None:
-                self.__validar_tipo_servico(
-                    nova_manutencao['tipo_servico']
-                )
-
-                manutencao.tipo_servico = (
+                manutencao.tipo_servico = self.__converter_tipo_servico(
                     nova_manutencao['tipo_servico']
                 )
 
@@ -216,4 +234,4 @@ class ControladorManutencao:
                         "Opção inválida. Tente novamente.")
             except ValueError as e:
                 self.__tela_manutencao.mostra_mensagem(
-                    f"Comando inesperado: {str(e)}")
+                    f"Erro: {str(e)}")
