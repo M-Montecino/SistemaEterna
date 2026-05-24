@@ -1,13 +1,15 @@
 from models.manutencao import Manutencao, TipoServico
-from controllers.controlador_geral import ControladorGeral
 from views.tela_manutencao import TelaManutencao
 from datetime import datetime
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from controllers.controlador_geral import ControladorGeral
 
 class ControladorManutencao:
     def __init__(self, controlador_geral: "ControladorGeral"):
         self.__manutencoes = []
         self.__controlador_geral = controlador_geral
-        self.__tela_manutencao = TelaManutencao()
+        self.__tela_manutencao = TelaManutencao(controlador_geral.tela_menu.root)
 
     #Funções auxiliares
     def __auxiliar_busca_manutencao(self, codigo: int):
@@ -189,7 +191,7 @@ class ControladorManutencao:
             )
 
     def retomar_menu(self):
-        self.__controlador_geral.abre_tela()
+        return
 
     def abre_tela(self):
         listar_opcoes = {
@@ -207,6 +209,8 @@ class ControladorManutencao:
                 funcao_escolhida = listar_opcoes.get(opcao_escolhida)
                 if funcao_escolhida:
                     funcao_escolhida()
+                    if opcao_escolhida == 0:
+                        break
                 else:
                     self.__tela_manutencao.mostra_mensagem(
                         "Opção inválida. Tente novamente.")

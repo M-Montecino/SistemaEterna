@@ -1,24 +1,15 @@
 from views.tela_menu import TelaMenu
-from controllers.controlador_manutencao import ControladorManutencao
-from controllers.controlador_tumulo import ControladorTumulo
-from controllers.controlador_falecido import ControladorFalecido
-from controllers.controlador_sepultamento import ControladorSepultamento
-from controllers.controlador_concessao import ControladorConcessao
-from controllers.controlador_responsavel import ControladorResponsavel
-from controllers.controlador_usuario import ControladorUsuario
-from controllers.controlador_exumacao import ControladorExumacao
-
 
 class ControladorGeral:
     def __init__(self):
-        self.__controlador_manutencao = ControladorManutencao(self)
-        self.__controlador_tumulo = ControladorTumulo(self)
-        self.__controlador_falecido = ControladorFalecido(self)
-        self.__controlador_sepultamento = ControladorSepultamento(self)
-        self.__controlador_concessao = ControladorConcessao(self)
-        self.__controlador_responsavel = ControladorResponsavel(self)
-        self.__controlador_usuario = ControladorUsuario(self)
-        self.__controlador_exumacao = ControladorExumacao(self)
+        self.__controlador_manutencao = None
+        self.__controlador_tumulo = None
+        self.__controlador_falecido = None
+        self.__controlador_sepultamento = None
+        self.__controlador_concessao = None
+        self.__controlador_responsavel = None
+        self.__controlador_usuario = None
+        self.__controlador_exumacao = None
         self.__tela_menu = TelaMenu()
 
     @property
@@ -61,27 +52,99 @@ class ControladorGeral:
         self.abre_tela()
 
     def abre_manutencao(self):
+        if self.controlador_manutencao is None:
+            try:
+                from controllers.controlador_manutencao import ControladorManutencao
+                self.__controlador_manutencao = ControladorManutencao(self)
+            except ModuleNotFoundError:
+                self.__tela_menu.mostra_mensagem(
+                    "Função Manutenção ainda não está implementada."
+                )
+                return
         self.__controlador_manutencao.abre_tela()
 
     def abre_tumulo(self):
+        if self.__controlador_tumulo is None:
+            try:
+                from controllers.controlador_tumulo import ControladorTumulo
+                self.__controlador_tumulo = ControladorTumulo(self)
+            except ModuleNotFoundError:
+                self.__tela_menu.mostra_mensagem(
+                    "Função Túmulo ainda não está implementada."
+                )
+                return
         self.__controlador_tumulo.abre_tela()
 
     def abre_falecido(self):
+        if self.__controlador_falecido is None:
+            try:
+                from controllers.controlador_falecido import ControladorFalecido
+                self.__controlador_falecido = ControladorFalecido(self)
+            except ModuleNotFoundError:
+                self.__tela_menu.mostra_mensagem(
+                    "Função Falecido ainda não está implementada."
+                )
+                return
         self.__controlador_falecido.abre_tela()
 
     def abre_sepultamento(self):
+        if self.__controlador_sepultamento is None:
+            try:
+                from controllers.controlador_sepultamento import ControladorSepultamento
+                self.__controlador_sepultamento = ControladorSepultamento(self)
+            except ModuleNotFoundError:
+                self.__tela_menu.mostra_mensagem(
+                    "Função Sepultamento ainda não está implementada."
+                )
+                return
         self.__controlador_sepultamento.abre_tela()
 
     def abre_concessao(self):
+        if self.__controlador_concessao is None:
+            try:
+                from controllers.controlador_concessao import ControladorConcessao
+                self.__controlador_concessao = ControladorConcessao(self)
+            except ModuleNotFoundError:
+                self.__tela_menu.mostra_mensagem(
+                    "Função Concessão ainda não está implementada."
+                )
+                return
         self.__controlador_concessao.abre_tela()
 
     def abre_responsavel(self):
+        if self.__controlador_responsavel is None:
+            try:
+                from controllers.controlador_responsavel import ControladorResponsavel
+                self.__controlador_responsavel = ControladorResponsavel(self)
+            except ModuleNotFoundError:
+                self.__tela_menu.mostra_mensagem(
+                    "Função Responsável ainda não está implementada."
+                )
+                return
         self.__controlador_responsavel.abre_tela()
 
     def abre_usuario(self):
+        if self.__controlador_usuario is None:
+            try:
+                from controllers.controlador_usuario import ControladorUsuario
+                self.__controlador_usuario = ControladorUsuario(self)
+            except ModuleNotFoundError:
+                self.__tela_menu.mostra_mensagem(
+                    "Função Usuário ainda não está implementada."
+                )
+                return
         self.__controlador_usuario.abre_tela()
 
     def abre_exumacao(self):
+        if self.__controlador_exumacao is None:
+            try:
+                from controllers.controlador_exumacao import ControladorExumacao
+                self.__controlador_exumacao = ControladorExumacao(self)
+            except ModuleNotFoundError:
+                self.__tela_menu.mostra_mensagem(
+                    "Função Exumação ainda não está implementada."
+                )
+                return
         self.__controlador_exumacao.abre_tela()
 
     def encerra_sistema(self):
