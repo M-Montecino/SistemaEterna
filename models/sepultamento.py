@@ -14,7 +14,7 @@ class Sepultamento:
         data_falecimento: datetime,
         causa_morte: str,
         tumulo: Tumulo,
-        valor_pagamento: float,
+        valor: float,
         data_pagamento: datetime,
         tipo_pagamento,
         responsavel,
@@ -37,7 +37,7 @@ class Sepultamento:
         self.tumulo = tumulo
 
         self.__concessao = Concessao(
-            valor_pagamento,
+            valor,
             data_pagamento,
             tipo_pagamento,
             responsavel,

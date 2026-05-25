@@ -7,7 +7,7 @@ class TipoPagamento(Enum):
     Pix = 3
 
 class Pagamento:
-    def __init__(self, valor, data_pagamento, tipo_pagamento):
+    def __init__(self, valor: float, data_pagamento, tipo_pagamento):
         self.__valor = valor
         self.__data_pagamento = data_pagamento
         self.__tipo_pagamento = tipo_pagamento

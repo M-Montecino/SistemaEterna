@@ -2,6 +2,7 @@ from models.sepultamento import Sepultamento
 from models.pagamento import Pagamento, TipoPagamento
 from models.falecido import Falecido
 from models.concessao import Concessao, StatusConcessao
+from models.tumulo import *
 from utils.funcoesAuxiliares import validar_cpf
 
 from views.tela_sepultamento import TelaSepultamento
@@ -18,7 +19,39 @@ class ControladorSepultamento:
     def __init__(
         self,
         controlador_geral: "ControladorGeral"):
-        self.__sepultamentos = []
+        self.__sepultamentos = [
+            Sepultamento(
+    cpf_falecido = "794.880.230-40",
+    nome_falecido = "Carlos Pereira",
+    data_nascimento = datetime.strptime("15/04/1950", "%d/%m/%Y"),
+    data_falecimento = datetime.strptime("20/05/2026", "%d/%m/%Y"),
+    causa_morte = "Causas naturais",
+
+    tumulo = Tumulo(
+    codigo=1,
+    setor="A",
+    numero=12,
+    tipo=TipoTumulo.Gaveteiro,
+    capacidade=2
+),
+
+    valor = 2500.00,
+    data_pagamento = datetime.strptime("21/05/2026", "%d/%m/%Y"),
+    tipo_pagamento = "PIX",
+
+    responsavel = '479.768.520-43',
+    responsavel2 = '310.531.250-11',
+
+    data_inicio_cons = datetime.strptime("21/05/2026", "%d/%m/%Y"),
+    data_final_cons = datetime.strptime("21/05/2031", "%d/%m/%Y"),
+
+    status = 2,
+
+    data_sepultamento = datetime.strptime("22/05/2026", "%d/%m/%Y"),
+
+    observacoes = "Sepultamento realizado sem ocorrências.")
+        ]
+
         self.__controlador_geral = (controlador_geral)
         self.__tela_sepultamento = (TelaSepultamento(controlador_geral.tela_menu.root))
 
@@ -80,7 +113,7 @@ class ControladorSepultamento:
             try:
                 return TipoPagamento[texto_normalizado]
             except KeyError:
-                raise ValueError("Tipo de serviço inválido.")
+                raise ValueError("Tipo de pagamento inválido.")
 
         if isinstance(tipo_pagamento, int):
             try:
@@ -127,7 +160,7 @@ class ControladorSepultamento:
         self.__validar_data(dados['data_falecimento'])
         self.__validar_texto(dados['causa_morte'])
         self.__validar_texto(dados['tumulo'])
-        self.__validar_valor_pagamento(dados['valor_pagamento'])
+        self.__validar_valor_pagamento(dados['valor'])
         self.__validar_data(dados['data_pagamento'])
         dados['tipo_pagamento'] = self.__converter_tipo_pagamento(dados['tipo_pagamento'])
         self.__validar_cpf(dados['responsavel'])
@@ -163,7 +196,7 @@ class ControladorSepultamento:
                 sepultamento.data_sepultamento.strftime("%d/%m/%Y"),
             "Observações:":
                 sepultamento.observacoes,
-            "Valor Pagamento:": concessao.valor_pagamento}
+            "Valor:": concessao.pagamento.valor}
     
     #metodos principais
     def cadastrar_sepultamento(self):
@@ -186,7 +219,7 @@ class ControladorSepultamento:
 
                     dados['tumulo'],
 
-                    dados['valor_pagamento'],
+                    dados['valor'],
                     dados['data_pagamento'],
                     dados['tipo_pagamento'],
 
@@ -245,9 +278,9 @@ class ControladorSepultamento:
                 self.__validar_texto(novo_sepultamento['tumulo'])
                 sepultamento.tumulo = novo_sepultamento['tumulo']
 
-            if novo_sepultamento['valor_pagamento'] is not None:
-                self.__validar_valor_pagamento(novo_sepultamento['valor_pagamento'])
-                sepultamento.concessao.valor_pagamento = novo_sepultamento['valor_pagamento']
+            if novo_sepultamento['valor'] is not None:
+                self.__validar_valor_pagamento(novo_sepultamento['valor'])
+                sepultamento.concessao.valor = novo_sepultamento['valor']
 
             if novo_sepultamento['data_pagamento'] is not None:
                 self.__validar_data(novo_sepultamento['data_pagamento'])

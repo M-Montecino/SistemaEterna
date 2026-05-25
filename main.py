@@ -3,5 +3,5 @@ from controllers.controlador_geral import ControladorGeral
 
 if __name__ == "__main__":
     ControladorGeral().inicializa_sistema()
-    #00000000000
-    #admin123
+    # 00000000000
+    # admin123
