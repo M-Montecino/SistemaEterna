@@ -1,4 +1,5 @@
 import re
+import tkinter as tk
 
 def validar_cpf(cpf: str) -> bool:
     cpf = re.sub(r'\D', '', cpf) #se ñ é digito = vazio
@@ -30,3 +31,17 @@ def validar_cep(cep: str) -> bool:
 def validar_telefone(telefone: str) -> bool:
     telefone = re.sub(r'\D', '', telefone)
     return len(telefone) == 11
+
+def mascara_data(event):
+    texto = event.widget.get()
+
+    texto = texto.replace("/", "")
+
+    if len(texto) > 2:
+        texto = texto[:2] + "/" + texto[2:]
+
+    if len(texto) > 5:
+        texto = texto[:5] + "/" + texto[5:]
+
+    event.widget.delete(0, tk.END)
+    event.widget.insert(0, texto[:10])

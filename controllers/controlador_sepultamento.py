@@ -162,7 +162,6 @@ class ControladorSepultamento:
                     funcao()
                     if opcao == 0:
                         break
-
                 else:
                     self.__tela_sepultamento.mostra_mensagem("Opção inválida.")
 

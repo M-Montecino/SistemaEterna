@@ -1,10 +1,9 @@
 import tkinter as tk
-
+from utils.funcoesAuxiliares import mascara_data
 from tkinter import (
     messagebox,
     simpledialog
 )
-
 from datetime import datetime
 
 
@@ -76,6 +75,7 @@ class TelaSepultamento:
         ).place(x=0, y=60)
         nascimento_str = tk.Entry(janela_cadastro)
         nascimento_str.place(x=190, y=60)
+        nascimento_str.bind("<KeyRelease>", mascara_data)
 
         tk.Label(
             janela_cadastro,
@@ -83,6 +83,8 @@ class TelaSepultamento:
         ).place(x=0, y=90)
         falecimento_str = tk.Entry(janela_cadastro)
         falecimento_str.place(x=190, y=90)
+        falecimento_str.bind("<KeyRelease>", mascara_data)
+
 
         tk.Label(
             janela_cadastro,
@@ -98,81 +100,49 @@ class TelaSepultamento:
         tumulo = tk.Entry(janela_cadastro)
         tumulo.place(x=190, y=150)
 
-        tk.Label(
-            janela_cadastro,
-            text='Valor pagamento'
-        ).place(x=0, y=180)
+        tk.Label(janela_cadastro,text='Valor pagamento').place(x=0, y=180)
         valor_pagamento = tk.Entry(janela_cadastro)
         valor_pagamento.place(x=190, y=180)
 
-        tk.Label(
-            janela_cadastro,
-            text='Data pagamento (dd/mm/aaaa)'
-        ).place(x=0, y=210)
+        tk.Label(janela_cadastro,text='Data pagamento (dd/mm/aaaa)').place(x=0, y=210)
         pagamento_str = tk.Entry(janela_cadastro)
         pagamento_str.place(x=190, y=210)
+        pagamento_str.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(
-            janela_cadastro,
-            text='Tipo pagamento'
-        ).place(x=0, y=240)
+        tk.Label(janela_cadastro,text='Tipo pagamento').place(x=0, y=240)
         tipo_pagamento = tk.Entry(janela_cadastro)
         tipo_pagamento.place(x=190, y=240)
 
-        tk.Label(
-            janela_cadastro,
-            text='Responsável 1'
-        ).place(x=0, y=270)
+        tk.Label(janela_cadastro, text='Responsável 1').place(x=0, y=270)
         responsavel = tk.Entry(janela_cadastro)
         responsavel.place(x=190, y=270)
 
-        tk.Label(
-            janela_cadastro,
-            text='Responsável 2'
-        ).place(x=0, y=300)
+        tk.Label(janela_cadastro,text='Responsável 2').place(x=0, y=300)
         responsavel2 = tk.Entry(janela_cadastro)
         responsavel2.place(x=190, y=300)
 
-        tk.Label(
-            janela_cadastro,
-            text='Início concessão (dd/mm/aaaa)'
-        ).place(x=0, y=330)
+        tk.Label(janela_cadastro,text='Início concessão (dd/mm/aaaa)').place(x=0, y=330)
         inicio_cons_str = tk.Entry(janela_cadastro)
         inicio_cons_str.place(x=190, y=330)
 
-        tk.Label(
-            janela_cadastro,
-            text='Final concessão (dd/mm/aaaa)'
-        ).place(x=0, y=360)
+
+        tk.Label(janela_cadastro,text='Final concessão (dd/mm/aaaa)').place(x=0, y=360)
         final_cons_str = tk.Entry(janela_cadastro)
         final_cons_str.place(x=190, y=360)
+        final_cons_str.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(
-            janela_cadastro,
-            text='Status (1-Ativa / 2-Carência / 3-Vencida)'
-        ).place(x=0, y=390)
+        tk.Label(janela_cadastro,text='Status (1-Ativa / 2-Carência / 3-Vencida)').place(x=0, y=390)
 
         status = tk.Entry(janela_cadastro)
         status.place(x=250, y=390)
 
-        tk.Label(
-            janela_cadastro,
-            text='Data sepultamento (dd/mm/aaaa)'
-        ).place(x=0, y=420)
-
+        tk.Label(janela_cadastro,text='Data sepultamento (dd/mm/aaaa)').place(x=0, y=420)
         sepultamento_str = tk.Entry(janela_cadastro)
         sepultamento_str.place(x=190, y=420)
+        sepultamento_str.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(
-            janela_cadastro,
-            text='Observações'
-        ).place(x=0, y=450)
-
-        observacoes = tk.Entry(
-            janela_cadastro,
-            width=35
-        )
-
+        tk.Label(janela_cadastro,text='Observações').place(x=0, y=450)
+        observacoes = tk.Entry(janela_cadastro,width=35)
         observacoes.place(x=190, y=450)
 
         def confirmar():
