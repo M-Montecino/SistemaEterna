@@ -1,8 +1,7 @@
 from datetime import datetime
-
-from tumulo import Tumulo
-from falecido import Falecido
-from concessao import *
+from models.tumulo import Tumulo
+from models.falecido import Falecido
+from models.concessao import *
 
 
 class Sepultamento:
