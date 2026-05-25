@@ -67,7 +67,7 @@ class Falecido:
     def causa_morte(self, causa):
         if not isinstance(
             causa, str):
-            raise TypeError("causa_morte ""deve ser string")
+            raise TypeError("causa_morte deve ser string")
         if not causa.strip():
             raise ValueError("causa_morte inválida")
         self.__causa_morte = causa

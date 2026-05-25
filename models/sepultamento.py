@@ -2,7 +2,7 @@ from datetime import datetime
 
 from tumulo import Tumulo
 from falecido import Falecido
-from concessao import Concessao
+from concessao import *
 
 
 class Sepultamento:
@@ -22,7 +22,7 @@ class Sepultamento:
         responsavel2,
         data_inicio_cons: datetime,
         data_final_cons: datetime,
-        status: bool,
+        status: StatusConcessao,
         data_sepultamento: datetime,
         observacoes: str,
     ):
