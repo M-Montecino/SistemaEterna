@@ -24,11 +24,13 @@ class Manutencao:
         return self.__tumulo
 
     @tumulo.setter
-    def tumulo(self, tumulo: Tumulo):
-        if isinstance(tumulo, Tumulo):
-            self.__tumulo = tumulo
-        else:
-            raise ValueError("Tipo de túmulo inválido")
+    def tumulo (self, tumulo):
+        self.__tumulo = tumulo
+    #def tumulo(self, tumulo: Tumulo):
+     #   if isinstance(tumulo, Tumulo):
+       #     self.__tumulo = tumulo
+       # else:
+        #    raise ValueError("Tipo de túmulo inválido")
 
     @property
     def tipo_servico(self) -> TipoServico:
