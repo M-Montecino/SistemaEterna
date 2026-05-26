@@ -63,24 +63,6 @@ class ControladorSepultamento:
                 return sep
         return None
 
-    def __validar_cpf(self, cpf: str):
-        cpf = ''.join(filter(str.isdigit, cpf))
-
-        if len(cpf) != 11:
-            raise ValueError("CPF deve possuir 11 dígitos.")
-
-        if cpf == cpf[0] * 11:
-            raise ValueError("CPF inválido.")
-        
-        soma = sum(int(cpf[i]) * (10 - i) for i in range(9))
-        digito1 = (soma * 10 % 11) % 10
-
-        soma = sum(int(cpf[i]) * (11 - i) for i in range(10))
-        digito2 = (soma * 10 % 11) % 10
-
-        if int(cpf[9]) != digito1 or int(cpf[10]) != digito2:
-            raise ValueError("CPF inválido.")
-    
     def __validar_nome(self, nome: str):
         if not nome.strip():
             raise ValueError("Nome não pode ser vazio.")
@@ -154,7 +136,8 @@ class ControladorSepultamento:
             raise ValueError("Data inválida.")
 
     def __validar_dados_sepultamento(self, dados):
-        self.__validar_cpf(dados['cpf_falecido'])
+        if not validar_cpf(dados['cpf_falecido']):
+            raise ValueError("CPF do falecido inválido.")
         self.__validar_nome(dados['nome_falecido'])
         self.__validar_data(dados['data_nascimento'])
         self.__validar_data(dados['data_falecimento'])
@@ -163,8 +146,11 @@ class ControladorSepultamento:
         self.__validar_valor_pagamento(dados['valor'])
         self.__validar_data(dados['data_pagamento'])
         dados['tipo_pagamento'] = self.__converter_tipo_pagamento(dados['tipo_pagamento'])
-        self.__validar_cpf(dados['responsavel'])
-        self.__validar_cpf(dados['responsavel2'])
+        if not validar_cpf(dados['responsavel']):
+            raise ValueError("CPF do falecido inválido.")
+        
+        if not validar_cpf(dados['responsavel2']):
+            raise ValueError("CPF do falecido inválido.")
         self.__validar_data(dados['data_inicio_cons'])
         self.__validar_data(dados['data_final_cons'])
         dados['status'] = self.__converter_status_concessao(dados['status'])
@@ -245,8 +231,9 @@ class ControladorSepultamento:
 
     def alterar_sepultamento(self):
         try:
-            cpf = self.__tela_sepultamento.alterar_sepultamento()
-            self.__validar_cpf(cpf)
+            cpf = self.__tela_sepultamento.pega_cpf_alteracao()
+            if not validar_cpf(cpf):
+                raise ValueError("CPF do falecido inválido.")
             sepultamento = self.__auxiliar_busca_sepultamento(cpf)
 
             if not sepultamento:
@@ -274,47 +261,47 @@ class ControladorSepultamento:
                 self.__validar_texto(novo_sepultamento['causa_morte'])
                 sepultamento.falecido.causa_morte = novo_sepultamento['causa_morte']
 
-            if novo_sepultamento['tumulo'] is not None:
-                self.__validar_texto(novo_sepultamento['tumulo'])
-                sepultamento.tumulo = novo_sepultamento['tumulo']
+            #if novo_sepultamento['tumulo'] is not None:
+            #    self.__validar_texto(novo_sepultamento['tumulo'])
+            #    sepultamento.tumulo = novo_sepultamento['tumulo']
 
-            if novo_sepultamento['valor'] is not None:
-                self.__validar_valor_pagamento(novo_sepultamento['valor'])
-                sepultamento.concessao.valor = novo_sepultamento['valor']
+            #if novo_sepultamento['valor'] is not None:
+             #   self.__validar_valor_pagamento(novo_sepultamento['valor'])
+            #    sepultamento.concessao.valor = novo_sepultamento['valor']
 
-            if novo_sepultamento['data_pagamento'] is not None:
-                self.__validar_data(novo_sepultamento['data_pagamento'])
-                sepultamento.concessao.data_pagamento = novo_sepultamento['data_pagamento']
+           # if novo_sepultamento['data_pagamento'] is not None:
+            #    self.__validar_data(novo_sepultamento['data_pagamento'])
+            #    sepultamento.concessao.data_pagamento = novo_sepultamento['data_pagamento']
 
-            if novo_sepultamento['tipo_pagamento'] is not None:
-                sepultamento.concessao.tipo_pagamento = self.__converter_tipo_pagamento(novo_sepultamento['tipo_pagamento'])
+            #if novo_sepultamento['tipo_pagamento'] is not None:
+            #    sepultamento.concessao.tipo_pagamento = self.__converter_tipo_pagamento(novo_sepultamento['tipo_pagamento'])
 
-            if novo_sepultamento['responsavel'] is not None:
-                self.__validar_cpf(novo_sepultamento['responsavel'])
-                sepultamento.responsavel = novo_sepultamento['responsavel']
+            #if novo_sepultamento['responsavel'] is not None:
+             #   self.__validar_cpf(novo_sepultamento['responsavel'])
+             #   sepultamento.responsavel = novo_sepultamento['responsavel']
 
-            if novo_sepultamento['responsavel2'] is not None:
-                self.__validar_cpf(novo_sepultamento['responsavel2'])
-                sepultamento.responsavel2 = novo_sepultamento['responsavel2']
+           # if novo_sepultamento['responsavel2'] is not None:
+              #  self.__validar_cpf(novo_sepultamento['responsavel2'])
+              #  sepultamento.responsavel2 = novo_sepultamento['responsavel2']
 
-            if novo_sepultamento['data_inicio_cons'] is not None:
-                self.__validar_data(novo_sepultamento['data_inicio_cons'])
-                sepultamento.concessao.data_inicio_cons = novo_sepultamento['data_inicio_cons']
+           # if novo_sepultamento['data_inicio_cons'] is not None:
+               # self.__validar_data(novo_sepultamento['data_inicio_cons'])
+               # sepultamento.concessao.data_inicio_cons = novo_sepultamento['data_inicio_cons']
 
-            if novo_sepultamento['data_final_cons'] is not None:
-                self.__validar_data(novo_sepultamento['data_final_cons'])
-                sepultamento.concessao.data_final_cons = novo_sepultamento['data_final_cons']
+            #if novo_sepultamento['data_final_cons'] is not None:
+              #  self.__validar_data(novo_sepultamento['data_final_cons'])
+              #  sepultamento.concessao.data_final_cons = novo_sepultamento['data_final_cons']
 
-            if novo_sepultamento['status'] is not None:
-                sepultamento.concessao.status = self.__converter_status_concessao(novo_sepultamento['status'])
+            #if novo_sepultamento['status'] is not None:
+              #  sepultamento.concessao.status = self.__converter_status_concessao(novo_sepultamento['status'])
 
-            if novo_sepultamento['data_sepultamento'] is not None:
-                self.__validar_data(novo_sepultamento['data_sepultamento'])
-                sepultamento.data_sepultamento = novo_sepultamento['data_sepultamento']
+            #if novo_sepultamento['data_sepultamento'] is not None:
+              #  self.__validar_data(novo_sepultamento['data_sepultamento'])
+               # sepultamento.data_sepultamento = novo_sepultamento['data_sepultamento']
 
-            if novo_sepultamento['observacoes'] is not None:
-                self.__validar_texto(novo_sepultamento['observacoes'])
-                sepultamento.observacoes = novo_sepultamento['observacoes']
+           # if novo_sepultamento['observacoes'] is not None:
+               # self.__validar_texto(novo_sepultamento['observacoes'])
+               # sepultamento.observacoes = novo_sepultamento['observacoes']
 
         except ValueError as erro:
             self.__tela_sepultamento.mostra_mensagem(
@@ -323,7 +310,8 @@ class ControladorSepultamento:
 
     def excluir_sepultamento(self):
         cpf = self.__tela_sepultamento.pega_cpf_exclusao()
-        self.__validar_cpf(cpf)
+        if not validar_cpf(cpf):
+                raise ValueError("CPF do falecido inválido.")
         sepultamento = self.__auxiliar_busca_sepultamento(cpf)
 
         if sepultamento:
@@ -349,8 +337,9 @@ class ControladorSepultamento:
             )
 
     def buscar_sepultamento(self):
-        cpf = self.__tela_sepultamento.buscar_cpf()
-        self.__validar_cpf(cpf)
+        cpf = self.__tela_sepultamento.pega_cpf_alteracao()
+        if not validar_cpf(cpf):
+                raise ValueError("CPF do falecido inválido.")
         sepultamento = self.__auxiliar_busca_sepultamento(cpf)
         if sepultamento:
             self.__tela_sepultamento.mostra_mensagem(

@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from utils.funcoesAuxiliares import mascara_data
+from utils.funcoesAuxiliares import mascara_data, formatar_cpf
 from tkinter import (
     messagebox,
     simpledialog
@@ -139,7 +139,7 @@ class TelaSepultamento:
         status = ttk.Combobox(
             janela_cadastro, values=[1 ,2 ,3], state = "readonly"
         )
-        status.place(x=250, y=390)
+        status.place(x=270, y=390)
 
         tk.Label(janela_cadastro,text='Data sepultamento (dd/mm/aaaa)').place(x=0, y=420)
         sepultamento_str = tk.Entry(janela_cadastro)
@@ -149,6 +149,8 @@ class TelaSepultamento:
         tk.Label(janela_cadastro,text='Observações').place(x=0, y=450)
         observacoes = tk.Entry(janela_cadastro,width=35)
         observacoes.place(x=190, y=450)
+
+        
 
         def confirmar():
             dados["cpf_falecido"] = cpf_falecido.get()
@@ -217,19 +219,128 @@ class TelaSepultamento:
 
         return dados
 
+    def pega_novos_dados_sepultamento(self):
+
+        janela = tk.Toplevel(self.__root)
+        janela.title("Alterar Sepultamento")
+        janela.geometry("500x300")
+
+        dados = {}
+
+        tk.Label(
+            janela,
+            text="Novo nome"
+        ).place(x=0, y=0)
+
+        nome = tk.Entry(
+            janela,
+            width=30
+        )
+
+        nome.place(x=190, y=0)
+
+        tk.Label(
+            janela,
+            text="Nova data nascimento (dd/mm/aaaa)"
+        ).place(x=0, y=40)
+
+        nascimento = tk.Entry(janela)
+
+        nascimento.place(x=210, y=40)
+
+        nascimento.bind(
+            "<KeyRelease>",
+            mascara_data
+        )
+
+        tk.Label(
+            janela,
+            text="Nova data falecimento (dd/mm/aaaa)"
+        ).place(x=0, y=80)
+
+        falecimento = tk.Entry(janela)
+
+        falecimento.place(x=210, y=80)
+
+        falecimento.bind(
+            "<KeyRelease>",
+            mascara_data
+        )
+
+        tk.Label(
+            janela,
+            text="Nova causa morte"
+        ).place(x=0, y=120)
+
+        causa = tk.Entry(
+            janela,
+            width=30
+        )
+
+        causa.place(x=190, y=120)
+
+        def confirmar():
+            dados['nome_falecido'] = (
+                nome.get()
+                if nome.get()
+                else None
+            )
+
+            dados['data_nascimento'] = (
+                datetime.strptime(
+                    nascimento.get(),
+                    "%d/%m/%Y"
+                )
+                if nascimento.get()
+                else None
+            )
+
+            dados['data_falecimento'] = (
+                datetime.strptime(
+                    falecimento.get(),
+                    "%d/%m/%Y"
+                )
+                if falecimento.get()
+                else None
+            )
+
+            dados['causa_morte'] = (
+                causa.get()
+                if causa.get()
+                else None
+            )
+
+            janela.destroy()
+
+        tk.Button(
+            janela,
+            text="Confirmar",
+            command=confirmar
+        ).place(x=190, y=180)
+
+        janela.wait_window()
+
+        return dados
+
     def pega_cpf_alteracao(self):
-        return simpledialog.askstring("Alterar", "CPF do falecido:")
+        cpf = simpledialog.askstring("Alterar", "CPF do falecido:")
+        cpf = formatar_cpf(cpf)
+        return cpf
 
     def pega_novas_observacoes(self):
         return simpledialog.askstring(
             "Alterar", "Novas observações:")
 
     def pega_cpf_exclusao(self):
-        return simpledialog.askstring("Excluir", "CPF do falecido:")
+        cpf =  simpledialog.askstring("Excluir", "CPF do falecido:")
+        cpf = formatar_cpf(cpf)
+        return cpf
 
     def pega_cpf_busca(self):
-        return simpledialog.askstring("Buscar", "CPF do falecido:")
-
+        cpf = simpledialog.askstring("Buscar", "CPF do falecido:")
+        cpf = formatar_cpf(cpf)
+        return cpf
+        
     def __selecionar_opcao(
         self, valor):
         self.__opcao = valor
