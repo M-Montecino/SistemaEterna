@@ -15,6 +15,7 @@ class TelaExumacao:
 
         self.__evento = None
         self.__codigo_exumacao_selecionada = None
+        self.__manter_foco_busca = False
 
         self.__montar_tela_principal()
 
@@ -44,7 +45,7 @@ class TelaExumacao:
         self.__entrada_busca.pack(side="left", fill="x", expand=True, padx=8, pady=8)
         self.__entrada_busca.bind(
             "<KeyRelease>",
-            lambda evento: self.__selecionar_evento("filtrar")
+            self.__acionar_filtro_busca
         )
 
         botao_limpar = tk.Button(
@@ -102,6 +103,19 @@ class TelaExumacao:
         botao_voltar.pack(side="right")
 
         self.atualizar_lista_exumacoes([])
+
+    def __acionar_filtro_busca(self, evento=None):
+        self.__manter_foco_busca = True
+        self.__selecionar_evento("filtrar")
+
+    def __focar_campo_busca(self):
+        try:
+            self.__entrada_busca.focus_force()
+            self.__entrada_busca.icursor(tk.END)
+        except tk.TclError:
+            pass
+
+        self.__manter_foco_busca = False
 
     def __criar_cabecalho_lista(self):
         colunas = [
@@ -202,7 +216,21 @@ class TelaExumacao:
 
     def __acionar_limpar_busca(self):
         self.__entrada_busca.delete(0, tk.END)
+        self.__manter_foco_busca = True
         self.__selecionar_evento("filtrar")
+
+    def __converter_data(self, texto_data: str) -> datetime:
+        texto_data = texto_data.strip()
+
+        if texto_data == "" or texto_data == "dd/mm/aaaa":
+            raise ValueError("Data é obrigatória.")
+
+        try:
+            return datetime.strptime(texto_data, "%d/%m/%Y")
+        except ValueError:
+            raise ValueError(
+                "Data inválida. Use o formato dd/mm/aaaa e informe uma data existente."
+            )
 
     def pega_dados_busca(self) -> str:
         return self.__entrada_busca.get().strip()
@@ -255,100 +283,82 @@ class TelaExumacao:
             font=("Arial", 13, "bold")
         ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 12))
 
-        tk.Label(frame, text="Código:").grid(row=1, column=0, sticky="w", pady=4)
-
-        if edicao and exumacao is not None:
-            entrada_codigo = tk.Entry(frame, width=20)
-            entrada_codigo.grid(row=1, column=1, sticky="w", pady=4)
-            entrada_codigo.insert(0, str(exumacao.get("codigo", "")))
-            entrada_codigo.configure(state="disabled")
-        else:
-            tk.Label(
-                frame,
-                text="Gerado automaticamente ao salvar",
-                anchor="w"
-            ).grid(row=1, column=1, columnspan=2, sticky="w", pady=4)
-
         tk.Label(frame, text="Sepultamento:").grid(
-            row=2,
+            row=1,
             column=0,
             sticky="nw",
             pady=4
         )
 
-        texto_sepultamento = tk.StringVar()
         entrada_sepultamento = tk.Entry(
             frame,
-            textvariable=texto_sepultamento,
             width=62,
             state="disabled"
         )
-        entrada_sepultamento.grid(row=2, column=1, sticky="w", pady=4)
+        entrada_sepultamento.grid(row=1, column=1, sticky="w", pady=4)
 
         if edicao and exumacao is not None:
-            texto_sepultamento.set(exumacao.get("sepultamento", ""))
+            entrada_sepultamento.configure(state="normal")
+            entrada_sepultamento.delete(0, tk.END)
+            entrada_sepultamento.insert(0, exumacao.get("sepultamento", ""))
+            entrada_sepultamento.configure(state="disabled")
 
         botao_sepultamento = tk.Button(
             frame,
             text="Selecionar/Trocar",
             command=lambda: self.__selecionar_sepultamento_para_formulario(
                 sepultamentos_disponiveis,
-                texto_sepultamento,
+                entrada_sepultamento,
                 sepultamento_selecionado
             )
         )
-        botao_sepultamento.grid(row=2, column=2, padx=(8, 0), pady=4)
+        botao_sepultamento.grid(row=1, column=2, padx=(8, 0), pady=4)
 
         if edicao:
             botao_sepultamento.configure(state="disabled")
 
-        tk.Label(frame, text="Data:").grid(row=3, column=0, sticky="w", pady=4)
+        tk.Label(frame, text="Data:").grid(row=2, column=0, sticky="w", pady=4)
         entrada_data = tk.Entry(frame, width=20)
-        entrada_data.grid(row=3, column=1, sticky="w", pady=4)
+        entrada_data.grid(row=2, column=1, sticky="w", pady=4)
 
         if edicao and exumacao is not None:
             entrada_data.insert(0, exumacao.get("data", ""))
         else:
             entrada_data.insert(0, "dd/mm/aaaa")
 
-        tk.Label(frame, text="Destino:").grid(row=4, column=0, sticky="w", pady=4)
+        tk.Label(frame, text="Destino:").grid(row=3, column=0, sticky="w", pady=4)
         entrada_destino = tk.Entry(frame, width=62)
-        entrada_destino.grid(row=4, column=1, columnspan=2, sticky="w", pady=4)
+        entrada_destino.grid(row=3, column=1, columnspan=2, sticky="w", pady=4)
 
         if edicao and exumacao is not None:
             entrada_destino.insert(0, exumacao.get("destino", ""))
 
         tk.Label(frame, text="Observações:").grid(
-            row=5,
+            row=4,
             column=0,
             sticky="nw",
             pady=4
         )
         texto_observacoes = tk.Text(frame, width=47, height=6)
-        texto_observacoes.grid(row=5, column=1, columnspan=2, sticky="w", pady=4)
+        texto_observacoes.grid(row=4, column=1, columnspan=2, sticky="w", pady=4)
 
         if edicao and exumacao is not None:
             texto_observacoes.insert("1.0", exumacao.get("observacoes", ""))
 
         frame_botoes = tk.Frame(frame)
-        frame_botoes.grid(row=6, column=0, columnspan=3, sticky="e", pady=(18, 0))
+        frame_botoes.grid(row=5, column=0, columnspan=3, sticky="e", pady=(18, 0))
 
         def salvar():
             try:
                 if edicao and exumacao is not None:
-                    codigo = int(exumacao.get("codigo"))
                     sepultamento = None
                 else:
-                    codigo = None
                     sepultamento = sepultamento_selecionado["objeto"]
 
                     if sepultamento is None:
                         raise ValueError("Selecione um sepultamento.")
 
-                data = datetime.strptime(
-                    entrada_data.get().strip(),
-                    "%d/%m/%Y"
-                )
+                data = self.__converter_data(entrada_data.get())
                 destino = entrada_destino.get().strip()
                 observacoes = texto_observacoes.get("1.0", tk.END).strip()
 
@@ -356,7 +366,6 @@ class TelaExumacao:
                     raise ValueError("Destino é obrigatório.")
 
                 resultado["dados"] = {
-                    "codigo": codigo,
                     "data": data,
                     "sepultamento": sepultamento,
                     "destino": destino,
@@ -394,7 +403,7 @@ class TelaExumacao:
     def __selecionar_sepultamento_para_formulario(
         self,
         sepultamentos_disponiveis: list[dict],
-        texto_sepultamento: tk.StringVar,
+        entrada_sepultamento: tk.Entry,
         sepultamento_selecionado: dict
     ):
         selecionado = self.__abre_modal_selecao_sepultamento(
@@ -405,7 +414,11 @@ class TelaExumacao:
             return
 
         sepultamento_selecionado["objeto"] = selecionado.get("objeto")
-        texto_sepultamento.set(selecionado.get("texto", ""))
+
+        entrada_sepultamento.configure(state="normal")
+        entrada_sepultamento.delete(0, tk.END)
+        entrada_sepultamento.insert(0, selecionado.get("texto", ""))
+        entrada_sepultamento.configure(state="disabled")
 
     def __abre_modal_selecao_sepultamento(
         self,
@@ -589,6 +602,10 @@ class TelaExumacao:
         self.__evento = None
         self.__root.deiconify()
         self.__root.grab_set()
+        
+        if self.__manter_foco_busca:
+            self.__root.after_idle(self.__focar_campo_busca)
+            
         self.__root.mainloop()
 
         try:
