@@ -187,7 +187,23 @@ class ControladorSepultamento:
                 sepultamento.data_sepultamento.strftime("%d/%m/%Y"),
             "Observações:":
                 sepultamento.observacoes,
-            "Valor:": concessao.pagamento.valor}
+            "Valor:": 
+                concessao.pagamento.valor,
+            "Data Pagamento:": 
+                concessao.pagamento.data_pagamento.strftime("%d/%m/%Y"),
+            "Tipo de Pagamento:": 
+                concessao.pagamento.tipo_pagamento,
+            "Responsável 1:":
+                concessao.responsavel,
+            "Responsável 2:":
+                concessao.responsavel2,
+            "Data Início Concessão:":
+                concessao.data_inicio.strftime("%d/%m/%Y"),
+            "Data Final Concessão:":
+                concessao.data_fim.strftime("%d/%m/%Y"),
+            "Status Concessão:":    
+                concessao.status
+            }
     
     #metodos principais
     def cadastrar_sepultamento(self):
