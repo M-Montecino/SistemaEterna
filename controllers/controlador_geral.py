@@ -102,6 +102,9 @@ class ControladorGeral:
         self.__controlador_usuario.abre_tela()
 
     def abre_exumacao(self):
+        if self.__controlador_sepultamento is None:
+            self.__controlador_sepultamento = ControladorSepultamento(self)
+        
         if self.__controlador_exumacao is None:
             self.__controlador_exumacao = ControladorExumacao(self)
         self.__controlador_exumacao.abre_tela()
