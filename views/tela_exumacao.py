@@ -1,0 +1,626 @@
+import tkinter as tk
+from tkinter import messagebox
+from datetime import datetime
+
+
+class TelaExumacao:
+    def __init__(self, master=None):
+        self.__root = tk.Toplevel(master)
+        self.__root.title("Gerenciamento de Exumações")
+        self.__root.geometry("920x560")
+        self.__root.minsize(820, 480)
+        self.__root.protocol("WM_DELETE_WINDOW", self.__fechar_janela)
+        self.__root.transient(master)
+        self.__root.withdraw()
+
+        self.__evento = None
+        self.__codigo_exumacao_selecionada = None
+
+        self.__montar_tela_principal()
+
+    def __montar_tela_principal(self):
+        cabecalho = tk.Frame(self.__root)
+        cabecalho.pack(fill="x", padx=12, pady=(12, 6))
+
+        titulo = tk.Label(
+            cabecalho,
+            text="Gerenciamento de exumações",
+            font=("Arial", 14, "bold")
+        )
+        titulo.pack(side="left")
+
+        botao_novo = tk.Button(
+            cabecalho,
+            text="Nova Exumação",
+            width=18,
+            command=lambda: self.__selecionar_evento("cadastrar")
+        )
+        botao_novo.pack(side="right")
+
+        frame_busca = tk.LabelFrame(self.__root, text="Buscar")
+        frame_busca.pack(fill="x", padx=12, pady=6)
+
+        self.__entrada_busca = tk.Entry(frame_busca)
+        self.__entrada_busca.pack(side="left", fill="x", expand=True, padx=8, pady=8)
+        self.__entrada_busca.bind(
+            "<KeyRelease>",
+            lambda evento: self.__selecionar_evento("filtrar")
+        )
+
+        botao_limpar = tk.Button(
+            frame_busca,
+            text="Limpar",
+            width=10,
+            command=self.__acionar_limpar_busca
+        )
+        botao_limpar.pack(side="left", padx=(0, 8), pady=8)
+
+        frame_lista = tk.Frame(self.__root)
+        frame_lista.pack(fill="both", expand=True, padx=12, pady=6)
+
+        self.__canvas = tk.Canvas(frame_lista, highlightthickness=0)
+        self.__barra_rolagem = tk.Scrollbar(
+            frame_lista,
+            orient="vertical",
+            command=self.__canvas.yview
+        )
+
+        self.__frame_lista = tk.Frame(self.__canvas)
+        self.__janela_lista = self.__canvas.create_window(
+            (0, 0),
+            window=self.__frame_lista,
+            anchor="nw"
+        )
+
+        self.__canvas.configure(yscrollcommand=self.__barra_rolagem.set)
+        self.__canvas.pack(side="left", fill="both", expand=True)
+        self.__barra_rolagem.pack(side="right", fill="y")
+
+        self.__frame_lista.bind(
+            "<Configure>",
+            lambda evento: self.__canvas.configure(
+                scrollregion=self.__canvas.bbox("all")
+            )
+        )
+        self.__canvas.bind(
+            "<Configure>",
+            lambda evento: self.__canvas.itemconfigure(
+                self.__janela_lista,
+                width=evento.width
+            )
+        )
+
+        rodape = tk.Frame(self.__root)
+        rodape.pack(fill="x", padx=12, pady=(6, 12))
+
+        botao_voltar = tk.Button(
+            rodape,
+            text="Voltar ao Menu",
+            width=16,
+            command=self.__fechar_janela
+        )
+        botao_voltar.pack(side="right")
+
+        self.atualizar_lista_exumacoes([])
+
+    def __criar_cabecalho_lista(self):
+        colunas = [
+            ("Código", 8),
+            ("Sepultamento", 42),
+            ("Data", 12),
+            ("Destino", 22),
+            ("Observações", 28),
+            ("Ações", 18)
+        ]
+
+        for coluna, (texto, largura) in enumerate(colunas):
+            label = tk.Label(
+                self.__frame_lista,
+                text=texto,
+                font=("Arial", 10, "bold"),
+                width=largura,
+                anchor="w",
+                relief="ridge",
+                padx=4,
+                pady=4
+            )
+            label.grid(row=0, column=coluna, sticky="nsew")
+
+        for coluna in range(len(colunas)):
+            self.__frame_lista.grid_columnconfigure(coluna, weight=1)
+
+    def atualizar_lista_exumacoes(self, exumacoes: list[dict]):
+        for widget in self.__frame_lista.winfo_children():
+            widget.destroy()
+
+        self.__criar_cabecalho_lista()
+
+        if not exumacoes:
+            label = tk.Label(
+                self.__frame_lista,
+                text="Nenhuma exumação encontrada.",
+                anchor="center",
+                padx=8,
+                pady=20
+            )
+            label.grid(row=1, column=0, columnspan=6, sticky="ew")
+            return
+
+        for linha, exumacao in enumerate(exumacoes, start=1):
+            valores = [
+                exumacao.get("codigo", ""),
+                exumacao.get("sepultamento", ""),
+                exumacao.get("data", ""),
+                exumacao.get("destino", ""),
+                exumacao.get("observacoes", "")
+            ]
+            larguras = [8, 42, 12, 22, 28]
+
+            for coluna, valor in enumerate(valores):
+                label = tk.Label(
+                    self.__frame_lista,
+                    text=str(valor),
+                    width=larguras[coluna],
+                    anchor="w",
+                    relief="groove",
+                    padx=4,
+                    pady=4,
+                    wraplength=300 if coluna in (1, 4) else 0,
+                    justify="left"
+                )
+                label.grid(row=linha, column=coluna, sticky="nsew")
+
+            frame_acoes = tk.Frame(
+                self.__frame_lista,
+                relief="groove",
+                borderwidth=1
+            )
+            frame_acoes.grid(row=linha, column=5, sticky="nsew")
+
+            codigo = exumacao.get("codigo")
+
+            botao_alterar = tk.Button(
+                frame_acoes,
+                text="Alterar",
+                width=8,
+                command=lambda c=codigo: self.__selecionar_evento("alterar", c)
+            )
+            botao_alterar.pack(side="left", padx=3, pady=3)
+
+            botao_remover = tk.Button(
+                frame_acoes,
+                text="Remover",
+                width=8,
+                command=lambda c=codigo: self.__selecionar_evento("excluir", c)
+            )
+            botao_remover.pack(side="left", padx=3, pady=3)
+
+    def __selecionar_evento(self, evento: str, codigo=None):
+        self.__evento = evento
+        self.__codigo_exumacao_selecionada = codigo
+        self.__root.quit()
+
+    def __acionar_limpar_busca(self):
+        self.__entrada_busca.delete(0, tk.END)
+        self.__selecionar_evento("filtrar")
+
+    def pega_dados_busca(self) -> str:
+        return self.__entrada_busca.get().strip()
+
+    def limpa_busca(self):
+        self.__entrada_busca.delete(0, tk.END)
+
+    def pega_codigo_exumacao_selecionada(self):
+        return self.__codigo_exumacao_selecionada
+
+    def pega_dados_exumacao(self, sepultamentos_disponiveis: list[dict]):
+        return self.__abre_formulario_exumacao(
+            titulo="Cadastrar Exumação",
+            sepultamentos_disponiveis=sepultamentos_disponiveis,
+            exumacao=None,
+            edicao=False
+        )
+
+    def pega_novos_dados_exumacao(self, exumacao: dict):
+        return self.__abre_formulario_exumacao(
+            titulo="Alterar Exumação",
+            sepultamentos_disponiveis=[],
+            exumacao=exumacao,
+            edicao=True
+        )
+
+    def __abre_formulario_exumacao(
+        self,
+        titulo: str,
+        sepultamentos_disponiveis: list[dict],
+        exumacao: dict | None,
+        edicao: bool
+    ):
+        janela = tk.Toplevel(self.__root)
+        janela.title(titulo)
+        janela.geometry("650x430")
+        janela.resizable(False, False)
+        janela.transient(self.__root)
+        janela.grab_set()
+
+        resultado = {"dados": None}
+        sepultamento_selecionado = {"objeto": None}
+
+        frame = tk.Frame(janela)
+        frame.pack(fill="both", expand=True, padx=16, pady=16)
+
+        tk.Label(
+            frame,
+            text=titulo,
+            font=("Arial", 13, "bold")
+        ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 12))
+
+        tk.Label(frame, text="Código:").grid(row=1, column=0, sticky="w", pady=4)
+
+        if edicao and exumacao is not None:
+            entrada_codigo = tk.Entry(frame, width=20)
+            entrada_codigo.grid(row=1, column=1, sticky="w", pady=4)
+            entrada_codigo.insert(0, str(exumacao.get("codigo", "")))
+            entrada_codigo.configure(state="disabled")
+        else:
+            tk.Label(
+                frame,
+                text="Gerado automaticamente ao salvar",
+                anchor="w"
+            ).grid(row=1, column=1, columnspan=2, sticky="w", pady=4)
+
+        tk.Label(frame, text="Sepultamento:").grid(
+            row=2,
+            column=0,
+            sticky="nw",
+            pady=4
+        )
+
+        texto_sepultamento = tk.StringVar()
+        entrada_sepultamento = tk.Entry(
+            frame,
+            textvariable=texto_sepultamento,
+            width=62,
+            state="disabled"
+        )
+        entrada_sepultamento.grid(row=2, column=1, sticky="w", pady=4)
+
+        if edicao and exumacao is not None:
+            texto_sepultamento.set(exumacao.get("sepultamento", ""))
+
+        botao_sepultamento = tk.Button(
+            frame,
+            text="Selecionar/Trocar",
+            command=lambda: self.__selecionar_sepultamento_para_formulario(
+                sepultamentos_disponiveis,
+                texto_sepultamento,
+                sepultamento_selecionado
+            )
+        )
+        botao_sepultamento.grid(row=2, column=2, padx=(8, 0), pady=4)
+
+        if edicao:
+            botao_sepultamento.configure(state="disabled")
+
+        tk.Label(frame, text="Data:").grid(row=3, column=0, sticky="w", pady=4)
+        entrada_data = tk.Entry(frame, width=20)
+        entrada_data.grid(row=3, column=1, sticky="w", pady=4)
+
+        if edicao and exumacao is not None:
+            entrada_data.insert(0, exumacao.get("data", ""))
+        else:
+            entrada_data.insert(0, "dd/mm/aaaa")
+
+        tk.Label(frame, text="Destino:").grid(row=4, column=0, sticky="w", pady=4)
+        entrada_destino = tk.Entry(frame, width=62)
+        entrada_destino.grid(row=4, column=1, columnspan=2, sticky="w", pady=4)
+
+        if edicao and exumacao is not None:
+            entrada_destino.insert(0, exumacao.get("destino", ""))
+
+        tk.Label(frame, text="Observações:").grid(
+            row=5,
+            column=0,
+            sticky="nw",
+            pady=4
+        )
+        texto_observacoes = tk.Text(frame, width=47, height=6)
+        texto_observacoes.grid(row=5, column=1, columnspan=2, sticky="w", pady=4)
+
+        if edicao and exumacao is not None:
+            texto_observacoes.insert("1.0", exumacao.get("observacoes", ""))
+
+        frame_botoes = tk.Frame(frame)
+        frame_botoes.grid(row=6, column=0, columnspan=3, sticky="e", pady=(18, 0))
+
+        def salvar():
+            try:
+                if edicao and exumacao is not None:
+                    codigo = int(exumacao.get("codigo"))
+                    sepultamento = None
+                else:
+                    codigo = None
+                    sepultamento = sepultamento_selecionado["objeto"]
+
+                    if sepultamento is None:
+                        raise ValueError("Selecione um sepultamento.")
+
+                data = datetime.strptime(
+                    entrada_data.get().strip(),
+                    "%d/%m/%Y"
+                )
+                destino = entrada_destino.get().strip()
+                observacoes = texto_observacoes.get("1.0", tk.END).strip()
+
+                if destino == "":
+                    raise ValueError("Destino é obrigatório.")
+
+                resultado["dados"] = {
+                    "codigo": codigo,
+                    "data": data,
+                    "sepultamento": sepultamento,
+                    "destino": destino,
+                    "observacoes": observacoes
+                }
+
+                janela.destroy()
+
+            except ValueError as erro:
+                messagebox.showerror(
+                    "Dados inválidos",
+                    str(erro),
+                    parent=janela
+                )
+
+        def cancelar():
+            resultado["dados"] = None
+            janela.destroy()
+
+        tk.Button(frame_botoes, text="Salvar", width=12, command=salvar).pack(
+            side="left",
+            padx=4
+        )
+        tk.Button(frame_botoes, text="Cancelar", width=12, command=cancelar).pack(
+            side="left",
+            padx=4
+        )
+
+        janela.protocol("WM_DELETE_WINDOW", cancelar)
+        self.__centralizar_janela(janela)
+        janela.wait_window()
+
+        return resultado["dados"]
+
+    def __selecionar_sepultamento_para_formulario(
+        self,
+        sepultamentos_disponiveis: list[dict],
+        texto_sepultamento: tk.StringVar,
+        sepultamento_selecionado: dict
+    ):
+        selecionado = self.__abre_modal_selecao_sepultamento(
+            sepultamentos_disponiveis
+        )
+
+        if selecionado is None:
+            return
+
+        sepultamento_selecionado["objeto"] = selecionado.get("objeto")
+        texto_sepultamento.set(selecionado.get("texto", ""))
+
+    def __abre_modal_selecao_sepultamento(
+        self,
+        sepultamentos_disponiveis: list[dict]
+    ):
+        janela = tk.Toplevel(self.__root)
+        janela.title("Selecionar Sepultamento")
+        janela.geometry("680x420")
+        janela.resizable(False, False)
+        janela.transient(self.__root)
+        janela.grab_set()
+
+        resultado = {"sepultamento": None}
+        itens_visiveis = {"lista": list(sepultamentos_disponiveis)}
+
+        frame = tk.Frame(janela)
+        frame.pack(fill="both", expand=True, padx=14, pady=14)
+
+        tk.Label(
+            frame,
+            text="Selecione um sepultamento elígivel:",
+            font=("Arial", 11, "bold")
+        ).pack(anchor="w", pady=(0, 8))
+
+        entrada_filtro = tk.Entry(frame)
+        entrada_filtro.pack(fill="x", pady=(0, 8))
+
+        frame_lista = tk.Frame(frame)
+        frame_lista.pack(fill="both", expand=True)
+
+        barra_rolagem = tk.Scrollbar(frame_lista)
+        barra_rolagem.pack(side="right", fill="y")
+
+        listbox = tk.Listbox(
+            frame_lista,
+            yscrollcommand=barra_rolagem.set,
+            height=12
+        )
+        listbox.pack(side="left", fill="both", expand=True)
+        barra_rolagem.config(command=listbox.yview)
+
+        def atualizar_lista():
+            filtro = entrada_filtro.get().strip().lower()
+            listbox.delete(0, tk.END)
+
+            if filtro == "":
+                itens_visiveis["lista"] = list(sepultamentos_disponiveis)
+            else:
+                itens_visiveis["lista"] = [
+                    item
+                    for item in sepultamentos_disponiveis
+                    if filtro in item.get("texto", "").lower()
+                ]
+
+            for item in itens_visiveis["lista"]:
+                listbox.insert(tk.END, item.get("texto", ""))
+
+        def confirmar():
+            selecao = listbox.curselection()
+
+            if not selecao:
+                messagebox.showwarning(
+                    "Seleção obrigatória",
+                    "Selecione um sepultamento.",
+                    parent=janela
+                )
+                return
+
+            indice = selecao[0]
+            resultado["sepultamento"] = itens_visiveis["lista"][indice]
+            janela.destroy()
+
+        def cancelar():
+            resultado["sepultamento"] = None
+            janela.destroy()
+
+        entrada_filtro.bind("<KeyRelease>", lambda evento: atualizar_lista())
+        listbox.bind("<Double-Button-1>", lambda evento: confirmar())
+
+        frame_botoes = tk.Frame(frame)
+        frame_botoes.pack(fill="x", pady=(10, 0))
+
+        tk.Button(
+            frame_botoes,
+            text="Selecionar",
+            width=12,
+            command=confirmar
+        ).pack(side="right", padx=4)
+        tk.Button(
+            frame_botoes,
+            text="Cancelar",
+            width=12,
+            command=cancelar
+        ).pack(side="right", padx=4)
+
+        atualizar_lista()
+
+        if listbox.size() > 0:
+            listbox.selection_set(0)
+
+        janela.protocol("WM_DELETE_WINDOW", cancelar)
+        self.__centralizar_janela(janela)
+        janela.wait_window()
+
+        return resultado["sepultamento"]
+
+    def confirma_exclusao_exumacao(self, exumacao: dict) -> bool:
+        janela = tk.Toplevel(self.__root)
+        janela.title("Remover Exumação")
+        janela.geometry("580x330")
+        janela.resizable(False, False)
+        janela.transient(self.__root)
+        janela.grab_set()
+
+        resultado = {"confirmou": False}
+
+        frame = tk.Frame(janela)
+        frame.pack(fill="both", expand=True, padx=16, pady=16)
+
+        tk.Label(
+            frame,
+            text="Confirma a exclusão da exumação abaixo?",
+            font=("Arial", 12, "bold")
+        ).pack(anchor="w", pady=(0, 12))
+
+        dados = [
+            ("Código", exumacao.get("codigo", "")),
+            ("Sepultamento", exumacao.get("sepultamento", "")),
+            ("Data", exumacao.get("data", "")),
+            ("Destino", exumacao.get("destino", "")),
+            ("Observações", exumacao.get("observacoes", ""))
+        ]
+
+        for rotulo, valor in dados:
+            linha = tk.Frame(frame)
+            linha.pack(fill="x", pady=2)
+
+            tk.Label(
+                linha,
+                text=f"{rotulo}:",
+                width=14,
+                anchor="w",
+                font=("Arial", 10, "bold")
+            ).pack(side="left")
+
+            tk.Label(
+                linha,
+                text=str(valor),
+                anchor="w",
+                wraplength=400,
+                justify="left"
+            ).pack(side="left", fill="x", expand=True)
+
+        frame_botoes = tk.Frame(frame)
+        frame_botoes.pack(fill="x", pady=(16, 0))
+
+        def confirmar():
+            resultado["confirmou"] = True
+            janela.destroy()
+
+        def cancelar():
+            resultado["confirmou"] = False
+            janela.destroy()
+
+        tk.Button(frame_botoes, text="Sim", width=12, command=confirmar).pack(
+            side="right",
+            padx=4
+        )
+        tk.Button(frame_botoes, text="Não", width=12, command=cancelar).pack(
+            side="right",
+            padx=4
+        )
+
+        janela.protocol("WM_DELETE_WINDOW", cancelar)
+        self.__centralizar_janela(janela)
+        janela.wait_window()
+
+        return resultado["confirmou"]
+
+    def tela_opcoes(self):
+        self.__evento = None
+        self.__root.deiconify()
+        self.__root.grab_set()
+        self.__root.mainloop()
+
+        try:
+            self.__root.grab_release()
+        except tk.TclError:
+            pass
+
+        if self.__evento is None:
+            self.__evento = "voltar"
+
+        if self.__evento == "voltar":
+            self.__root.withdraw()
+
+        return self.__evento
+
+    def __fechar_janela(self):
+        self.__selecionar_evento("voltar")
+
+    def mostra_mensagem(self, mensagem):
+        messagebox.showinfo("Mensagem", mensagem, parent=self.__root)
+
+    def __centralizar_janela(self, janela: tk.Toplevel):
+        janela.update_idletasks()
+
+        largura = janela.winfo_width()
+        altura = janela.winfo_height()
+
+        if self.__root.winfo_viewable():
+            x = self.__root.winfo_rootx() + (self.__root.winfo_width() // 2) - (largura // 2)
+            y = self.__root.winfo_rooty() + (self.__root.winfo_height() // 2) - (altura // 2)
+        else:
+            x = (janela.winfo_screenwidth() // 2) - (largura // 2)
+            y = (janela.winfo_screenheight() // 2) - (altura // 2)
+
+        janela.geometry(f"+{x}+{y}")
