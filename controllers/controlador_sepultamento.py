@@ -53,7 +53,12 @@ class ControladorSepultamento:
         ]
 
         self.__controlador_geral = (controlador_geral)
-        self.__tela_sepultamento = (TelaSepultamento(controlador_geral.tela_menu.root))
+        self.__tela_sepultamento = (
+            TelaSepultamento(controlador_geral.tela_menu.root))
+
+    @property
+    def sepultamentos(self):
+        return self.__sepultamentos
 
     #Metodos auxiliares
     def __auxiliar_busca_sepultamento(
