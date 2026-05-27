@@ -3,7 +3,7 @@ from models.pagamento import Pagamento, TipoPagamento
 from models.falecido import Falecido
 from models.concessao import Concessao, StatusConcessao
 from models.tumulo import *
-from utils.funcoesAuxiliares import validar_cpf
+from utils.funcoesAuxiliares import validar_cpf, formatar_cpf
 
 from views.tela_sepultamento import TelaSepultamento
 
@@ -58,8 +58,9 @@ class ControladorSepultamento:
     #Metodos auxiliares
     def __auxiliar_busca_sepultamento(
         self, cpf: str):
+        cpf_formatado = formatar_cpf(cpf)
         for sep in (self.__sepultamentos):
-            if (sep.falecido.cpf == cpf):
+            if (sep.falecido.cpf == cpf_formatado):
                 return sep
         return None
 
@@ -206,7 +207,9 @@ class ControladorSepultamento:
             dados = self.__tela_sepultamento.pega_dados_sepultamento()
             self.__validar_dados_sepultamento(dados)
 
-            if self.__auxiliar_busca_sepultamento(dados['cpf_falecido']):
+            cpf_formatado = dados['cpf_falecido']
+
+            if self.__auxiliar_busca_sepultamento(cpf_formatado):
                 self.__tela_sepultamento.mostra_mensagem(
                         "CPF já cadastrado"
                     )
@@ -248,8 +251,11 @@ class ControladorSepultamento:
     def alterar_sepultamento(self):
         try:
             cpf = self.__tela_sepultamento.pega_cpf_alteracao()
+            if cpf is None:
+                return
             if not validar_cpf(cpf):
                 raise ValueError("CPF do falecido inválido.")
+            
             sepultamento = self.__auxiliar_busca_sepultamento(cpf)
 
             if not sepultamento:
@@ -326,6 +332,9 @@ class ControladorSepultamento:
 
     def excluir_sepultamento(self):
         cpf = self.__tela_sepultamento.pega_cpf_exclusao()
+
+        if cpf is None:
+            return
         if not validar_cpf(cpf):
                 raise ValueError("CPF do falecido inválido.")
         sepultamento = self.__auxiliar_busca_sepultamento(cpf)
@@ -354,9 +363,11 @@ class ControladorSepultamento:
 
     def buscar_sepultamento(self):
         cpf = self.__tela_sepultamento.pega_cpf_alteracao()
+        if cpf is None:
+            return
+        sepultamento = self.__auxiliar_busca_sepultamento(cpf)
         if not validar_cpf(cpf):
                 raise ValueError("CPF do falecido inválido.")
-        sepultamento = self.__auxiliar_busca_sepultamento(cpf)
         if sepultamento:
             self.__tela_sepultamento.mostra_mensagem(
                 self.__formatar_sepultamento(sepultamento)

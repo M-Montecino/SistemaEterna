@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from utils.funcoesAuxiliares import mascara_data, formatar_cpf
+from utils.funcoesAuxiliares import mascara_data
 from tkinter import (
     messagebox,
     simpledialog
@@ -219,6 +219,7 @@ class TelaSepultamento:
 
         return dados
 
+
     def pega_novos_dados_sepultamento(self):
 
         janela = tk.Toplevel(self.__root)
@@ -324,21 +325,10 @@ class TelaSepultamento:
 
     def pega_cpf_alteracao(self):
         cpf = simpledialog.askstring("Alterar", "CPF do falecido:")
-        cpf = formatar_cpf(cpf)
         return cpf
-
-    def pega_novas_observacoes(self):
-        return simpledialog.askstring(
-            "Alterar", "Novas observações:")
 
     def pega_cpf_exclusao(self):
         cpf =  simpledialog.askstring("Excluir", "CPF do falecido:")
-        cpf = formatar_cpf(cpf)
-        return cpf
-
-    def pega_cpf_busca(self):
-        cpf = simpledialog.askstring("Buscar", "CPF do falecido:")
-        cpf = formatar_cpf(cpf)
         return cpf
         
     def __selecionar_opcao(
