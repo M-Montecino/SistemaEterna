@@ -196,6 +196,7 @@ class TelaSepultamento:
                     "%d/%m/%Y"
                 ),
 
+                "status": int(status.get()),
 
                 "data_sepultamento": datetime.strptime(
                     sepultamento_str.get(),
