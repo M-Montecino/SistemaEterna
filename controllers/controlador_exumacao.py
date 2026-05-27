@@ -20,7 +20,7 @@ class ControladorExumacao:
     @property
     def exumacoes(self):
         return self.__exumacoes
-
+    
     def __criar_sepultamentos_teste(self) -> list[Sepultamento]:
         # Esta lista substitui temporariamente a busca no ControladorSepultamento,
         # permitindo testar sepultamentos elegiveis e nao elegiveis para exumacao.
@@ -142,14 +142,8 @@ class ControladorExumacao:
         return None
 
     def __cpf_falecido_sepultamento(self, sepultamento: Sepultamento) -> str:
-        if sepultamento is None:
-            return ""
-
-        falecido = getattr(sepultamento, "falecido", None)
-        cpf = getattr(falecido, "cpf", None)
-
-        if cpf is None:
-            return str(id(sepultamento))
+        falecido = sepultamento.falecido
+        cpf = falecido.cpf
 
         return str(cpf)
 
@@ -191,9 +185,9 @@ class ControladorExumacao:
         maior_codigo = 0
 
         for exumacao in self.__exumacoes:
-            codigo = getattr(exumacao, "codigo", 0)
+            codigo = exumacao.codigo
 
-            if isinstance(codigo, int) and codigo > maior_codigo:
+            if codigo > maior_codigo:
                 maior_codigo = codigo
 
         novo_codigo = maior_codigo + 1
@@ -215,7 +209,7 @@ class ControladorExumacao:
         #         "Controlador de sepultamento não foi inicializado."
         #     )
         #
-        # com property da lista de sepultamentos:
+        # com @property da lista de sepultamentos:
         # return list(controlador_sepultamento.sepultamentos)
         #
         # se tiver um metodo de obter_sepultamentos():
@@ -227,12 +221,7 @@ class ControladorExumacao:
         self,
         sepultamento: Sepultamento
     ) -> Optional[datetime]:
-        concessao = sepultamento.concessao
-
-        if concessao is None:
-            return None
-
-        data_final = concessao.data_fim
+        data_final = sepultamento.concessao.data_fim
 
         if not isinstance(data_final, datetime):
             return None
@@ -284,30 +273,12 @@ class ControladorExumacao:
         return str(data) if data is not None else ""
 
     def __formatar_tumulo(self, tumulo: Any) -> str:
-        if tumulo is None:
-            return ""
-
-        codigo = getattr(tumulo, "codigo", None)
-        setor = getattr(tumulo, "setor", None)
-        numero = getattr(tumulo, "numero", None)
-        tipo = getattr(tumulo, "tipo", None)
-
-        partes = []
-
-        if codigo is not None:
-            partes.append(f"Código {codigo}")
-        if setor is not None:
-            partes.append(f"Setor {setor}")
-        if numero is not None:
-            partes.append(f"Nº {numero}")
-        if tipo is not None:
-            nome_tipo = getattr(tipo, "name", str(tipo))
-            partes.append(str(nome_tipo))
-
-        if partes:
-            return " | ".join(partes)
-
-        return str(tumulo)
+        return (
+            f"Código {tumulo.codigo} | "
+            f"Setor {tumulo.setor} | "
+            f"Nº {tumulo.numero} | "
+            f"{tumulo.tipo.name}"
+        )
 
     def __formatar_sepultamento_para_tela(
         self,
@@ -315,15 +286,13 @@ class ControladorExumacao:
     ) -> dict:
         falecido = sepultamento.falecido
 
-        nome = getattr(falecido, "nome", "")
-        cpf = getattr(falecido, "cpf", "")
-        data_falecimento = self.__formatar_data(
-            getattr(falecido, "data_falecimento", None)
-        )
+        nome = falecido.nome
+        cpf = falecido.cpf
+        data_falecimento = self.__formatar_data(falecido.data_falecimento)
         data_sepultamento = self.__formatar_data(
-            getattr(sepultamento, "data_sepultamento", None)
+            sepultamento.data_sepultamento
         )
-        tumulo = self.__formatar_tumulo(getattr(sepultamento, "tumulo", None))
+        tumulo = self.__formatar_tumulo(sepultamento.tumulo)
 
         texto = (
             f"Falecido: {nome} | CPF: {cpf} | "
