@@ -60,7 +60,7 @@ class TelaSepultamento:
         janela_cadastro.title('Cadastro')
         janela_cadastro.geometry("500x550")
 
-        dados = {}
+        dados = None
 
         tk.Label(janela_cadastro, text='CPF').place(x=0, y=0)
         cpf_falecido = tk.Entry(janela_cadastro)
@@ -114,7 +114,7 @@ class TelaSepultamento:
         tipo_pagamento = ttk.Combobox(
             janela_cadastro, values=[1 ,2 ,3], state = "readonly"
         )
-        tipo_pagamento.place(x=250, y=240)
+        tipo_pagamento.place(x=260, y=240)
 
         tk.Label(janela_cadastro, text='Responsável 1').place(x=0, y=270)
         responsavel = tk.Entry(janela_cadastro)
@@ -153,57 +153,57 @@ class TelaSepultamento:
         
 
         def confirmar():
-            dados["cpf_falecido"] = cpf_falecido.get()
+            nonlocal dados
 
-            dados["nome_falecido"] = nome_falecido.get()
+            dados = {
+                "cpf_falecido": cpf_falecido.get(),
+                "nome_falecido": nome_falecido.get(),
 
-            dados["data_nascimento"] = datetime.strptime(
-                nascimento_str.get(),
-                "%d/%m/%Y"
-            )
+                "data_nascimento": datetime.strptime(
+                    nascimento_str.get(),
+                    "%d/%m/%Y"
+                ),
 
-            dados["data_falecimento"] = datetime.strptime(
-                falecimento_str.get(),
-                "%d/%m/%Y"
-            )
+                "data_falecimento": datetime.strptime(
+                    falecimento_str.get(),
+                    "%d/%m/%Y"
+                ),
 
-            dados["causa_morte"] = causa_morte.get()
+                "causa_morte": causa_morte.get(),
 
-            dados["tumulo"] = tumulo.get()
+                "tumulo": tumulo.get(),
 
-            dados["valor"] = float(
-                valor.get()
-            )
+                "valor": float(valor.get()),
 
-            dados["data_pagamento"] = datetime.strptime(
-                pagamento_str.get(),
-                "%d/%m/%Y"
-            )
+                "data_pagamento": datetime.strptime(
+                    pagamento_str.get(),
+                    "%d/%m/%Y"
+                ),
 
-            dados["tipo_pagamento"] = tipo_pagamento.get()
+                "tipo_pagamento": tipo_pagamento.get(),
 
-            dados["responsavel"] = responsavel.get()
+                "responsavel": responsavel.get(),
 
-            dados["responsavel2"] = responsavel2.get()
+                "responsavel2": responsavel2.get(),
 
-            dados["data_inicio_cons"] = datetime.strptime(
-                inicio_cons_str.get(),
-                "%d/%m/%Y"
-            )
+                "data_inicio_cons": datetime.strptime(
+                    inicio_cons_str.get(),
+                    "%d/%m/%Y"
+                ),
 
-            dados["data_final_cons"] = datetime.strptime(
-                final_cons_str.get(),
-                "%d/%m/%Y"
-            )
+                "data_final_cons": datetime.strptime(
+                    final_cons_str.get(),
+                    "%d/%m/%Y"
+                ),
 
-            dados["status"] = int(status.get())
 
-            dados["data_sepultamento"] = datetime.strptime(
-                sepultamento_str.get(),
-                "%d/%m/%Y"
-            )
+                "data_sepultamento": datetime.strptime(
+                    sepultamento_str.get(),
+                    "%d/%m/%Y"
+                ),
 
-            dados["observacoes"] = observacoes.get()
+                "observacoes": observacoes.get()
+            }
 
             janela_cadastro.destroy()
 
@@ -215,10 +215,19 @@ class TelaSepultamento:
 
         botao.place(x=190, y=490)
 
+        def fechar():
+            janela_cadastro.destroy()
+
+        janela_cadastro.protocol(
+            "WM_DELETE_WINDOW",
+            fechar
+        )
+
         janela_cadastro.wait_window()
 
         return dados
 
+    
 
     def pega_novos_dados_sepultamento(self):
 

@@ -210,11 +210,10 @@ class ControladorSepultamento:
     def cadastrar_sepultamento(self):
         try:
             dados = self.__tela_sepultamento.pega_dados_sepultamento()
+            if dados is None:
+                return
             self.__validar_dados_sepultamento(dados)
-
-            cpf_formatado = dados['cpf_falecido']
-
-            if self.__auxiliar_busca_sepultamento(cpf_formatado):
+            if self.__auxiliar_busca_sepultamento(dados['cpf_falecido']):
                 self.__tela_sepultamento.mostra_mensagem(
                         "CPF já cadastrado"
                     )
@@ -245,7 +244,7 @@ class ControladorSepultamento:
                 ))
             self.__sepultamentos.append(novo_sepultamento)
             self.__tela_sepultamento.mostra_mensagem(
-                "Sepultamentocadastrado com sucesso."
+                "Sepultamento cadastrado com sucesso."
                 )
             
         except ValueError as erro:
@@ -329,7 +328,10 @@ class ControladorSepultamento:
            # if novo_sepultamento['observacoes'] is not None:
                # self.__validar_texto(novo_sepultamento['observacoes'])
                # sepultamento.observacoes = novo_sepultamento['observacoes']
-
+            self.__tela_sepultamento.mostra_mensagem(
+                "Sepultamento alterado com sucesso."
+                )    
+            
         except ValueError as erro:
             self.__tela_sepultamento.mostra_mensagem(
                 f"Erro ao alterar sepultamento: {str(erro)}"
