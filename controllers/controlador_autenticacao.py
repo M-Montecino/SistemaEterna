@@ -14,14 +14,6 @@ class ControladorAutenticacao:
         self.__tela_login = TelaLogin()
         self.__usuario_logado = None
 
-    def __normalizar_cpf(self, cpf: str) -> str:
-        if not isinstance(cpf, str):
-            return ""
-        return "".join(caractere for caractere in cpf if caractere.isdigit())
-
-    def __cpf_valido_para_login(self, cpf: str) -> bool:
-        return len(self.__normalizar_cpf(cpf)) == 11
-
     def __verificar_senha(self, usuario: Usuario, senha: str) -> bool:
         if usuario is None or not isinstance(senha, str):
             return False
@@ -41,10 +33,9 @@ class ControladorAutenticacao:
         return senha_hash.hex() == hash_hex
 
     def autenticar(self, cpf: str, senha: str) -> str:
-        if not self.__cpf_valido_para_login(cpf):
-            return "cpf_invalido"
 
         usuario = self.__controlador_usuario.buscar_por_cpf(cpf)
+
         if usuario is None:
             return "cpf_invalido"
 
@@ -52,6 +43,7 @@ class ControladorAutenticacao:
             return "senha_invalida"
 
         self.__usuario_logado = usuario
+
         return "sucesso"
 
     def iniciar(self):
@@ -60,29 +52,39 @@ class ControladorAutenticacao:
 
         while True:
             opcao = self.__tela_login.tela_login()
+
             if opcao == 0:
                 self.__tela_login.mostra_mensagem("Execução cancelada.")
                 exit(0)
 
-            dados = self.__tela_login.pega_dados_login()
+            elif opcao == 1:
+                dados = self.__tela_login.pega_dados_login()
+
             cpf = dados.get("cpf", "")
             senha = dados.get("senha", "")
 
             resultado = self.autenticar(cpf, senha)
-            if resultado == "cpf_invalido":
-                self.__tela_login.mostra_mensagem(
-                    "CPF inválido. Tente novamente."
-                )
-                continue
 
-            if resultado == "senha_invalida":
-                self.__tela_login.mostra_mensagem(
-                    "Senha inválida. Tente novamente."
-                )
-                continue
+            match resultado:
+                case "cpf_invalido":
+                    self.__tela_login.mostra_mensagem(
+                        "CPF inválido. Tente novamente."
+                    )
+                    continue
 
-            self.__tela_login.mostra_mensagem("Login efetuado com sucesso!")
+                case "senha_invalida":
+                    self.__tela_login.mostra_mensagem(
+                        "Senha inválida. Tente novamente."
+                    )
+                    continue
+
+                case "sucesso":
+                    self.__tela_login.mostra_mensagem(
+                        "Login efetuado com sucesso!"
+                    )
+
             self.__tela_login.root.withdraw()
+
             break
 
     def eh_admin(self) -> bool:

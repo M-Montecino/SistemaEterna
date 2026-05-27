@@ -48,7 +48,7 @@ class ControladorUsuario:
             if usuario.cpf == cpf:
                 return usuario
         return None
-
+    
     def buscar_por_email(self, email: str):
         if not isinstance(email, str):
             return None
