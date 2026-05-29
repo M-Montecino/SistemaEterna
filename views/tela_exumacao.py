@@ -104,7 +104,7 @@ class TelaExumacao:
 
         self.atualizar_lista_exumacoes([])
 
-    def __acionar_filtro_busca(self, evento=None):
+    def __acionar_filtro_busca(self, _evento=None):    # Tkinter precisa que exista parametro
         self.__manter_foco_busca = True
         self.__selecionar_evento("filtrar")
 
@@ -203,7 +203,7 @@ class TelaExumacao:
 
             botao_remover = tk.Button(
                 frame_acoes,
-                text="Remover",
+                text="Excluir",
                 width=8,
                 command=lambda c=codigo: self.__selecionar_evento("excluir", c)
             )
@@ -226,11 +226,18 @@ class TelaExumacao:
             raise ValueError("Data é obrigatória.")
 
         try:
-            return datetime.strptime(texto_data, "%d/%m/%Y")
+            data = datetime.strptime(texto_data, "%d/%m/%Y")
         except ValueError:
             raise ValueError(
                 "Data inválida. Use o formato dd/mm/aaaa e informe uma data existente."
             )
+        
+        if data.date() < datetime.now().date():
+            raise ValueError(
+                "A data da exumação não pode ser anterior à data atual."
+            )
+
+        return data
 
     def pega_dados_busca(self) -> str:
         return self.__entrada_busca.get().strip()
@@ -439,7 +446,7 @@ class TelaExumacao:
 
         tk.Label(
             frame,
-            text="Selecione um sepultamento elígivel:",
+            text="Selecione um sepultamento elegivel:",
             font=("Arial", 11, "bold")
         ).pack(anchor="w", pady=(0, 8))
 

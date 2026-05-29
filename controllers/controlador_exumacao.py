@@ -139,7 +139,8 @@ class ControladorExumacao:
         for exumacao in self.__exumacoes:
             if exumacao.codigo == codigo:
                 return exumacao
-        return None
+            
+        raise ValueError("Exumação selecionada não foi encontrada.")
 
     def __cpf_falecido_sepultamento(self, sepultamento: Sepultamento) -> str:
         falecido = sepultamento.falecido
@@ -147,31 +148,16 @@ class ControladorExumacao:
 
         return str(cpf)
 
-    def __auxiliar_busca_exumacao_por_sepultamento(
-        self,
-        sepultamento: Sepultamento
-    ) -> Optional[Exumacao]:
-        cpf_sepultamento = self.__cpf_falecido_sepultamento(sepultamento)
-
-        for exumacao in self.__exumacoes:
-            cpf_exumacao = self.__cpf_falecido_sepultamento(
-                exumacao.sepultamento
-            )
-            if cpf_exumacao == cpf_sepultamento:
-                return exumacao
-
-        return None
-
-    def __validar_codigo(self, codigo: int):
-        if not isinstance(codigo, int):
-            raise ValueError("O código deve ser um inteiro.")
-
-        if codigo <= 0:
-            raise ValueError("O código deve ser positivo.")
-
     def __validar_data(self, data: datetime):
         if not isinstance(data, datetime):
             raise ValueError("Data inválida.")
+        
+        data_atual = datetime.now().date()
+
+        if data.date() < data_atual:
+            raise ValueError(
+                "A data da exumação não pode ser anterior à data atual."
+            )
 
     def __validar_destino(self, destino: str):
         if not isinstance(destino, str) or destino.strip() == "":
@@ -190,12 +176,7 @@ class ControladorExumacao:
             if codigo > maior_codigo:
                 maior_codigo = codigo
 
-        novo_codigo = maior_codigo + 1
-
-        while self.__auxiliar_busca_exumacao(novo_codigo) is not None:
-            novo_codigo += 1
-
-        return novo_codigo
+        return maior_codigo + 1
 
     def __obter_sepultamentos(self) -> list[Sepultamento]:
         # Fluxo real, para reativar depois:
@@ -217,22 +198,11 @@ class ControladorExumacao:
 
         return list(self.__sepultamentos_teste)
 
-    def __obter_data_final_concessao(
-        self,
-        sepultamento: Sepultamento
-    ) -> Optional[datetime]:
-        data_final = sepultamento.concessao.data_fim
-
-        if not isinstance(data_final, datetime):
-            return None
-
-        return data_final
-
     def __concessao_vencida_ha_mais_de_30_dias(
         self,
         sepultamento: Sepultamento
     ) -> bool:
-        data_final = self.__obter_data_final_concessao(sepultamento)
+        data_final = sepultamento.concessao.data_fim
 
         if data_final is None:
             return False
@@ -245,10 +215,17 @@ class ControladorExumacao:
         self,
         sepultamento: Sepultamento
     ) -> bool:
-        return (
-            self.__auxiliar_busca_exumacao_por_sepultamento(sepultamento)
-            is not None
-        )
+        cpf_sepultamento = self.__cpf_falecido_sepultamento(sepultamento)
+
+        for exumacao in self.__exumacoes:
+            cpf_exumacao = self.__cpf_falecido_sepultamento(
+                exumacao.sepultamento
+            )
+
+            if cpf_exumacao == cpf_sepultamento:
+                return True
+
+        return False
 
     # concessão do sepultamento deve estar vencida há mais de 30 dias;
     # sepultamento ainda não pode estar associado a uma exumação.
@@ -272,7 +249,7 @@ class ControladorExumacao:
             return data.strftime("%d/%m/%Y")
         return str(data) if data is not None else ""
 
-    def __formatar_tumulo(self, tumulo: Any) -> str:
+    def __formatar_tumulo(self, tumulo: Tumulo) -> str:
         return (
             f"Código {tumulo.codigo} | "
             f"Setor {tumulo.setor} | "
@@ -379,15 +356,7 @@ class ControladorExumacao:
     def alterar_exumacao(self):
         try:
             codigo = self.__tela_exumacao.pega_codigo_exumacao_selecionada()
-            self.__validar_codigo(codigo)
-
             exumacao = self.__auxiliar_busca_exumacao(codigo)
-
-            if exumacao is None:
-                self.__tela_exumacao.mostra_mensagem(
-                    "Exumação não encontrada."
-                )
-                return
 
             novos_dados = self.__tela_exumacao.pega_novos_dados_exumacao(
                 self.__formatar_exumacao_para_tela(exumacao)
@@ -396,13 +365,8 @@ class ControladorExumacao:
             if novos_dados is None:
                 return
 
-            dados_para_validar = {
-                "data": novos_dados["data"],
-                "destino": novos_dados["destino"],
-                "observacoes": novos_dados.get("observacoes", "")
-            }
 
-            self.__validar_dados_exumacao(dados_para_validar)
+            self.__validar_dados_exumacao(novos_dados)
 
             exumacao.data = novos_dados["data"]
             exumacao.destino = novos_dados["destino"]
@@ -421,15 +385,7 @@ class ControladorExumacao:
     def excluir_exumacao(self):
         try:
             codigo = self.__tela_exumacao.pega_codigo_exumacao_selecionada()
-            self.__validar_codigo(codigo)
-
             exumacao = self.__auxiliar_busca_exumacao(codigo)
-
-            if exumacao is None:
-                self.__tela_exumacao.mostra_mensagem(
-                    "Exumação não encontrada."
-                )
-                return
 
             confirmou = self.__tela_exumacao.confirma_exclusao_exumacao(
                 self.__formatar_exumacao_para_tela(exumacao)
