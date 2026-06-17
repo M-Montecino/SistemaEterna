@@ -1,5 +1,6 @@
 from models.manutencao import Manutencao, TipoServico
 from views.tela_manutencao import TelaManutencao
+from utils.funcoesAuxiliares import validar_cpf
 from datetime import datetime
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -57,30 +58,14 @@ class ControladorManutencao:
     def __validar_data(self, data: datetime):
         if not isinstance(data, datetime):
             raise ValueError("Data inválida.")
-
-    def __validar_cpf(self, cpf: str):
-        cpf = ''.join(filter(str.isdigit, cpf))
-
-        if len(cpf) != 11:
-            raise ValueError("CPF deve possuir 11 dígitos.")
-
-        if cpf == cpf[0] * 11:
-            raise ValueError("CPF inválido.")
-        
-        soma = sum(int(cpf[i]) * (10 - i) for i in range(9))
-        digito1 = (soma * 10 % 11) % 10
-
-        soma = sum(int(cpf[i]) * (11 - i) for i in range(10))
-        digito2 = (soma * 10 % 11) % 10
-
-        if int(cpf[9]) != digito1 or int(cpf[10]) != digito2:
-            raise ValueError("CPF inválido.")
         
     def __validar_dados_manutencao(self, dados):
         self.__validar_codigo(dados['codigo'])
         dados['tipo_servico'] = self.__converter_tipo_servico(dados['tipo_servico'])
+        self.__controlador_geral.controlador_tumulo.__validar_tumulo(dados['tumulo'])
         self.__validar_data(dados['data'])
-        self.__validar_cpf(dados['cpf_responsavel'])
+        if not validar_cpf(dados['cpf_responsavel']):
+            raise ValueError("CPF do responsável inválido.")
 
     def __formatar_manutencao(self, manutencao):
         return {
@@ -126,6 +111,7 @@ class ControladorManutencao:
             codigo = self.__tela_manutencao.alterar_manutencao()
             self.__validar_codigo(codigo)
             manutencao = self.__auxiliar_busca_manutencao(codigo)
+            manutencao_atualizada = manutencao
 
             if not manutencao:
                 self.__tela_manutencao.mostra_mensagem(
@@ -133,35 +119,23 @@ class ControladorManutencao:
                 )
                 return
             
-            nova_manutencao = (
+            novos_dados = (
             self.__tela_manutencao.pega_novos_dados_manutencao()
             )
 
             #atualizando dados
-            if nova_manutencao['tumulo'] is not None:
-                manutencao.tumulo = nova_manutencao['tumulo']
+            if novos_dados['tumulo'] is not None:
+                manutencao_atualizada.tumulo = novos_dados['tumulo']
+            if novos_dados['tipo_servico'] is not None:
+                manutencao_atualizada.tipo_servico =novos_dados['tipo_servico']
+            if novos_dados['data'] is not None:
+                manutencao_atualizada.data = novos_dados['data']
+            if novos_dados['cpf_responsavel'] is not None:
+                manutencao_atualizada.cpf_responsavel = novos_dados['cpf_responsavel']
 
-            if nova_manutencao['tipo_servico'] is not None:
-                manutencao.tipo_servico = self.__converter_tipo_servico(
-                    nova_manutencao['tipo_servico']
-                )
-
-            if nova_manutencao['data'] is not None:
-                self.__validar_data(
-                    nova_manutencao['data']
-                )
-
-                manutencao.data = nova_manutencao['data']
-
-            if nova_manutencao['cpf_responsavel'] is not None:
-                self.__validar_cpf(
-                    nova_manutencao['cpf_responsavel']
-                )
-
-                manutencao.cpf_responsavel = (
-                    nova_manutencao['cpf_responsavel']
-                )
-
+            self.__validar_dados_manutencao(manutencao_atualizada)
+            manutencao = manutencao_atualizada
+            
             self.__tela_manutencao.mostra_mensagem(
                 "Manutenção alterada com sucesso."
             )

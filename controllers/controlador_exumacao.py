@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class ControladorExumacao:
     def __init__(self, controlador_geral: "ControladorGeral"):
-        self.__exumacoes: list[Exumacao] = []
+        self.__exumacoes = []
         self.__sepultamentos_teste = self.__criar_sepultamentos_teste()
         self.__controlador_geral = controlador_geral
         self.__tela_exumacao = TelaExumacao(controlador_geral.tela_menu.root)

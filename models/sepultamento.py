@@ -13,8 +13,7 @@ class Sepultamento:
         data_nascimento: datetime,
         data_falecimento: datetime,
         causa_morte: str,
-        tumulo: int,
-        #tumulo: Tumulo,
+        tumulo: Tumulo,
         valor: float,
         data_pagamento: datetime,
         tipo_pagamento,
@@ -70,9 +69,9 @@ class Sepultamento:
 
     @tumulo.setter
     def tumulo(self, tumulo):
-       # if not isinstance(
-        #    tumulo,Tumulo):
-           # raise TypeError("tumulo deve ser Tumulo")
+        if not isinstance(
+            tumulo,Tumulo):
+            raise TypeError("tumulo deve ser Tumulo")
         self.__tumulo = tumulo
 
     @property
