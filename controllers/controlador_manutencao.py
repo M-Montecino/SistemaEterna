@@ -8,17 +8,10 @@ if TYPE_CHECKING:
 
 class ControladorManutencao:
     def __init__(self, controlador_geral: "ControladorGeral"):
-        self.__manutencoes = []
         self.__controlador_geral = controlador_geral
         self.__tela_manutencao = TelaManutencao(controlador_geral.tela_menu.root)
 
     #Funções auxiliares
-    def __auxiliar_busca_manutencao(self, codigo: int):
-        for manutencao in self.__manutencoes:
-            if manutencao.codigo == codigo:
-                return manutencao
-        return None
-
     def __validar_codigo(self, codigo):
         if not isinstance(codigo, int):
             raise ValueError("O código deve ser um inteiro.")
@@ -32,7 +25,6 @@ class ControladorManutencao:
     def __converter_tipo_servico(self, tipo_servico):
         if isinstance(tipo_servico, TipoServico):
             return tipo_servico
-
         if isinstance(tipo_servico, str):
             texto = tipo_servico.strip()
             if texto.isdigit():
@@ -40,19 +32,15 @@ class ControladorManutencao:
                     return TipoServico(int(texto))
                 except ValueError:
                     pass
-
-            texto_normalizado = texto.strip().upper()
             try:
-                return TipoServico[texto_normalizado]
+                return TipoServico[texto.upper()]
             except KeyError:
                 raise ValueError("Tipo de serviço inválido.")
-
         if isinstance(tipo_servico, int):
             try:
                 return TipoServico(tipo_servico)
             except ValueError:
                 pass
-
         raise ValueError("Tipo de serviço inválido.")
 
     def __validar_data(self, data: datetime):
@@ -79,24 +67,22 @@ class ControladorManutencao:
     #Funções principais
     def cadastrar_manutencao(self):
         try:
-            dados_manutencao = self.__tela_manutencao.pega_dados_manutencao()
-            self.__validar_dados_manutencao(dados_manutencao)
+            dados = self.__tela_manutencao.pega_dados_manutencao()
+            self.__validar_dados_manutencao(dados)
 
-            if self.__auxiliar_busca_manutencao(dados_manutencao['codigo']):
-                self.__tela_manutencao.mostra_mensagem(
-                    "Código já cadastrado."
-                )
+            if Manutencao.buscar_por_codigo(dados['codigo']):
+                self.__tela_manutencao.mostra_mensagem("Código já cadastrado.")
                 return
 
-            nova_manutencao = Manutencao(
-                dados_manutencao['codigo'],
-                dados_manutencao['tumulo'],
-                dados_manutencao['tipo_servico'],
-                dados_manutencao['data'],
-                dados_manutencao['cpf_responsavel'] 
+            nova = Manutencao(
+                dados['codigo'],
+                dados['tumulo'],
+                dados['tipo_servico'],
+                dados['data'],
+                dados['cpf_responsavel'] 
             )
 
-            self.__manutencoes.append(nova_manutencao)
+            nova.cadastrar()
             self.__tela_manutencao.mostra_mensagem(
                 "Manutenção adicionada com sucesso"
             )
@@ -110,13 +96,10 @@ class ControladorManutencao:
         try:
             codigo = self.__tela_manutencao.alterar_manutencao()
             self.__validar_codigo(codigo)
-            manutencao = self.__auxiliar_busca_manutencao(codigo)
-            manutencao_atualizada = manutencao
 
+            manutencao = Manutencao.buscar_por_codigo(codigo)
             if not manutencao:
-                self.__tela_manutencao.mostra_mensagem(
-                    "Manutenção não encontrada"
-                )
+                self.__tela_manutencao.mostra_mensagem("Manutenção não encontrada.")
                 return
             
             novos_dados = (
@@ -125,17 +108,16 @@ class ControladorManutencao:
 
             #atualizando dados
             if novos_dados['tumulo'] is not None:
-                manutencao_atualizada.tumulo = novos_dados['tumulo']
+                manutencao.tumulo = novos_dados['tumulo']
             if novos_dados['tipo_servico'] is not None:
-                manutencao_atualizada.tipo_servico =novos_dados['tipo_servico']
+                manutencao.tipo_servico = self.__converter_tipo_servico(
+                    novos_dados['tipo_servico'])
             if novos_dados['data'] is not None:
-                manutencao_atualizada.data = novos_dados['data']
+                manutencao.data = novos_dados['data']
             if novos_dados['cpf_responsavel'] is not None:
-                manutencao_atualizada.cpf_responsavel = novos_dados['cpf_responsavel']
+                manutencao.cpf_responsavel = novos_dados['cpf_responsavel']
 
-            self.__validar_dados_manutencao(manutencao_atualizada)
-            manutencao = manutencao_atualizada
-            
+            manutencao.alterar()            
             self.__tela_manutencao.mostra_mensagem(
                 "Manutenção alterada com sucesso."
             )
@@ -146,47 +128,56 @@ class ControladorManutencao:
             )           
     
     def excluir_manutencao(self):
-        codigo = self.__tela_manutencao.excluir_manutencao()
-        manutencao = self.__auxiliar_busca_manutencao(codigo)
+        try:
+            codigo = self.__tela_manutencao.excluir_manutencao()
+            self.__validar_codigo(codigo)
 
-        if manutencao:
-            self.__manutencoes.remove(manutencao)
-            self.__tela_manutencao.mostra_mensagem(
-                "Manutenção excluída com sucesso"
-            )
-        else:
-            self.__tela_manutencao.mostra_mensagem(
-                "Manutenção não encontrada"
-            )
+            manutencao = Manutencao.buscar_por_codigo(codigo)
+            if not manutencao:
+                self.__tela_manutencao.mostra_mensagem("Manutenção não encontrada.")
+                return
+            
+            manutencao.deletar()
+            self.__tela_manutencao.mostra_mensagem("Manutenção excluída com sucesso.")
+
+        except:
+            self.__tela_manutencao.mostra_mensagem(f"Erro ao excluir: {str(e)}")
 
     def listar_manutencoes(self):
-        if not self.__manutencoes:
+        manutencoes = Manutencao.buscar_todos()
+
+        if not manutencoes:
             self.__tela_manutencao.mostra_mensagem("" \
             "Nenhuma manutenção cadastrada")
             return
         
-        for manutencao in self.__manutencoes:
+        for manutencao in manutencoes:
             self.__tela_manutencao.mostra_mensagem(
                 self.__formatar_manutencao(manutencao)
             )
 
     def buscar_manutencao(self):
-        codigo = self.__tela_manutencao.buscar_manutencao()
-        manutencao = self.__auxiliar_busca_manutencao(codigo)
-        if manutencao:
-            self.__tela_manutencao.mostra_mensagem(
-                self.__formatar_manutencao(manutencao)
-            )
-        else:
-            self.__tela_manutencao.mostra_mensagem(
-                "Manutenção não encontrada"
-            )
+        try:
+            codigo = self.__tela_manutencao.buscar_manutencao()
+            self.__validar_codigo(codigo)
+            
+            manutencao = Manutencao.buscar_por_codigo(codigo)
+            if manutencao:
+                self.__tela_manutencao.mostra_mensagem(
+                    self.__formatar_manutencao(manutencao)
+                )
+            else:
+                self.__tela_manutencao.mostra_mensagem(
+                    "Manutenção não encontrada"
+                )
+        except:
+            self.__tela_manutencao.mostra_mensagem(f"Erro ao buscar: {str(e)}")
 
     def retomar_menu(self):
         return
 
     def abre_tela(self):
-        listar_opcoes = {
+        opcoes = {
             1: self.cadastrar_manutencao,
             2: self.alterar_manutencao,
             3: self.excluir_manutencao,
@@ -197,15 +188,13 @@ class ControladorManutencao:
 
         while True:
             try:
-                opcao_escolhida = self.__tela_manutencao.tela_opcoes()
-                funcao_escolhida = listar_opcoes.get(opcao_escolhida)
-                if funcao_escolhida:
-                    funcao_escolhida()
-                    if opcao_escolhida == 0:
+                opcao = self.__tela_manutencao.tela_opcoes()
+                funcao = opcoes.get(opcao)
+                if funcao:
+                    funcao()
+                    if opcao == 0:
                         break
                 else:
-                    self.__tela_manutencao.mostra_mensagem(
-                        "Opção inválida. Tente novamente.")
+                    self.__tela_manutencao.mostra_mensagem("Opção inválida.")
             except ValueError as e:
-                self.__tela_manutencao.mostra_mensagem(
-                    f"Erro: {str(e)}")
+                self.__tela_manutencao.mostra_mensagem(f"Erro: {str(e)}")
