@@ -1,8 +1,8 @@
 from utils.funcoesAuxiliares import *
 import re
+from models.database import Database
 
 class Responsavel:
-
     def __init__(self,
         nome: str,
         cpf: str,
@@ -84,3 +84,73 @@ class Responsavel:
             self.__email = email
         else:
             raise ValueError("E-mail inválido")
+        
+#persistencia
+    def cadastrar(self):
+        db = Database.get_instance()
+        cursor = db.coneccao.cursor()
+        cursor.execute("""
+            INSERT INTO responsaveis (cpf, nome, telefone, cep, numero, email)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            self.__cpf,
+            self.__nome,
+            self.__telefone,
+            self.__cep,
+            self.__numero,
+            self.__email
+        ))
+        db.coneccao.commit()
+
+    def alterar(self):
+        db = Database.get_instance()
+        cursor = db.coneccao.cursor()
+
+        cursor.execute("""
+            UPDATE responsaveis
+            SET nome = ?, telefone = ?, cep = ?, numero = ?, email = ?
+            WHERE cpf = ?
+        """, (
+            self.__nome,
+            self.__telefone,
+            self.__cep,
+            self.__numero,
+            self.__email,
+            self.__cpf
+        ))
+        db.coneccao.commit()
+    
+    def deletar(self):
+        db = Database.get_instance()
+        db.coneccao.execute(
+            "DELETE FROM responsaveis WHERE cpf = ?", (self.__cpf,)
+        )
+        db.coneccao.commit()
+        self.__cpf = None
+    
+#buscas
+    @staticmethod
+    def buscar_por_cpf(cpf):
+        db = Database.get_instance()
+        row = db.coneccao.execute(
+            "SELECT * FROM responsaveis WHERE cpf = ?", (re.sub(r'\D', '', cpf),)
+        ).fetchone()
+        return Responsavel._row_para_objeto(row) if row else None
+    
+    @staticmethod
+    def buscar_todos():
+        db = Database.get_instance()
+        rows = db.coneccao.execute("SELECT * FROM responsaveis").fetchall()
+        return [Responsavel._row_para_objeto(r) for r in rows]
+
+#auxiliar
+    @staticmethod
+    def _row_para_objeto(row):
+        return Responsavel(
+            nome = row["nome"],
+            cpf = row["cpf"],
+            telefone = row["telefone"],
+            cep = row["cep"],
+            numero = row["numero"],
+            email = row["email"]
+        )

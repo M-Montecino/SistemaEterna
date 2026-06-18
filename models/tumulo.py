@@ -1,4 +1,5 @@
 from enum import Enum
+from models.database import Database
 
 class TipoTumulo(Enum):
     Cova = 1
@@ -22,7 +23,8 @@ class Tumulo:
         self.numero = numero
         self.tipo = tipo
         self.capacidade = capacidade
-        self.lotado = False
+
+#properties
 
     @property
     def codigo(self) -> int:
@@ -72,13 +74,68 @@ class Tumulo:
         else:
             raise ValueError("Tipo de capacidade inválido")
 
-    @property
-    def lotado(self) -> bool:
-        return self.__lotado
+#persistencia
+    def cadastrar(self):
+        db = Database.get_instance()
+        cursor = db.coneccao.cursor()
 
-    @lotado.setter
-    def lotado(self, lotado: bool):
-        if isinstance(lotado, bool):
-            self.__lotado = lotado
-        else:
-            raise ValueError("Tipo de lotado inválido")
+        cursor.execute("""
+            INSERT INTO tumulos (codigo, setor, numero, tipo, capacidade)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            self.__codigo,
+            self.__setor,
+            self.__numero,
+            self.__tipo.name,
+            self.__capacidade
+            ))
+        db.coneccao.commit()
+
+    def alterar(self):
+        db = Database.get_instance()
+        cursor = db.coneccao.cursor()
+
+        cursor.execute("""
+                UPDATE tumulos
+                SET setor = ?, numero = ?, tipo = ?, capacidade = ?
+                WHERE codigo = ?
+        """, (
+            self.__setor,
+            self.__numero,
+            self.__tipo.name,
+            self.__capacidade
+        ))
+    
+    def deletar(self):
+        db = Database.get_instance()
+        db.coneccao.execute(
+            "DELETE FROM tumulos WHERE codigo = ?", (self.__cpf,)
+        )
+        db.coneccao.commit()
+        self.__cpf = None
+
+#buscas
+    @staticmethod
+    def buscar_por_codigo(codigo):
+        db = Database.get_instance()
+        row = db.coneccao.execute(
+            "SELECT * FROM tumulos WHERE codigo ?", (codigo,)
+        ).fetchone()
+        return Tumulo.row_para_objeto(row) if row else None
+    
+    @staticmethod
+    def buscar_todos():
+        db = Database.get_instance()
+        rows = db.coneccao.execute("SELECT * FROM tumulos").fetchall
+        return [Tumulo._row_para_objeto(r) for r in rows]
+    
+#auxiliar
+    @staticmethod
+    def _row_para_objeto(row):
+        return Tumulo(
+            codigo = row['codigo'],
+            setor = row['setor'],
+            numero = row['numero'],
+            tipo = TipoTumulo(row['tipo']),
+            capacidade = row['capacidade']
+        )

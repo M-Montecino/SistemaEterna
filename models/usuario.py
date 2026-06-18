@@ -1,7 +1,7 @@
 from enum import Enum
 import hashlib
 import secrets
-
+from models.database import Database
 
 class Cargo(Enum):
     Gestor = 1
@@ -120,3 +120,69 @@ class Usuario:
 
         if senha is not None and senha.strip() != "":
             self.senha = senha
+
+#persistência
+    def cadastrar(self):
+        db = Database()
+        cursor = db.coneccao.cursor()
+        cursor.execute("""
+            INSERT INTO usuarios (cpf, nome, cargo, email, senha_hash)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            self.__cpf,
+            self.__nome,
+            self.__cargo.name,
+            self.__email,
+            self.__senha
+        ))
+        db.coneccao.commit()
+
+    def alterar(self):
+        db = Database().get_instance()
+        cursor = db.coneccao.cursor()
+
+        cursor.execute("""
+            UPDATE usuarios
+            SET nome = ?, cargo = ?, email = ?, senha_hash
+            WHERE cpf = ?
+        """, (
+            self.__nome,
+            self.__cargo.name,
+            self.__email,
+            self.__senha,
+            self.__cpf
+        ))
+        db.coneccao.commit()
+
+    def deletar(self):
+        db = Database.get_instance()
+        db.coneccao.execute(
+            "DELETE FROM usuarios WHERE cpf = ?"
+        )
+        db.coneccao.commit()
+        self.__codigo = None
+
+#buscas
+    @staticmethod
+    def buscar_por_cpf(cpf):
+        db = Database.get_instance()
+        row = db.coneccao.execute(
+            "SELECT * FROM usuarios WHERE cpf = ?"
+        ).fetchone()
+        return Usuario._row_para_objeto(row) if row else None
+
+    @staticmethod
+    def buscar_todos():
+        db = Database.get_instance()
+        rows = db.coneccao.execute("SELECT * FROM usuarios").fetchall()
+        return [Usuario.row_para_objeto(r) for r in rows]
+    
+#auxiliar
+    def _row_para_objeto(row):
+        return Usuario(
+            nome = row["nome"],
+            cargo = Cargo[row["cargo"]],
+            email = row["cargo"],
+            senha = row["senha_hash"],
+            cpf = row["cpf"]
+        )

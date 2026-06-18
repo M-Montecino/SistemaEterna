@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 from utils.funcoesAuxiliares import validar_cpf
-
+from models.database import Database
 
 class Falecido:
     def __init__(
@@ -14,11 +14,13 @@ class Falecido:
     ):
         if not (isinstance(cpf, str) and validar_cpf(cpf)):
             raise ValueError("CPF inválido")
-        self.nome = nome
+        self.__nome = nome
         self.__cpf = re.sub(r'\D', '', cpf)
-        self.data_nascimento = data_nascimento
-        self.data_falecimento = data_falecimento
-        self.causa_morte = causa_morte
+        self.__data_nascimento = data_nascimento
+        self.__data_falecimento = data_falecimento
+        self.__causa_morte = causa_morte
+
+#properties
 
     @property
     def nome(self):
@@ -71,3 +73,69 @@ class Falecido:
         if not causa.strip():
             raise ValueError("causa_morte inválida")
         self.__causa_morte = causa
+
+#persistência
+    def cadastrar(self):
+        db = Database.get_instance()
+        cursor = db.coneccao.cursor()
+        cursor.execute("""
+            INSERT INTO falecidos (cpf, nome, data_nascimento, data_falecimento, causa_morte)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            self.__cpf,
+            self.__nome,
+            self.__data_nascimento.strftime("%Y-%m-%d"),
+            self.__data_falecimento.strftime("%Y-%m-%d"),
+            self.__causa_morte
+            ))
+        db.connecao.commit()
+
+    def alterar(self):
+        db = Database.get_instance()
+        cursor = db.coneccao.cursor()
+
+        cursor.execute("""
+            UPDATE falecidos
+            SET nome = ?, data_nascimento = ?, data_falecimento = ?, causa_morte = ?
+            WHERE cpf = ?
+            """, (
+                self.__nome,
+                self.__data_falecimento.strftime("%Y-%m-%d"),
+                self.__data_falecimento.strftime("%Y-%m-%d"),
+                self.__causa_morte
+            ))
+        db.coneccao.commit()
+
+    def deletar(self):
+        db = Database.get_instance()
+        db.coneccao.execute(
+            "DELETE FROM falecidos WHERE cpf = ?", (self.__cpf,)
+        )
+        db.coneccao.commit()
+        self.__cpf = None
+
+#buscas
+    @staticmethod
+    def buscar_por_codigo(cpf: int):
+        db = Database.get_instance()
+        row = db.coneccao.execute(
+            "SELECT * FROM falecidos WHERE cpf = ?", (cpf)
+        ).fetchone()
+        return Falecido._row_para_objeto(row) if row else None
+    
+    @staticmethod
+    def buscar_todos():
+        db = Database.get_instance()
+        rows = db.coneccao.execute("SELECT * FROM falecidos").fetchall()
+        return [Falecido._row_para_objeto(r) for r in rows]
+    
+#auxiliar
+    @staticmethod
+    def _row_para_objeto(row):
+        return Falecido(
+            nome= row['nome'],
+            cpf= row['cpf'],
+            data_nascimento=datetime.strptime(row["data_nascimento"], "%Y-%m-%d"),
+            data_falecimento=datetime.strptime(row["data_falecimento"], "%Y-%m-%d"),
+            causa_morte= row['causa_morte']
+        )

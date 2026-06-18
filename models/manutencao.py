@@ -22,7 +22,7 @@ class Manutencao:
         return self.__codigo
 
     @property
-    def tumulo(self) -> Tumulo:
+    def tumulo(self) -> int:
         return self.__tumulo
 
     @tumulo.setter
@@ -74,7 +74,13 @@ class Manutencao:
         cursor.execute("""
             INSERT INTO manutencoes (codigo, tumulo, tipo_servico, data, cpf_responsavel)
             VALUES (?, ?, ?, ?, ?)
-        """, (self.__codigo, self.__tumulo, tipo, data, self.__cpf_responsavel))
+        """, (
+            self.__codigo,
+            self.__tumulo, 
+            tipo, 
+            data, 
+            self.__cpf_responsavel
+            ))
         db.coneccao.commit()
 
     def alterar(self):
@@ -85,11 +91,16 @@ class Manutencao:
         data = self.__data.strftime("%Y-%m-%d")
 
         cursor.execute("""
-                UPDATE manutencoes
-                SET tumulo = ?, tipo_servico = ?, data = ?, cpf_responsavel = ?
-                WHERE codigo = ?
-            """, (self.__tumulo, tipo, data, self.__cpf_responsavel, self.__codigo))
-        
+            UPDATE manutencoes
+            SET tumulo = ?, tipo_servico = ?, data = ?, cpf_responsavel = ?
+            WHERE codigo = ?
+            """, (
+                self.__tumulo,
+                tipo, 
+                data, 
+                self.__cpf_responsavel, 
+                self.__codigo
+            ))
         db.coneccao.commit()
 
     def deletar(self):
@@ -110,20 +121,18 @@ class Manutencao:
         return Manutencao._row_para_objeto(row) if row else None
     
     @staticmethod
-    def buscar_todos() -> list:
-        """Retorna lista com todas as manutenções."""
-        db   = Database.get_instance()
+    def buscar_todos():
+        db = Database.get_instance()
         rows = db.coneccao.execute("SELECT * FROM manutencoes").fetchall()
         return [Manutencao._row_para_objeto(r) for r in rows]
 
 #auxiliar
     @staticmethod
     def _row_para_objeto(row):
-        """Converte uma linha do banco em objeto Manutencao."""
         return Manutencao(
-            codigo         = row["codigo"],
-            tumulo         = row["tumulo"],          # código do túmulo (int)
-            tipo_servico   = TipoServico[row["tipo_servico"]],  # str → Enum
-            data           = datetime.strptime(row["data"], "%Y-%m-%d"),
-            cpf_responsavel= row["cpf_responsavel"]
+            codigo = row["codigo"],
+            tumulo = row["tumulo"],
+            tipo_servico = TipoServico[row["tipo_servico"]],
+            data = datetime.strptime(row["data"], "%Y-%m-%d"),
+            cpf_responsavel = row["cpf_responsavel"]
         )

@@ -19,78 +19,78 @@ class Database:
         cursor = self.coneccao.cursor()
         cursor.executescript("""
         CREATE TABLE IF NOT EXISTS pagamentos(
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            valor           REAL NOT NULL,
-            data_pagamento  DATE NOT NULL,
-            tipo_pagamento  TEXT NOT NULL
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            valor REAL NOT NULL,
+            data_pagamento DATE NOT NULL,
+            tipo_pagamento TEXT NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS responsaveis(
-            cpf      VARCHAR(11) PRIMARY KEY,
-            nome     TEXT NOT NULL,
+            cpf VARCHAR(11) PRIMARY KEY,
+            nome TEXT NOT NULL,
             telefone VARCHAR(11) NOT NULL,
-            cep      VARCHAR(8),
-            numero   INTEGER,
-            email    TEXT
+            cep VARCHAR(8),
+            numero INTEGER,
+            email TEXT
         );
 
         CREATE TABLE IF NOT EXISTS falecidos(
-            cpf               VARCHAR(11) PRIMARY KEY,
-            nome              TEXT NOT NULL,
-            data_nascimento   DATE NOT NULL,
-            data_falecimento  DATE NOT NULL,
-            causa_morte       TEXT NOT NULL
+            cpf VARCHAR(11) PRIMARY KEY,
+            nome TEXT NOT NULL,
+            data_nascimento DATE NOT NULL,
+            data_falecimento DATE NOT NULL,
+            causa_morte TEXT NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS tumulos(
-            codigo     INTEGER PRIMARY KEY,
-            setor      TEXT NOT NULL,
-            numero     INTEGER NOT NULL,
-            tipo       TEXT NOT NULL,
+            codigo INTEGER PRIMARY KEY,
+            setor TEXT NOT NULL,
+            numero INTEGER NOT NULL,
+            tipo TEXT NOT NULL,
             capacidade INTEGER NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS concessoes(
-            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             id_pagamento INTEGER REFERENCES pagamentos(id),
-            responsavel  VARCHAR(11) REFERENCES responsaveis(cpf),
+            responsavel VARCHAR(11) REFERENCES responsaveis(cpf),
             responsavel2 VARCHAR(11) REFERENCES responsaveis(cpf),
-            data_inicio  DATE,
-            data_fim     DATE,
-            status       CHAR
+            data_inicio DATE,
+            data_fim DATE,
+            status CHAR
         );
 
         CREATE TABLE IF NOT EXISTS sepultamentos(
-            cpf_falecido      VARCHAR(11) PRIMARY KEY REFERENCES falecidos(cpf),
-            tumulo            INTEGER     REFERENCES tumulos(codigo),
-            responsavel       VARCHAR(11) REFERENCES responsaveis(cpf),
-            responsavel2      VARCHAR(11) REFERENCES responsaveis(cpf),
+            cpf_falecido VARCHAR(11) REFERENCES falecidos(cpf),
+            tumulo INTEGER REFERENCES tumulos(codigo),
+            id_concessao INTEGER REFERENCES concessoes(id),
             data_sepultamento DATE NOT NULL,
-            observacoes       TEXT
+            ativo INTEGER,
+            observacoes TEXT
         );
 
         CREATE TABLE IF NOT EXISTS exumacoes(
-            codigo        INTEGER PRIMARY KEY,
-            data          DATE NOT NULL,
-            sepultamento  VARCHAR(11) REFERENCES sepultamentos(cpf_falecido),
-            destino       TEXT NOT NULL,
-            observacoes   TEXT
+            codigo INTEGER PRIMARY KEY,
+            data DATE NOT NULL,
+            sepultamento VARCHAR(11) REFERENCES sepultamentos(cpf_falecido),
+            destino TEXT NOT NULL,
+            observacoes TEXT
         );
 
         CREATE TABLE IF NOT EXISTS manutencoes(
-            codigo          INTEGER PRIMARY KEY,
-            tumulo          INTEGER     REFERENCES tumulos(codigo),
-            tipo_servico    TEXT NOT NULL,
-            data            DATE NOT NULL,
+            codigoINTEGER PRIMARY KEY,
+            tumulo INTEGER     REFERENCES tumulos(codigo),
+            tipo_servico TEXT NOT NULL,
+            data DATE NOT NULL,
             cpf_responsavel VARCHAR(11) REFERENCES responsaveis(cpf)
         );
 
         CREATE TABLE IF NOT EXISTS usuarios(
-            cpf   VARCHAR(11) PRIMARY KEY,
+            cpf VARCHAR(11) PRIMARY KEY,
             nome  TEXT NOT NULL,
             cargo TEXT NOT NULL,
             email TEXT NOT NULL,
-            senha TEXT NOT NULL
+            senha_hash TEXT NOT NULL
         );
         """)
         self.coneccao.commit()

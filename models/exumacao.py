@@ -1,13 +1,11 @@
 from datetime import datetime
-from models.sepultamento import Sepultamento
-
+from models.database import Database
 
 class Exumacao:
-
     def __init__(self,
                  codigo: int,
                  data: datetime,
-                 sepultamento: Sepultamento,
+                 sepultamento: int,
                  destino: str,
                  observacoes: str = ""):
         self.__codigo = codigo
@@ -50,12 +48,12 @@ class Exumacao:
         self.__data = self.__validar_data(data)
 
     @property
-    def sepultamento(self) -> Sepultamento:
+    def sepultamento(self) -> int:
         return self.__sepultamento
 
     @sepultamento.setter
-    def sepultamento(self, sepultamento: Sepultamento):
-        if not isinstance(sepultamento, Sepultamento):
+    def sepultamento(self, sepultamento: int):
+        if not isinstance(sepultamento, int):
             raise ValueError("Sepultamento invalido.")
         self.__sepultamento = sepultamento
 
@@ -77,3 +75,68 @@ class Exumacao:
             observacoes = ""
         else:
             self.__observacoes = str(observacoes).strip()
+
+#persistência
+    def cadastrar(self):
+        db = Database.get_instance()
+        cursor = db.coneccao.cursor()
+        
+        cursor.execute("""
+            INSERT INTO exumacoes (codigo, data, sepultamento, destino, observacoes)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            self.__codigo,
+            self.__data.strftime("%Y-%m-%d"),
+            self.__sepultamento,
+            self.__destino,
+            self.__observacoes
+        ))
+        db.coneccao.commit()
+
+    def alterar(self):
+        db = Database.get_instance()
+        db.coneccao.execute("""
+            UPDATE exumacoes
+            SET data = ?, sepultamento = ?, destino = ?, observacoes = ?
+            WHERE codigo = ?             
+        """, (
+            self.__data.strftime("%Y-%m-%d"),
+            self.__sepultamento,
+            self.__destino,
+            self.__observacoes,
+        ))
+        db.coneccao.commit()
+
+    def deletar(self):
+        db = Database.get_instance()
+        db.coneccao.execute(
+            "DELETE FROM exumacoes WHERE codigo = ?", (self.__codigo,)
+        )
+        db.coneccao.commit()
+        self.__codigo = None
+
+#buscas
+    @staticmethod
+    def buscar_por_codigo(codigo: int):
+        db = Database.get_instance()
+        row = db.coneccao.execute(
+            "SELECT * FROM exumacoes WHERE codigo = ?", (codigo,)
+        ).fetchone()
+        return Exumacao._row_para_objeto(row) if row else None
+    
+    @staticmethod
+    def buscar_todos():
+        db = Database.get_instance()
+        rows = db.coneccao.execute("SELECT * FROM exumacoes").fetchall()
+        return [Exumacao._row_para_objeto(r) for r in rows]
+    
+#auxiliar
+    @staticmethod
+    def _row_para_objetos(row):
+        return Exumacao(
+            codigo = row['codigo'],
+            data = datetime.strptime(row["data"], "%Y-%m-%d"),
+            sepultamento = row['sepultamento'],
+            destino= row['destino']
+            observacoes= row['observacoes']
+        )
