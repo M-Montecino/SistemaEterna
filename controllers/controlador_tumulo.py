@@ -8,17 +8,10 @@ class ControladorTumulo:
     def __init__(
         self,
         controlador_geral: "ControladorGeral"):
-        self.__tumulos = []
         self.__controlador_geral = (controlador_geral)
         self.__tela_tumulo = TelaTumulo(controlador_geral.tela_menu.root)
 
 #Funções auxiliares
-    def __auxiliar_busca_tumulo(self, codigo: int):
-        for tumulo in self.__tumulos:
-            if tumulo.codigo == codigo:
-                return tumulo
-        return None
-
     def __validar_numeros(self, numero):
         if not isinstance(numero, int):
             raise ValueError("O número deve ser um inteiro.")
@@ -87,64 +80,68 @@ class ControladorTumulo:
 #Funções principais
     def cadastrar_tumulo(self):
         try:
-            dados_tumulo = self.__tela_tumulo.pega_dados_tumulo()
-            self.__validar_dados_tumulo(dados_tumulo)
+            dados = self.__tela_tumulo.pega_dados_tumulo()
+            self.__validar_dados_tumulo(dados)
 
-            if self.__auxiliar_busca_tumulo(dados_tumulo['codigo']) is not None:
+            if Tumulo.buscar_por_codigo(dados['codigo']):
                 self.__tela_tumulo.mostra_mensagem(
                     "Código de túmulo já cadastrado."
                 )
                 return
 
-            novo_tumulo = Tumulo(
-                dados_tumulo['codigo'],
-                dados_tumulo['setor'], 
-                dados_tumulo['numero'], 
-                dados_tumulo['tipo'], 
-                dados_tumulo['capacidade']
+            novo = Tumulo(
+                dados['codigo'],
+                dados['setor'], 
+                dados['numero'], 
+                dados['tipo'], 
+                dados['capacidade']
             )
 
 
-            self.__tumulos.append(novo_tumulo)
+            novo.cadastrar()
             self.__tela_tumulo.mostra_mensagem(
                 "Túmulo cadastrado com sucesso."
             )
 
-        except ValueError as e:
+        except ValueError as erro:
             self.__tela_tumulo.mostra_mensagem(
-                f"Erro ao cadastrar túmulo: {str(e)}"
+                f"Erro ao cadastrar túmulo: {str(erro)}"
             )
 
     def alterar_tumulo(self):
         try:
             codigo = self.__tela_tumulo.alterar_tumulo()
-            self.__validar_numeros(codigo)
-            tumulo = self.__auxiliar_busca_tumulo(codigo)
-            tumulo_atualizado = tumulo
+            if not self.__validar_numeros(codigo):
+                raise ValueError("Código inválido.")
 
+            tumulo = Tumulo(codigo)
             if not tumulo:
                 self.__tela_tumulo.mostra_mensagem(
                     "Túmulo não encontrado."
-                )
+                    )
                 return
             
             novos_dados = (
-                self.__tela_tumulo.pega_dados_tumulo()
+                self.__tela_tumulo.pega_novos_dados_tumulo()
             )
 
+            dados_finais = {
+                'codigo': codigo,
+                'setor': novos_dados['setor'] if novos_dados['setor'] is not None else tumulo.setor,
+                'numero': novos_dados['numero'] if novos_dados['numero'] is not None else tumulo.numero,
+                'tipo': novos_dados['tipo'] if novos_dados['tipo'] is not None else tumulo.tipo,
+                'capacidade': novos_dados['capacidade'] if novos_dados['capacidade'] is not None else tumulo.capacidade
+            }
+
+            self.__validar_dados_tumulo(dados_finais)
+
             #atualizando dados
-            if novos_dados['setor'] is not None:
-                tumulo_atualizado.setor = novos_dados['setor']
-            if novos_dados['numero'] is not None:
-                tumulo_atualizado.numero = novos_dados['numero']
-            if novos_dados['tipo'] is not None:
-                tumulo_atualizado.tipo = novos_dados['tipo']
-            if novos_dados['capacidade'] is not None:
-                tumulo_atualizado.capacidade = novos_dados['capacidade']
+            tumulo.setor = dados_finais['setor']
+            tumulo.numero = dados_finais['numero']
+            tumulo.tipo = dados_finais['tipo']
+            tumulo.capacidade = dados_finais['capacidade']
 
-            self.__validar_dados_tumulo(tumulo_atualizado)
-            tumulo = tumulo_atualizado
-
+            tumulo.alterar()
             self.__tela_tumulo.mostra_mensagem(
                 "Túmulo alterado com sucesso."
             )
@@ -155,21 +152,27 @@ class ControladorTumulo:
             )
 
     def excluir_tumulo(self):
-        codigo = self.__tela_tumulo.excluir_tumulo()
-        tumulo = self.__auxiliar_busca_tumulo(codigo)
+        try:
+            codigo = self.__tela_tumulo.excluir_tumulo()
+            self.__validar_numeros(codigo)
 
-        if tumulo:
-            self.__tumulos.remove(tumulo)
+            tumulo = Tumulo.buscar_por_codigo(codigo)
+            if not tumulo:
+                self.__tela_tumulo.mostra_mensagem("Túmulo não encontrado")
+                return
+            
+            tumulo.deletar()
+            self.__tela_tumulo.mostra_mensagem("Túmulo excluído com sucesso.")
+
+        except ValueError as erro:
             self.__tela_tumulo.mostra_mensagem(
-                "Túmulo excluido com sucesso"
-            )
-        else:
-            self.__tela_tumulo.mostra_mensagem(
-                "Túmulo não encontrado"
+                f"Erro ao alterar túmulo: {str(erro)}"
             )
         
     def listar_tumulos(self):
-        if not self.__tumulos:
+        tumulos = Tumulo.buscar_todos()
+
+        if not tumulos:
             self.__tela_tumulo.mostra_mensagem("" \
             "Nenhum túmulo cadastrado")
             return
@@ -180,15 +183,23 @@ class ControladorTumulo:
             )
 
     def buscar_tumulo(self):
-        codigo = self.__tela_tumulo.buscar_tumulo()
-        tumulo = self.__auxiliar_busca_tumulo(codigo)
-        if tumulo:
+        try:
+            codigo = self.__tela_tumulo.buscar_tumulo()
+            self.__validar_numeros(codigo)
+
+            tumulo = Tumulo.buscar_por_codigo(codigo)
+            if tumulo:
+                self.__tela_tumulo.mostra_mensagem(
+                    self.__formatar_tumulo(tumulo)
+                )
+            else:
+                self.__tela_tumulo.mostra_mensagem(
+                "Túmulo não encontrado"
+                )
+        except ValueError as erro:
             self.__tela_tumulo.mostra_mensagem(
-                self.__formatar_tumulo(tumulo)
+                f"Erro ao alterar túmulo: {str(erro)}"
             )
-        else:
-            self.__tela_tumulo.mostra_mensagem("" \
-            "Túmulo não encontrado")
 
     def retomar_menu(self):
         return
@@ -219,7 +230,8 @@ class ControladorTumulo:
                     f"Erro: {str(e)}")
                 
     def validar_tumulo(self, codigo):
-        tumulo = self.__auxiliar_busca_tumulo(codigo)
+        self.__validar_numeros(codigo)
+        tumulo = Tumulo.buscar_por_codigo(codigo)
 
         if not tumulo:
             raise ValueError("Esse túmulo não existe")

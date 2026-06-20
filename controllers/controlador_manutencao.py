@@ -71,7 +71,9 @@ class ControladorManutencao:
             self.__validar_dados_manutencao(dados)
 
             if Manutencao.buscar_por_codigo(dados['codigo']):
-                self.__tela_manutencao.mostra_mensagem("Código já cadastrado.")
+                self.__tela_manutencao.mostra_mensagem(
+                "Código já cadastrado."
+                )
                 return
 
             nova = Manutencao(
@@ -99,23 +101,30 @@ class ControladorManutencao:
 
             manutencao = Manutencao.buscar_por_codigo(codigo)
             if not manutencao:
-                self.__tela_manutencao.mostra_mensagem("Manutenção não encontrada.")
+                self.__tela_manutencao.mostra_mensagem(
+                    "Manutenção não encontrada."
+                    )
                 return
             
             novos_dados = (
             self.__tela_manutencao.pega_novos_dados_manutencao()
             )
 
+            dados_finais = {
+            'codigo': codigo,
+            'tumulo': novos_dados['tumulo'] if novos_dados['tumulo'] is not None else manutencao.tumulo,
+            'tipo_servico': novos_dados['tipo_servico'] if novos_dados['tipo_servico'] is not None else manutencao.tipo_servico,
+            'data': novos_dados['data'] if novos_dados['data'] is not None else manutencao.data,
+            'cpf_responsavel': novos_dados['cpf_responsavel'] if novos_dados['cpf_responsavel'] is not None else manutencao.cpf_responsavel
+            }
+
+            self.__validar_dados_manutencao(dados_finais)
+
             #atualizando dados
-            if novos_dados['tumulo'] is not None:
-                manutencao.tumulo = novos_dados['tumulo']
-            if novos_dados['tipo_servico'] is not None:
-                manutencao.tipo_servico = self.__converter_tipo_servico(
-                    novos_dados['tipo_servico'])
-            if novos_dados['data'] is not None:
-                manutencao.data = novos_dados['data']
-            if novos_dados['cpf_responsavel'] is not None:
-                manutencao.cpf_responsavel = novos_dados['cpf_responsavel']
+            manutencao.tumulo = dados_finais['tumulo']
+            manutencao.tipo_servico = dados_finais['tipo_servico']
+            manutencao.data = dados_finais['data']
+            manutencao.cpf_responsavel = dados_finais['cpf_responsavel']
 
             manutencao.alterar()            
             self.__tela_manutencao.mostra_mensagem(
@@ -140,14 +149,16 @@ class ControladorManutencao:
             manutencao.deletar()
             self.__tela_manutencao.mostra_mensagem("Manutenção excluída com sucesso.")
 
-        except:
-            self.__tela_manutencao.mostra_mensagem(f"Erro ao excluir: {str(e)}")
+        except ValueError as erro:
+            self.__tela_manutencao.mostra_mensagem(
+                f"Erro ao cadastrar manutenção: {str(erro)}"
+            )
 
     def listar_manutencoes(self):
         manutencoes = Manutencao.buscar_todos()
 
         if not manutencoes:
-            self.__tela_manutencao.mostra_mensagem("" \
+            self.__tela_manutencao.mostra_mensagem(
             "Nenhuma manutenção cadastrada")
             return
         
@@ -170,8 +181,10 @@ class ControladorManutencao:
                 self.__tela_manutencao.mostra_mensagem(
                     "Manutenção não encontrada"
                 )
-        except:
-            self.__tela_manutencao.mostra_mensagem(f"Erro ao buscar: {str(e)}")
+        except ValueError as erro:
+            self.__tela_manutencao.mostra_mensagem(
+                f"Erro ao cadastrar manutenção: {str(erro)}"
+            )
 
     def retomar_menu(self):
         return

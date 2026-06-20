@@ -125,6 +125,14 @@ class Exumacao:
         return Exumacao._row_para_objeto(row) if row else None
     
     @staticmethod
+    def buscar_por_cpf_falecido(cpf: str):
+        db  = Database.get_instance()
+        row = db.coneccao.execute(
+            "SELECT * FROM exumacoes WHERE sepultamento = ?", (cpf,)
+        ).fetchone()
+        return Exumacao._row_para_objeto(row) if row else None
+    
+    @staticmethod
     def buscar_todos():
         db = Database.get_instance()
         rows = db.coneccao.execute("SELECT * FROM exumacoes").fetchall()
@@ -137,6 +145,6 @@ class Exumacao:
             codigo = row['codigo'],
             data = datetime.strptime(row["data"], "%Y-%m-%d"),
             sepultamento = row['sepultamento'],
-            destino= row['destino']
+            destino= row['destino'],
             observacoes= row['observacoes']
         )

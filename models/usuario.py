@@ -23,6 +23,7 @@ class Usuario:
         self.__cpf = self.__validar_cpf(cpf)
         self.senha = senha
 
+#validações
     def __validar_cpf(self, cpf: str) -> str:
         if not isinstance(cpf, str):
             raise ValueError("CPF invalido")
@@ -70,6 +71,7 @@ class Usuario:
         )
         return f"{salt.hex()}${senha_hash.hex()}"
 
+#properties
     @property
     def nome(self) -> str:
         return self.__nome
@@ -109,80 +111,86 @@ class Usuario:
     def senha(self, senha: str):
         self.__senha = self.__proteger_senha(senha)
 
-    def alterar_dados(self,
-                      nome: str,
-                      cargo: Cargo,
-                      email: str,
-                      senha: str = None):
-        self.nome = nome
+    def alterar_dados(self, nome: str, cargo: Cargo, email: str, senha: str = None):
+        self.nome  = nome
         self.cargo = cargo
         self.email = email
-
-        if senha is not None and senha.strip() != "":
+        if senha is not None and senha.strip():
             self.senha = senha
 
 #persistência
     def cadastrar(self):
-        db = Database()
+        db     = Database.get_instance()
         cursor = db.coneccao.cursor()
         cursor.execute("""
-            INSERT INTO usuarios (cpf, nome, cargo, email, senha_hash)
+            INSERT INTO usuarios (cpf, nome, cargo, email, senha)
             VALUES (?, ?, ?, ?, ?)
-        """, (
-            self.__cpf,
-            self.__nome,
-            self.__cargo.name,
-            self.__email,
-            self.__senha
-        ))
+        """, (self.__cpf, self.__nome, self.__cargo.name, self.__email, self.__senha))
         db.coneccao.commit()
 
     def alterar(self):
-        db = Database().get_instance()
-        cursor = db.coneccao.cursor()
-
-        cursor.execute("""
+        db = Database.get_instance()
+        db.coneccao.execute("""
             UPDATE usuarios
-            SET nome = ?, cargo = ?, email = ?, senha_hash
+            SET nome = ?, cargo = ?, email = ?, senha = ?
             WHERE cpf = ?
-        """, (
-            self.__nome,
-            self.__cargo.name,
-            self.__email,
-            self.__senha,
-            self.__cpf
-        ))
+        """, (self.__nome, self.__cargo.name, self.__email, self.__senha, self.__cpf))
         db.coneccao.commit()
 
     def deletar(self):
         db = Database.get_instance()
         db.coneccao.execute(
-            "DELETE FROM usuarios WHERE cpf = ?"
+            "DELETE FROM usuarios WHERE cpf = ?", (self.__cpf,)
         )
         db.coneccao.commit()
-        self.__codigo = None
 
 #buscas
     @staticmethod
-    def buscar_por_cpf(cpf):
-        db = Database.get_instance()
+    def buscar_por_cpf(cpf: str):
+        db  = Database.get_instance()
         row = db.coneccao.execute(
-            "SELECT * FROM usuarios WHERE cpf = ?"
+            "SELECT * FROM usuarios WHERE cpf = ?", (cpf,)
         ).fetchone()
         return Usuario._row_para_objeto(row) if row else None
+    
+    @staticmethod
+    def buscar_por_email(email: str):
+        db  = Database.get_instance()
+        row = db.coneccao.execute(
+            "SELECT * FROM usuarios WHERE email = ?", (email.strip().lower(),)
+        ).fetchone()
+        return Usuario._row_para_objeto(row) if row else None
+
+    @staticmethod
+    def buscar_por_nome(nome: str) -> list:
+        db   = Database.get_instance()
+        rows = db.coneccao.execute(
+            "SELECT * FROM usuarios WHERE LOWER(nome) LIKE ?", (f"%{nome.lower()}%",)
+        ).fetchall()
+        return [Usuario._row_para_objeto(r) for r in rows]
+
+    @staticmethod
+    def buscar_por_cargo(cargo: Cargo) -> list:
+        db   = Database.get_instance()
+        rows = db.coneccao.execute(
+            "SELECT * FROM usuarios WHERE cargo = ?", (cargo.name,)
+        ).fetchall()
+        return [Usuario._row_para_objeto(r) for r in rows]
 
     @staticmethod
     def buscar_todos():
         db = Database.get_instance()
         rows = db.coneccao.execute("SELECT * FROM usuarios").fetchall()
-        return [Usuario.row_para_objeto(r) for r in rows]
+        return [Usuario._row_para_objeto(r) for r in rows]
     
 #auxiliar
-    def _row_para_objeto(row):
-        return Usuario(
-            nome = row["nome"],
-            cargo = Cargo[row["cargo"]],
-            email = row["cargo"],
-            senha = row["senha_hash"],
-            cpf = row["cpf"]
-        )
+    @staticmethod
+    def _row_para_objeto(row) -> "Usuario":
+        """Reconstrói o objeto sem re-hashear a senha."""
+        usuario = object.__new__(Usuario)
+        usuario._Usuario__nome  = row["nome"]
+        usuario._Usuario__cpf   = row["cpf"]
+        usuario._Usuario__email = row["email"]
+        usuario._Usuario__cargo = Cargo[row["cargo"]]
+        usuario._Usuario__senha = row["senha"]
+        return usuario

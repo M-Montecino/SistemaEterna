@@ -6,20 +6,11 @@ if TYPE_CHECKING:
     from controllers.controlador_geral import ControladorGeral
 
 class ControladorResponsavel:
-    def __init__(
-        self, 
-        controlador_geral: "ControladorGeral"):
-        self.__responsaveis = []
+    def __init__(self, controlador_geral: "ControladorGeral"):
         self.__controlador_geral = (controlador_geral)
         self.__tela_responsavel = TelaResponsavel(controlador_geral.tela_menu.root)
 
-#Funções auxiliares
-    def __auxiliar_busca_responsavel(self, cpf: int):
-        for responsavel in self.__responsaveis:
-            if responsavel.cpf == cpf:
-                return responsavel
-        return None
-    
+#Funções auxiliares    
     def __validar_nome(self, nome):
         if not isinstance(nome, str):
             raise ValueError("Nome precisa ser uma string")
@@ -59,25 +50,25 @@ class ControladorResponsavel:
 #Funções principais
     def cadastrar_responsavel(self):
         try:
-            dados_responsavel = self.__tela_responsavel.pegar_dados_responsavel()
-            self.__validar_dados_responsavel(dados_responsavel)
+            dados = self.__tela_responsavel.pegar_dados_responsavel()
+            self.__validar_dados_responsavel(dados)
 
-            if self.__auxiliar_busca_responsavel(dados_responsavel['cpf']) is not None:
+            if Responsavel.buscar_por_cpf(dados['cpf']):
                 self.__tela_responsavel.mostra_mensagem(
                     "CPF já cadastrado."
                 )
                 return
             
-            novo_responsavel = Responsavel(
-                dados_responsavel['nome'],
-                dados_responsavel['cpf'],
-                dados_responsavel['telefone'],
-                dados_responsavel['cep'],
-                dados_responsavel['numero'],
-                dados_responsavel['email']
+            novo = Responsavel(
+                dados['nome'],
+                dados['cpf'],
+                dados['telefone'],
+                dados['cep'],
+                dados['numero'],
+                dados['email']
             )
 
-            self.__responsavels.append(novo_responsavel)
+            novo.cadastrar()
             self.__tela_responsavel.mostra_mensagem(
                 "Responsável cadastrado com sucesso."
             )
@@ -90,10 +81,10 @@ class ControladorResponsavel:
     def alterar_responsavel(self):
         try:
             cpf = self.__tela_responsavel.alterar_responsavel()
-            validar_cpf(cpf)
-            responsavel = self.__auxiliar_busca_responsavel(cpf)
-            responsavel_atualizado = responsavel
+            if not validar_cpf(cpf):
+                raise ValueError("CPF inválido.")
 
+            responsavel = Responsavel.buscar_por_cpf(cpf)
             if not responsavel:
                 self.__tela_responsavel.mostra_mensagem(
                     "Responsável não encontrado."
@@ -104,21 +95,25 @@ class ControladorResponsavel:
                 self.__tela_responsavel.pega_dados_responsavel()
             )
 
+            dados_finais = {
+                'cpf': cpf,
+                'nome': novos_dados['nome'] if novos_dados['nome'] is not None else responsavel.nome,
+                'telefone': novos_dados['telefone'] if novos_dados['telefone'] is not None else responsavel.telefone,
+                'cep': novos_dados['cep'] if novos_dados['cep'] is not None else responsavel.cep,
+                'numero': novos_dados['numero'] if novos_dados['numero'] is not None else responsavel.numero,
+                'email': novos_dados['email'] if novos_dados['email'] is not None else responsavel.email
+            }
+
+            self.__validar_dados_responsavel(dados_finais)
+
             #atualizando dados
-            if novos_dados['nome'] is not None:
-                responsavel_atualizado.nome = novos_dados['nome']   
-            if novos_dados['telefone'] is not None:
-                responsavel_atualizado.telefone = novos_dados['telefone']
-            if novos_dados['cep'] is not None:
-                responsavel_atualizado.cep = novos_dados['cep']
-            if novos_dados['numero'] is not None:
-                responsavel_atualizado.numero = novos_dados['numero']
-            if novos_dados['email'] is not None:
-                responsavel_atualizado.email = novos_dados['email']
+            responsavel.nome = dados_finais['nome']   
+            responsavel.telefone = dados_finais['telefone']
+            responsavel.cep = dados_finais['cep']
+            responsavel.numero = dados_finais['numero']
+            responsavel.email = dados_finais['email']
 
-            self.__validar_dados_responsavel(responsavel_atualizado)
-            responsavel = responsavel_atualizado
-
+            responsavel.alterar()
             self.__tela_responsavel.mostra_mensagem(
                 "Responsável atualizado com sucesso."
             )
@@ -129,43 +124,58 @@ class ControladorResponsavel:
             )
 
     def excluir_responsavel(self):
-        cpf = self.__tela_responsavel.excluir_responsavel()
-        validar_cpf(cpf)
-        responsavel = self.__auxiliar_busca_responsavel(cpf)
+        try:
+            cpf = self.__tela_responsavel.excluir_responsavel()
+            validar_cpf(cpf)
 
-        if responsavel:
-            self.__responsaveis.remove(responsavel)
+            responsavel = Responsavel.buscar_por_cpf(cpf)
+            if not responsavel:
+                self.__tela_responsavel.mostra_mensagem(
+                    "Responsável não encontrado."
+                )
+                return
+            
+            responsavel.deletar()
             self.__tela_responsavel.mostra_mensagem(
-                "Responsável excluído com sucesso."
-            )
-        else:
+                    "Responsável excluído com sucesso."
+                )
+
+        except ValueError as e:
             self.__tela_responsavel.mostra_mensagem(
-                "Responsável não encontrado."
+                f"Erro ao alterar responsável: {str(e)}"
             )
     
     def listar_responsaveis(self):
-        if not self.__responsaveis:
+        responsaveis = Responsavel.buscar_todos()
+
+        if not responsaveis:
             self.__tela_responsavel.mostra_mensagem(
                 "Nenhum responsável cadastrado."
             )
         
-        for responsavel in self.__responsaveis:
+        for responsavel in responsaveis:
             self.__tela_responsavel.mostra_mensagem(
                 self.__formatar_responsavel(responsavel)
             )
 
     def buscar_responsavel(self):
-        cpf = self.__tela_responsavel.buscar_responsavel()
-        validar_cpf(cpf)
-        responsavel = self.__auxiliar_busca_responsavel(cpf)
-        
-        if responsavel:
-            self.__tela_responsavel.mostra_mensagem(
-                self.__formatar_responsavel(responsavel)
-            )
-        else:
-            self.__tela_responsavel.mostra_mensagem(
-                "Responsável não encontrado."
+        try:
+            cpf = self.__tela_responsavel.buscar_responsavel()
+            validar_cpf(cpf)
+
+            responsavel = Responsavel.buscar_por_cpf(cpf)            
+            if responsavel:
+                self.__tela_responsavel.mostra_mensagem(
+                    self.__formatar_responsavel(responsavel)
+                )
+            else:
+                self.__tela_responsavel.mostra_mensagem(
+                    "Responsável não encontrado."
+                )
+
+        except ValueError as erro:
+            self.__tela_manutencao.mostra_mensagem(
+                f"Erro ao cadastrar manutenção: {str(erro)}"
             )
         
     def retomar_menu(self):
@@ -197,7 +207,8 @@ class ControladorResponsavel:
                     f"Erro: {str(e)}")
                 
     def validar_responsavel(self, cpf):
-        responsavel = self.__auxiliar_busca_responsavel(validar_cpf(cpf))
+        validar_cpf(cpf)
+        responsavel = Responsavel.buscar_por_cpf(cpf)
 
         if not responsavel:
             raise ValueError("Responsável não existe")

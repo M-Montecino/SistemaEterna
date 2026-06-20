@@ -9,145 +9,12 @@ from views.tela_exumacao import TelaExumacao
 if TYPE_CHECKING:
     from controllers.controlador_geral import ControladorGeral
 
-
 class ControladorExumacao:
     def __init__(self, controlador_geral: "ControladorGeral"):
-        self.__exumacoes = []
-        self.__sepultamentos_teste = self.__criar_sepultamentos_teste()
         self.__controlador_geral = controlador_geral
         self.__tela_exumacao = TelaExumacao(controlador_geral.tela_menu.root)
 
-    @property
-    def exumacoes(self):
-        return self.__exumacoes
-    
-    def __criar_sepultamentos_teste(self) -> list[Sepultamento]:
-        # Esta lista substitui temporariamente a busca no ControladorSepultamento,
-        # permitindo testar sepultamentos elegiveis e nao elegiveis para exumacao.
-        hoje = datetime.now()
-
-        def criar_sepultamento(
-            cpf_falecido: str,
-            nome_falecido: str,
-            codigo_tumulo: int,
-            setor: str,
-            numero_tumulo: int,
-            data_final_cons: datetime,
-            observacoes: str
-        ) -> Sepultamento:
-            data_nascimento = datetime.strptime("01/01/1940", "%d/%m/%Y")
-            data_falecimento = data_final_cons - timedelta(days=365)
-            data_sepultamento = data_falecimento + timedelta(days=2)
-            data_inicio_cons = data_final_cons - timedelta(days=5 * 365)
-            data_pagamento = data_inicio_cons
-
-            return Sepultamento(
-                cpf_falecido=cpf_falecido,
-                nome_falecido=nome_falecido,
-                data_nascimento=data_nascimento,
-                data_falecimento=data_falecimento,
-                causa_morte="Causas naturais",
-                tumulo=Tumulo(
-                    codigo=codigo_tumulo,
-                    setor=setor,
-                    numero=numero_tumulo,
-                    tipo=TipoTumulo.Gaveteiro,
-                    capacidade=2
-                ),
-                valor=2500.00,
-                data_pagamento=data_pagamento,
-                tipo_pagamento="PIX",
-                responsavel="479.768.520-43",
-                responsavel2="310.531.250-11",
-                data_inicio_cons=data_inicio_cons,
-                data_final_cons=data_final_cons,
-                status=2,
-                data_sepultamento=data_sepultamento,
-                observacoes=observacoes
-            )
-
-        return [
-            criar_sepultamento(
-                cpf_falecido="794.880.230-40",
-                nome_falecido="Carlos Pereira",
-                codigo_tumulo=1,
-                setor="A",
-                numero_tumulo=12,
-                data_final_cons=hoje - timedelta(days=90),
-                observacoes=(
-                    "Elegivel: concessao vencida ha 90 dias."
-                )
-            ),
-            criar_sepultamento(
-                cpf_falecido="529.982.247-25",
-                nome_falecido="Maria Oliveira",
-                codigo_tumulo=2,
-                setor="A",
-                numero_tumulo=18,
-                data_final_cons=hoje - timedelta(days=31),
-                observacoes=(
-                    "Elegivel: concessao vencida ha 31 dias."
-                )
-            ),
-            criar_sepultamento(
-                cpf_falecido="111.444.777-35",
-                nome_falecido="Joao Almeida",
-                codigo_tumulo=3,
-                setor="B",
-                numero_tumulo=7,
-                data_final_cons=hoje - timedelta(days=30),
-                observacoes=(
-                    "Elegivel no limite: data_final_cons + 30 dias ja chegou."
-                )
-            ),
-            criar_sepultamento(
-                cpf_falecido="123.456.789-09",
-                nome_falecido="Ana Souza",
-                codigo_tumulo=4,
-                setor="B",
-                numero_tumulo=21,
-                data_final_cons=hoje - timedelta(days=15),
-                observacoes=(
-                    "Nao elegivel: concessao vencida ha apenas 15 dias."
-                )
-            ),
-            criar_sepultamento(
-                cpf_falecido="987.654.321-00",
-                nome_falecido="Pedro Santos",
-                codigo_tumulo=5,
-                setor="C",
-                numero_tumulo=4,
-                data_final_cons=hoje + timedelta(days=60),
-                observacoes=(
-                    "Nao elegivel: concessao ainda nao venceu."
-                )
-            ),
-            criar_sepultamento(
-                cpf_falecido="390.533.447-05",
-                nome_falecido="Helena Costa",
-                codigo_tumulo=6,
-                setor="C",
-                numero_tumulo=30,
-                data_final_cons=hoje - timedelta(days=365),
-                observacoes=(
-                    "Elegivel: concessao vencida ha aproximadamente 1 ano."
-                )
-            )
-        ]
-
-    def __auxiliar_busca_exumacao(self, codigo: int) -> Optional[Exumacao]:
-        for exumacao in self.__exumacoes:
-            if exumacao.codigo == codigo:
-                return exumacao
-            
-        raise ValueError("Exumação selecionada não foi encontrada.")
-
-    def __cpf_falecido_sepultamento(self, sepultamento: Sepultamento) -> str:
-        falecido = sepultamento.falecido
-        cpf = falecido.cpf
-
-        return str(cpf)
-
+#funções auxiliares
     def __validar_data(self, data: datetime):
         if not isinstance(data, datetime):
             raise ValueError("Data inválida.")
@@ -167,83 +34,30 @@ class ControladorExumacao:
         self.__validar_data(dados["data"])
         self.__validar_destino(dados["destino"])
 
-    def __gerar_codigo_exumacao(self) -> int:
-        maior_codigo = 0
-
-        for exumacao in self.__exumacoes:
-            codigo = exumacao.codigo
-
-            if codigo > maior_codigo:
-                maior_codigo = codigo
-
-        return maior_codigo + 1
-
-    def __obter_sepultamentos(self) -> list[Sepultamento]:
-        # Fluxo real, para reativar depois:
-        #
-        # controlador_sepultamento = (
-        #     self.__controlador_geral.controlador_sepultamento
-        # )
-        #
-        # if controlador_sepultamento is None:
-        #     raise ValueError(
-        #         "Controlador de sepultamento não foi inicializado."
-        #     )
-        #
-        # com @property da lista de sepultamentos:
-        # return list(controlador_sepultamento.sepultamentos)
-        #
-        # se tiver um metodo de obter_sepultamentos():
-        # return list(controlador_sepultamento.obter_sepultamentos())
-
-        return list(self.__sepultamentos_teste)
-
-    def __concessao_vencida_ha_mais_de_30_dias(
-        self,
-        sepultamento: Sepultamento
-    ) -> bool:
+    def __concessao_vencida_ha_mais_de_30_dias(self, sepultamento: Sepultamento) -> bool:
         data_final = sepultamento.concessao.data_fim
-
         if data_final is None:
             return False
+        return datetime.now() >= data_final + timedelta(days=30)
 
-        data_minima_para_exumacao = data_final + timedelta(days=30)
+    def __sepultamento_ja_possui_exumacao(self, sepultamento: Sepultamento) -> bool:
+        # busca no banco em vez da lista
+        return Exumacao.buscar_por_cpf_falecido(sepultamento.falecido.cpf) is not None
 
-        return datetime.now() >= data_minima_para_exumacao
-
-    def __sepultamento_ja_possui_exumacao(
-        self,
-        sepultamento: Sepultamento
-    ) -> bool:
-        cpf_sepultamento = self.__cpf_falecido_sepultamento(sepultamento)
-
-        for exumacao in self.__exumacoes:
-            cpf_exumacao = self.__cpf_falecido_sepultamento(
-                exumacao.sepultamento
-            )
-
-            if cpf_exumacao == cpf_sepultamento:
-                return True
-
-        return False
-
-    # concessão do sepultamento deve estar vencida há mais de 30 dias;
-    # sepultamento ainda não pode estar associado a uma exumação.
-    def __obter_sepultamentos_disponiveis(self) -> list[Sepultamento]:
-        sepultamentos = self.__obter_sepultamentos()
-        sepultamentos_disponiveis = []
-
-        for sepultamento in sepultamentos:
-            if not self.__concessao_vencida_ha_mais_de_30_dias(sepultamento):
-                continue
-
-            if self.__sepultamento_ja_possui_exumacao(sepultamento):
-                continue
-
-            sepultamentos_disponiveis.append(sepultamento)
-
-        return sepultamentos_disponiveis
-
+    def __obter_sepultamentos_disponiveis(self) -> list:
+        sepultamentos = Sepultamento.buscar_ativos()
+        return [
+            s for s in sepultamentos
+            if self.__concessao_vencida_ha_mais_de_30_dias(s)
+            and not self.__sepultamento_ja_possui_exumacao(s)
+        ]
+    
+    def __cpf_falecido_sepultamento(self, sepultamento: Sepultamento) -> str:
+        return str(sepultamento.falecido.cpf)
+    
+    def __normalizar(self, valor: Any) -> str:
+        return str(valor).strip().lower()
+    
     def __formatar_data(self, data: Any) -> str:
         if isinstance(data, datetime):
             return data.strftime("%d/%m/%Y")
@@ -257,26 +71,14 @@ class ControladorExumacao:
             f"{tumulo.tipo.name}"
         )
 
-    def __formatar_sepultamento_para_tela(
-        self,
-        sepultamento: Sepultamento
-    ) -> dict:
-        falecido = sepultamento.falecido
-
-        nome = falecido.nome
-        cpf = falecido.cpf
-        data_falecimento = self.__formatar_data(falecido.data_falecimento)
-        data_sepultamento = self.__formatar_data(
-            sepultamento.data_sepultamento
-        )
-        tumulo = self.__formatar_tumulo(sepultamento.tumulo)
-
+    def __formatar_sepultamento_para_tela(self, sepultamento: Sepultamento) -> dict:
+        f = sepultamento.falecido
         texto = (
-            f"Falecido: {nome} | CPF: {cpf} | "
-            f"Falecimento: {data_falecimento} | "
-            f"Sepultamento: {data_sepultamento} | Túmulo: {tumulo}"
+            f"Falecido: {f.nome} | CPF: {f.cpf} | "
+            f"Falecimento: {self.__formatar_data(f.data_falecimento)} | "
+            f"Sepultamento: {self.__formatar_data(sepultamento.data_sepultamento)} | "
+            f"Túmulo: {self.__formatar_tumulo(sepultamento.tumulo)}"
         )
-
         return {
             "identificador": self.__cpf_falecido_sepultamento(sepultamento),
             "texto": texto,
@@ -285,64 +87,55 @@ class ControladorExumacao:
 
     def __formatar_exumacao_para_tela(self, exumacao: Exumacao) -> dict:
         return {
-            "codigo": exumacao.codigo,
-            "data": self.__formatar_data(exumacao.data),
-            "sepultamento": self.__formatar_sepultamento_para_tela(
-                exumacao.sepultamento
-            )["texto"],
-            "destino": exumacao.destino,
-            "observacoes": exumacao.observacoes,
-            "objeto": exumacao
+            "codigo":        exumacao.codigo,
+            "data":          self.__formatar_data(exumacao.data),
+            "sepultamento":  self.__formatar_sepultamento_para_tela(exumacao.sepultamento)["texto"],
+            "destino":       exumacao.destino,
+            "observacoes":   exumacao.observacoes,
+            "objeto":        exumacao
         }
-
-    def __normalizar(self, valor: Any) -> str:
-        return str(valor).strip().lower()
 
     def __texto_busca_exumacao(self, exumacao: Exumacao) -> str:
         dados = self.__formatar_exumacao_para_tela(exumacao)
         return " ".join(
-            self.__normalizar(valor)
-            for chave, valor in dados.items()
-            if chave != "objeto"
+            self.__normalizar(v)
+            for k, v in dados.items()
+            if k != "objeto"
         )
 
-    def __atualizar_lista_tela(self, exumacoes: list[Exumacao]):
+    def __atualizar_lista_tela(self, exumacoes: list):
         self.__tela_exumacao.atualizar_lista_exumacoes(
             [self.__formatar_exumacao_para_tela(ex) for ex in exumacoes]
         )
 
+#metodos principais
     def cadastrar_exumacao(self):
         try:
-            sepultamentos_disponiveis = self.__obter_sepultamentos_disponiveis()
-
-            if not sepultamentos_disponiveis:
+            disponiveis = self.__obter_sepultamentos_disponiveis()
+            if not disponiveis:
                 self.__tela_exumacao.mostra_mensagem(
                     "Não existem sepultamentos disponíveis para exumação."
                 )
                 return
 
-            dados_exumacao = self.__tela_exumacao.pega_dados_exumacao(
-                [
-                    self.__formatar_sepultamento_para_tela(sepultamento)
-                    for sepultamento in sepultamentos_disponiveis
-                ]
+            dados = self.__tela_exumacao.pega_dados_exumacao(
+                [self.__formatar_sepultamento_para_tela(s) for s in disponiveis]
             )
 
-            if dados_exumacao is None:
+            if dados is None:
                 return
 
-            self.__validar_dados_exumacao(dados_exumacao)
-            codigo = self.__gerar_codigo_exumacao()
+            self.__validar_dados_exumacao(dados)
 
-            nova_exumacao = Exumacao(
-                codigo,
-                dados_exumacao["data"],
-                dados_exumacao["sepultamento"],
-                dados_exumacao["destino"],
-                dados_exumacao.get("observacoes", "")
+            nova = Exumacao(
+                codigo = None,   # banco gera
+                data = dados["data"],
+                sepultamento= dados["sepultamento"],
+                destino = dados["destino"],
+                observacoes = dados.get("observacoes", "")
             )
 
-            self.__exumacoes.append(nova_exumacao)
+            nova.cadastrar()
             self.__tela_exumacao.mostra_mensagem(
                 "Exumação cadastrada com sucesso."
             )
@@ -355,23 +148,27 @@ class ControladorExumacao:
 
     def alterar_exumacao(self):
         try:
-            codigo = self.__tela_exumacao.pega_codigo_exumacao_selecionada()
-            exumacao = self.__auxiliar_busca_exumacao(codigo)
+            codigo  = self.__tela_exumacao.pega_codigo_exumacao_selecionada()
+            exumacao = Exumacao.buscar_por_codigo(codigo)
+            if not exumacao:
+                raise ValueError("Exumação não encontrada.")
 
-            novos_dados = self.__tela_exumacao.pega_novos_dados_exumacao(
+            novos = self.__tela_exumacao.pega_novos_dados_exumacao(
                 self.__formatar_exumacao_para_tela(exumacao)
             )
 
-            if novos_dados is None:
-                return
+            if novos is None:
+                return 
 
 
-            self.__validar_dados_exumacao(novos_dados)
+            self.__validar_dados_exumacao(novos)
 
-            exumacao.data = novos_dados["data"]
-            exumacao.destino = novos_dados["destino"]
-            exumacao.observacoes = novos_dados.get("observacoes", "")
 
+            exumacao.data       = novos["data"]
+            exumacao.destino    = novos["destino"]
+            exumacao.observacoes= novos.get("observacoes", "")
+
+            exumacao.alterar()
             self.__tela_exumacao.mostra_mensagem(
                 "Exumação atualizada com sucesso."
             )
@@ -385,16 +182,17 @@ class ControladorExumacao:
     def excluir_exumacao(self):
         try:
             codigo = self.__tela_exumacao.pega_codigo_exumacao_selecionada()
-            exumacao = self.__auxiliar_busca_exumacao(codigo)
+            exumacao = Exumacao.buscar_por_codigo(codigo)
 
-            confirmou = self.__tela_exumacao.confirma_exclusao_exumacao(
+            if not exumacao:
+                raise ValueError("Exumação não encontrada.")
+
+            if not self.__tela_exumacao.confirma_exclusao_exumacao(
                 self.__formatar_exumacao_para_tela(exumacao)
-            )
-
-            if not confirmou:
+            ):
                 return
 
-            self.__exumacoes.remove(exumacao)
+            exumacao.deletar()
             self.__tela_exumacao.mostra_mensagem(
                 "Exumação excluída com sucesso."
             )
@@ -406,19 +204,16 @@ class ControladorExumacao:
             )
 
     def filtrar_exumacoes(self):
-        filtro = self.__tela_exumacao.pega_dados_busca()
-        filtro = self.__normalizar(filtro)
+        filtro    = self.__normalizar(self.__tela_exumacao.pega_dados_busca())
+        exumacoes = Exumacao.buscar_todos()
 
-        if filtro == "":
-            exumacoes_filtradas = self.__exumacoes
-        else:
-            exumacoes_filtradas = [
-                exumacao
-                for exumacao in self.__exumacoes
-                if filtro in self.__texto_busca_exumacao(exumacao)
+        if filtro:
+            exumacoes = [
+                ex for ex in exumacoes
+                if filtro in self.__texto_busca_exumacao(ex)
             ]
 
-        self.__atualizar_lista_tela(exumacoes_filtradas)
+        self.__atualizar_lista_tela(exumacoes)
 
     def listar_exumacoes(self):
         self.__tela_exumacao.limpa_busca()

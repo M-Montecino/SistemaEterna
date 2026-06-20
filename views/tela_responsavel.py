@@ -1,0 +1,4 @@
+
+
+class TelaResponsavel():
+    pass

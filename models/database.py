@@ -6,7 +6,7 @@ class Database:
     def __init__(self, db_path="eterna.db"):
         self.coneccao = sqlite3.connect(db_path)
         self.coneccao.row_factory = sqlite3.Row
-        self.coneccao.execute("PRAGMA foreign_keys = ON")  # ativa FK no SQLite!
+        self.coneccao.execute("PRAGMA foreign_keys = ON")
         self._criar_tabelas()
 
     @classmethod
@@ -90,7 +90,22 @@ class Database:
             nome  TEXT NOT NULL,
             cargo TEXT NOT NULL,
             email TEXT NOT NULL,
-            senha_hash TEXT NOT NULL
+            senha TEXT NOT NULL
         );
         """)
+        self._migrar_tabela_usuarios()
         self.coneccao.commit()
+
+    def _migrar_tabela_usuarios(self):
+        cursor = self.coneccao.cursor()
+        colunas = {linha[1] for linha in cursor.execute("PRAGMA table_info(usuarios)").fetchall()}
+
+        if "senha" in colunas:
+            return
+
+        if "senha_hash" in colunas:
+            cursor.execute("ALTER TABLE usuarios RENAME COLUMN senha_hash TO senha")
+            return
+
+        if colunas:
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN senha TEXT")
