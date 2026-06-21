@@ -133,9 +133,9 @@ class Falecido:
     @staticmethod
     def _row_para_objeto(row):
         return Falecido(
-            nome= row['nome'],
-            cpf= row['cpf'],
-            data_nascimento=datetime.strptime(row["data_nascimento"], "%Y-%m-%d"),
-            data_falecimento=datetime.strptime(row["data_falecimento"], "%Y-%m-%d"),
-            causa_morte= row['causa_morte']
+            nome = row['nome'],
+            cpf = row['cpf'],
+            data_nascimento = datetime.strptime(row["data_nascimento"], "%Y-%m-%d"),
+            data_falecimento = datetime.strptime(row["data_falecimento"], "%Y-%m-%d"),
+            causa_morte = row['causa_morte']
         )

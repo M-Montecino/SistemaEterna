@@ -92,8 +92,8 @@ class Pagamento:
     def _row_para_objeto(row):
         from datetime import datetime
         return Pagamento(
-            id             = row["id"],
-            valor          = row["valor"],
+            id = row["id"],
+            valor = row["valor"],
             data_pagamento = datetime.strptime(row["data_pagamento"], "%Y-%m-%d"),
             tipo_pagamento = row["tipo_pagamento"]
         )

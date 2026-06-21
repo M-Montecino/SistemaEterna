@@ -188,8 +188,8 @@ class Usuario:
     def _row_para_objeto(row) -> "Usuario":
         """Reconstrói o objeto sem re-hashear a senha."""
         usuario = object.__new__(Usuario)
-        usuario._Usuario__nome  = row["nome"]
-        usuario._Usuario__cpf   = row["cpf"]
+        usuario._Usuario__nome = row["nome"]
+        usuario._Usuario__cpf = row["cpf"]
         usuario._Usuario__email = row["email"]
         usuario._Usuario__cargo = Cargo[row["cargo"]]
         usuario._Usuario__senha = row["senha"]

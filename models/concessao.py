@@ -135,13 +135,13 @@ class Concessao:
         pagamento = Pagamento.buscar_por_id(row["id_pagamento"])
 
         return Concessao(
-            id             = row["id"],
-            valor          = pagamento.valor,
+            id = row["id"],
+            valor = pagamento.valor,
             data_pagamento = pagamento.data_pagamento,
             tipo_pagamento = pagamento.tipo_pagamento,
-            responsavel    = row["responsavel"],     
-            responsavel2   = row["responsavel2"],
-            data_inicio    = datetime.strptime(row["data_inicio"], "%Y-%m-%d"),
-            data_fim       = datetime.strptime(row["data_fim"],    "%Y-%m-%d"),
-            status         = StatusConcessao[row["status"]]
+            responsavel = row["responsavel"],     
+            responsavel2 = row["responsavel2"],
+            data_inicio = datetime.strptime(row["data_inicio"], "%Y-%m-%d"),
+            data_fim = datetime.strptime(row["data_fim"],    "%Y-%m-%d"),
+            status = StatusConcessao[row["status"]]
         )
