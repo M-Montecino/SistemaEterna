@@ -92,7 +92,7 @@ class ControladorResponsavel:
                 return
             
             novos_dados = (
-                self.__tela_responsavel.pega_dados_responsavel()
+                self.__tela_responsavel.pega_novos_dados_responsavel()
             )
 
             dados_finais = {
