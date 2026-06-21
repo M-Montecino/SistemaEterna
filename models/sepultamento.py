@@ -12,7 +12,7 @@ class Sepultamento:
         data_nascimento: datetime,
         data_falecimento: datetime,
         causa_morte: str,
-        tumulo: Tumulo,
+        tumulo: int,
         valor: float,
         data_pagamento: datetime,
         tipo_pagamento,
@@ -35,8 +35,8 @@ class Sepultamento:
             data_inicio_cons, data_final_cons, status
         )
         self.__data_sepultamento = data_sepultamento
-        self.__observacoes       = observacoes
-        self.__ativo             = True
+        self.__observacoes = observacoes
+        self.__ativo = True
 
     #properties
     @property
@@ -53,8 +53,8 @@ class Sepultamento:
 
     @tumulo.setter
     def tumulo(self, tumulo):
-        if not isinstance(tumulo, Tumulo):
-            raise TypeError("tumulo deve ser Tumulo")
+        if not isinstance(tumulo, int):
+            raise TypeError("tumulo deve ser inteiro")
         self.__tumulo = tumulo
 
     @property
@@ -87,6 +87,7 @@ class Sepultamento:
 
 #persistência
     def cadastrar(self):
+        
         self.__falecido.cadastrar()
         self.__concessao.cadastrar()
 
@@ -99,7 +100,7 @@ class Sepultamento:
             VALUES (?, ?, ?, ?, ?, ?)
         """, (
             self.__falecido.cpf,
-            self.__tumulo.codigo,
+            self.__tumulo,
             self.__concessao.id,
             self.__data_sepultamento.strftime("%Y-%m-%d"),
             self.__observacoes,
@@ -118,7 +119,7 @@ class Sepultamento:
                 observacoes = ?, ativo = ?
             WHERE cpf_falecido = ?
         """, (
-            self.__tumulo.codigo,
+            self.__tumulo,
             self.__data_sepultamento.strftime("%Y-%m-%d"),
             self.__observacoes,
             int(self.__ativo),
@@ -161,32 +162,27 @@ class Sepultamento:
 
     @staticmethod
     def _row_para_objeto(row):
-        """Reconstrói o objeto buscando cada filho pelo seu id/cpf."""
-        from models.falecido import Falecido
-        from models.concessao import Concessao
-        from models.tumulo import Tumulo
-
-        falecido  = Falecido.buscar_por_cpf(row["cpf_falecido"])
+        falecido = Falecido.buscar_por_cpf(row["cpf_falecido"])
         concessao = Concessao.buscar_por_id(row["id_concessao"])
-        tumulo    = Tumulo.buscar_por_codigo(row["tumulo"])
+        tumulo = row["tumulo"]
 
         sep = Sepultamento(
-            cpf_falecido     = falecido.cpf,
-            nome_falecido    = falecido.nome,
-            data_nascimento  = falecido.data_nascimento,
+            cpf_falecido  = falecido.cpf,
+            nome_falecido = falecido.nome,
+            data_nascimento = falecido.data_nascimento,
             data_falecimento = falecido.data_falecimento,
-            causa_morte      = falecido.causa_morte,
-            tumulo           = tumulo,
-            valor            = concessao.pagamento.valor,
-            data_pagamento   = concessao.pagamento.data_pagamento,
-            tipo_pagamento   = concessao.pagamento.tipo_pagamento,
-            responsavel      = concessao.responsavel,
-            responsavel2     = concessao.responsavel2,
+            causa_morte = falecido.causa_morte,
+            tumulo = row["tumulo"],
+            valor = concessao.pagamento.valor,
+            data_pagamento = concessao.pagamento.data_pagamento,
+            tipo_pagamento = concessao.pagamento.tipo_pagamento,
+            responsavel = concessao.responsavel,
+            responsavel2 = concessao.responsavel2,
             data_inicio_cons = concessao.data_inicio,
-            data_final_cons  = concessao.data_fim,
-            status           = concessao.status,
-            data_sepultamento= datetime.strptime(row["data_sepultamento"], "%Y-%m-%d"),
-            observacoes      = row["observacoes"] or ""
+            data_final_cons = concessao.data_fim,
+            status = concessao.status,
+            data_sepultamento = datetime.strptime(row["data_sepultamento"], "%Y-%m-%d"),
+            observacoes = row["observacoes"] or ""
         )
         sep._Sepultamento__ativo = bool(row["ativo"])
         return sep

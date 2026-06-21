@@ -86,7 +86,7 @@ class Tumulo:
             self.__codigo,
             self.__setor,
             self.__numero,
-            self.__tipo.name,
+            self.__tipo.value,
             self.__capacidade
             ))
         db.coneccao.commit()
@@ -102,40 +102,44 @@ class Tumulo:
         """, (
             self.__setor,
             self.__numero,
-            self.__tipo.name,
-            self.__capacidade
+            self.__tipo.value,
+            self.__capacidade,
+            self.__codigo
         ))
+        db.coneccao.commit()
     
     def deletar(self):
         db = Database.get_instance()
         db.coneccao.execute(
-            "DELETE FROM tumulos WHERE codigo = ?", (self.__cpf,)
+            "DELETE FROM tumulos WHERE codigo = ?", (self.__codigo,)
         )
         db.coneccao.commit()
-        self.__cpf = None
 
 #buscas
     @staticmethod
     def buscar_por_codigo(codigo):
+        
         db = Database.get_instance()
         row = db.coneccao.execute(
-            "SELECT * FROM tumulos WHERE codigo ?", (codigo,)
+            "SELECT * FROM tumulos WHERE codigo = ?", (codigo,)
         ).fetchone()
-        return Tumulo.row_para_objeto(row) if row else None
+        return Tumulo._row_para_objeto(row) if row else None
     
     @staticmethod
     def buscar_todos():
         db = Database.get_instance()
-        rows = db.coneccao.execute("SELECT * FROM tumulos").fetchall
+        rows = db.coneccao.execute("SELECT * FROM tumulos").fetchall()
         return [Tumulo._row_para_objeto(r) for r in rows]
     
 #auxiliar
     @staticmethod
     def _row_para_objeto(row):
+
+        
         return Tumulo(
             codigo = row['codigo'],
             setor = row['setor'],
             numero = row['numero'],
-            tipo = TipoTumulo(row['tipo']),
+            tipo = TipoTumulo(int(row['tipo'])),
             capacidade = row['capacidade']
         )

@@ -65,9 +65,6 @@ class ControladorTumulo:
         if tipo_tumulo == TipoTumulo.Cova and dados['capacidade'] != 1:
             raise ValueError("Capacidade inválida para túmulo do tipo Cova. Deve ser 1.")
         
-        if dados['numero'] < dados['capacidade']:
-            raise ValueError("Número do túmulo não pode ser menor que a capacidade.")
-        
     def __formatar_tumulo(self, tumulo):
         return {
             "Código: ": tumulo.codigo,
@@ -89,11 +86,15 @@ class ControladorTumulo:
                 )
                 return
 
+            tipo = TipoTumulo(int(dados['tipo']))
+
+
+
             novo = Tumulo(
                 dados['codigo'],
                 dados['setor'], 
                 dados['numero'], 
-                dados['tipo'], 
+                tipo,
                 dados['capacidade']
             )
 
@@ -110,11 +111,10 @@ class ControladorTumulo:
 
     def alterar_tumulo(self):
         try:
-            codigo = self.__tela_tumulo.alterar_tumulo()
-            if not self.__validar_numeros(codigo):
-                raise ValueError("Código inválido.")
+            codigo = int(self.__tela_tumulo.alterar_tumulo())
+            self.__validar_numeros(codigo)
 
-            tumulo = Tumulo(codigo)
+            tumulo = Tumulo.buscar_por_codigo(codigo)
             if not tumulo:
                 self.__tela_tumulo.mostra_mensagem(
                     "Túmulo não encontrado."
@@ -125,6 +125,7 @@ class ControladorTumulo:
                 self.__tela_tumulo.pega_novos_dados_tumulo()
             )
 
+
             dados_finais = {
                 'codigo': codigo,
                 'setor': novos_dados['setor'] if novos_dados['setor'] is not None else tumulo.setor,
@@ -134,11 +135,14 @@ class ControladorTumulo:
             }
 
             self.__validar_dados_tumulo(dados_finais)
+            tipo_tumulo = self.__converter_tipo_tumulo(dados_finais['tipo'])
 
             #atualizando dados
             tumulo.setor = dados_finais['setor']
             tumulo.numero = dados_finais['numero']
-            tumulo.tipo = dados_finais['tipo']
+            tumulo.tipo = tipo_tumulo
+            print(type(tipo_tumulo))
+            print(tipo_tumulo)
             tumulo.capacidade = dados_finais['capacidade']
 
             tumulo.alterar()
@@ -153,7 +157,7 @@ class ControladorTumulo:
 
     def excluir_tumulo(self):
         try:
-            codigo = self.__tela_tumulo.excluir_tumulo()
+            codigo = int(self.__tela_tumulo.excluir_tumulo())
             self.__validar_numeros(codigo)
 
             tumulo = Tumulo.buscar_por_codigo(codigo)
@@ -166,7 +170,7 @@ class ControladorTumulo:
 
         except ValueError as erro:
             self.__tela_tumulo.mostra_mensagem(
-                f"Erro ao alterar túmulo: {str(erro)}"
+                f"Erro ao excluir túmulo: {str(erro)}"
             )
         
     def listar_tumulos(self):
@@ -177,14 +181,14 @@ class ControladorTumulo:
             "Nenhum túmulo cadastrado")
             return
         
-        for tumulo in self.__tumulos:
+        for tumulo in tumulos:
             self.__tela_tumulo.mostra_mensagem(
                 self.__formatar_tumulo(tumulo)
             )
 
     def buscar_tumulo(self):
         try:
-            codigo = self.__tela_tumulo.buscar_tumulo()
+            codigo = int(self.__tela_tumulo.excluir_tumulo())
             self.__validar_numeros(codigo)
 
             tumulo = Tumulo.buscar_por_codigo(codigo)
@@ -198,7 +202,7 @@ class ControladorTumulo:
                 )
         except ValueError as erro:
             self.__tela_tumulo.mostra_mensagem(
-                f"Erro ao alterar túmulo: {str(erro)}"
+                f"Erro ao buscar túmulo: {str(erro)}"
             )
 
     def retomar_menu(self):

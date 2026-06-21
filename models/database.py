@@ -78,7 +78,7 @@ class Database:
         );
 
         CREATE TABLE IF NOT EXISTS manutencoes(
-            codigoINTEGER PRIMARY KEY,
+            codigo INTEGER PRIMARY KEY,
             tumulo INTEGER     REFERENCES tumulos(codigo),
             tipo_servico TEXT NOT NULL,
             data DATE NOT NULL,

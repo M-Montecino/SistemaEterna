@@ -134,6 +134,11 @@ class ControladorSepultamento:
             if Sepultamento.buscar_por_cpf(dados['cpf_falecido']):
                 self.__tela_sepultamento.mostra_mensagem("CPF já cadastrado.")
                 return
+
+            
+            self.__controlador_geral.controlador_tumulo.validar_tumulo(
+                    dados['tumulo']
+)
             
             novo = Sepultamento(
                 dados['cpf_falecido'],
@@ -177,6 +182,10 @@ class ControladorSepultamento:
             if not sepultamento:
                 self.__tela_sepultamento.mostra_mensagem("Sepultamento não encontrado.")
                 return
+            self.__controlador_geral.controlador_tumulo.validar_tumulo(
+                dados_finais['tumulo']
+            )
+
 
             novos = self.__tela_sepultamento.pega_novos_dados_sepultamento()
             f = sepultamento.falecido
