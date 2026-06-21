@@ -50,9 +50,10 @@ class TelaManutencao:
             )
         )
 
-        tumulo = simpledialog.askstring(
+        tumulo = int(simpledialog.askstring(
             "Cadastro",
             "Digite o túmulo:"
+        )
         )
 
         tipo = simpledialog.askstring(

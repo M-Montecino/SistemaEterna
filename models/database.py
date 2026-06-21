@@ -15,6 +15,8 @@ class Database:
             cls._instance = Database()
         return cls._instance
 
+
+
     def _criar_tabelas(self):
         cursor = self.coneccao.cursor()
         cursor.executescript("""
@@ -82,7 +84,7 @@ class Database:
             tumulo INTEGER     REFERENCES tumulos(codigo),
             tipo_servico TEXT NOT NULL,
             data DATE NOT NULL,
-            cpf_responsavel VARCHAR(11) REFERENCES responsaveis(cpf)
+            cpf_responsavel VARCHAR(11)
         );
 
         CREATE TABLE IF NOT EXISTS usuarios(

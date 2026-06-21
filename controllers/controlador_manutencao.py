@@ -50,7 +50,7 @@ class ControladorManutencao:
     def __validar_dados_manutencao(self, dados):
         self.__validar_codigo(dados['codigo'])
         dados['tipo_servico'] = self.__converter_tipo_servico(dados['tipo_servico'])
-        self.__controlador_geral.controlador_tumulo.__validar_tumulo(dados['tumulo'])
+        self.__controlador_geral.controlador_tumulo.validar_tumulo(dados['tumulo'])
         self.__validar_data(dados['data'])
         if not validar_cpf(dados['cpf_responsavel']):
             raise ValueError("CPF do responsável inválido.")
