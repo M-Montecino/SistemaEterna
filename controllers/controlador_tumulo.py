@@ -9,7 +9,10 @@ class ControladorTumulo:
         self,
         controlador_geral: "ControladorGeral"):
         self.__controlador_geral = (controlador_geral)
-        self.__tela_tumulo = TelaTumulo(controlador_geral.tela_menu.root)
+        self.__tela_tumulo = None
+
+    def reinicia_tela(self):
+        self.__tela_tumulo = None
 
 #Funções auxiliares
     def __validar_numeros(self, numero):
@@ -209,6 +212,9 @@ class ControladorTumulo:
         return
     
     def abre_tela(self):
+        if self.__tela_tumulo is None:
+            self.__tela_tumulo = TelaTumulo(self.__controlador_geral.tela_menu.root)
+
         listar_opcoes = {
             1: self.cadastrar_tumulo,
             2: self.alterar_tumulo,

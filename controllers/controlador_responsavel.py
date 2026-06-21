@@ -8,7 +8,10 @@ if TYPE_CHECKING:
 class ControladorResponsavel:
     def __init__(self, controlador_geral: "ControladorGeral"):
         self.__controlador_geral = (controlador_geral)
-        self.__tela_responsavel = TelaResponsavel(controlador_geral.tela_menu.root)
+        self.__tela_responsavel = None
+
+    def reinicia_tela(self):
+        self.__tela_responsavel = None
 
 #Funções auxiliares    
     def __validar_nome(self, nome):
@@ -174,14 +177,17 @@ class ControladorResponsavel:
                 )
 
         except ValueError as erro:
-            self.__tela_manutencao.mostra_mensagem(
-                f"Erro ao cadastrar manutenção: {str(erro)}"
+            self.__tela_responsavel.mostra_mensagem(
+                f"Erro ao buscar responsável: {str(erro)}"
             )
         
     def retomar_menu(self):
         return
     
     def abre_tela(self):
+        if self.__tela_responsavel is None:
+            self.__tela_responsavel = TelaResponsavel(self.__controlador_geral.tela_menu.root)
+
         listar_opcoes = {
             1: self.cadastrar_responsavel,
             2: self.alterar_responsavel,

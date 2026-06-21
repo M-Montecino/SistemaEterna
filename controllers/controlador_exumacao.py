@@ -12,7 +12,10 @@ if TYPE_CHECKING:
 class ControladorExumacao:
     def __init__(self, controlador_geral: "ControladorGeral"):
         self.__controlador_geral = controlador_geral
-        self.__tela_exumacao = TelaExumacao(controlador_geral.tela_menu.root)
+        self.__tela_exumacao = None
+
+    def reinicia_tela(self):
+        self.__tela_exumacao = None
 
 #funções auxiliares
     def __validar_data(self, data: datetime):
@@ -223,6 +226,9 @@ class ControladorExumacao:
         return
 
     def abre_tela(self):
+        if self.__tela_exumacao is None:
+            self.__tela_exumacao = TelaExumacao(self.__controlador_geral.tela_menu.root)
+
         listar_opcoes = {
             "cadastrar": self.cadastrar_exumacao,
             "filtrar": self.filtrar_exumacoes,

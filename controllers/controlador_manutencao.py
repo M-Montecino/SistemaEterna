@@ -9,7 +9,11 @@ if TYPE_CHECKING:
 class ControladorManutencao:
     def __init__(self, controlador_geral: "ControladorGeral"):
         self.__controlador_geral = controlador_geral
-        self.__tela_manutencao = TelaManutencao(controlador_geral.tela_menu.root)
+        self.__tela_manutencao = None
+
+
+    def reinicia_tela(self):
+        self.__tela_manutencao = None
 
     #Funções auxiliares
     def __validar_codigo(self, codigo):
@@ -190,6 +194,9 @@ class ControladorManutencao:
         return
 
     def abre_tela(self):
+        if self.__tela_manutencao is None:
+            self.__tela_manutencao = TelaManutencao(self.__controlador_geral.tela_menu.root)
+
         opcoes = {
             1: self.cadastrar_manutencao,
             2: self.alterar_manutencao,

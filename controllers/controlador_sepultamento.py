@@ -14,8 +14,10 @@ class ControladorSepultamento:
         self,
         controlador_geral: "ControladorGeral"):
         self.__controlador_geral = (controlador_geral)
-        self.__tela_sepultamento = (
-            TelaSepultamento(controlador_geral.tela_menu.root))
+        self.__tela_sepultamento = None
+        
+    def reinicia_tela(self):
+        self.__tela_sepultamento = None
 
 #Funções auxiliares
     def __validar_nome(self, nome: str):
@@ -287,6 +289,8 @@ class ControladorSepultamento:
         return
 
     def abre_tela(self):
+        if self.__tela_sepultamento is None:
+            self.__tela_sepultamento = TelaSepultamento(self.__controlador_geral.tela_menu.root)
 
         lista_opcoes = {
             1: self.cadastrar_sepultamento,
