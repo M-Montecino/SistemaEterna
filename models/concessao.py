@@ -9,8 +9,10 @@ class StatusConcessao(Enum):
     VENCIDA = 3
 
 class Concessao:
-    def __init__(self, valor, data_pagamento, tipo_pagamento, responsavel, responsavel2, data_inicio, data_fim, status):
+    def __init__(self, valor, data_pagamento, tipo_pagamento, responsavel, responsavel2, data_inicio, data_fim, status, 
+    id=None):
         self.pagamento = Pagamento(valor, data_pagamento, tipo_pagamento)
+        self.__id = id
         self.__responsavel = responsavel
         self.__responsavel2 = responsavel2
         self.__data_inicio = data_inicio
@@ -18,7 +20,10 @@ class Concessao:
         self.__status = status
 
 #properties
-
+    @property
+    def id(self):
+        return self.__id
+    
     @property
     def responsavel(self) -> str:
         return self.__responsavel

@@ -16,6 +16,7 @@ class Sepultamento:
         valor: float,
         data_pagamento: datetime,
         tipo_pagamento,
+        id,
         responsavel,
         responsavel2,
         data_inicio_cons: datetime,
@@ -32,7 +33,7 @@ class Sepultamento:
         self.__concessao = Concessao(
             valor, data_pagamento, tipo_pagamento,
             responsavel, responsavel2,
-            data_inicio_cons, data_final_cons, status
+            data_inicio_cons, data_final_cons, status, id
         )
         self.__data_sepultamento = data_sepultamento
         self.__observacoes = observacoes
@@ -87,10 +88,11 @@ class Sepultamento:
 
 #persistência
     def cadastrar(self):
-        
-        self.__falecido.cadastrar()
+        print("Cadastrando falecido")
+        self.__falecido.cadastrar() 
+        print("Cadastrando concessão")
         self.__concessao.cadastrar()
-
+        print("Inserindo sepultamento")
         db     = Database.get_instance()
         cursor = db.coneccao.cursor()
         cursor.execute("""
@@ -176,6 +178,7 @@ class Sepultamento:
             valor = concessao.pagamento.valor,
             data_pagamento = concessao.pagamento.data_pagamento,
             tipo_pagamento = concessao.pagamento.tipo_pagamento,
+            id=concessao.id,
             responsavel = concessao.responsavel,
             responsavel2 = concessao.responsavel2,
             data_inicio_cons = concessao.data_inicio,
