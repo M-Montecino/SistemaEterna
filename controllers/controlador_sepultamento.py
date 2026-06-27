@@ -89,7 +89,7 @@ class ControladorSepultamento:
         self.__validar_data(dados['data_nascimento'])
         self.__validar_data(dados['data_falecimento'])
         self.__validar_texto(dados['causa_morte'])
-        self.__controlador_geral.controlador_tumulo.__validar_tumulo(dados['tumulo'])
+        self.__controlador_geral.controlador_tumulo.validar_tumulo((dados['tumulo']))
         self.__validar_valor_pagamento(dados['valor'])
         self.__validar_data(dados['data_pagamento'])
         dados['tipo_pagamento']  = self.__converter_tipo_pagamento(dados['tipo_pagamento'])
@@ -136,11 +136,6 @@ class ControladorSepultamento:
             if Sepultamento.buscar_por_cpf(dados['cpf_falecido']):
                 self.__tela_sepultamento.mostra_mensagem("CPF já cadastrado.")
                 return
-
-            
-            self.__controlador_geral.controlador_tumulo.validar_tumulo(
-                    dados['tumulo']
-)
             
             novo = Sepultamento(
                 dados['cpf_falecido'],

@@ -240,7 +240,6 @@ class ControladorTumulo:
                     f"Erro: {str(e)}")
                 
     def validar_tumulo(self, codigo):
-        self.__validar_numeros(codigo)
         tumulo = Tumulo.buscar_por_codigo(codigo)
 
         if not tumulo:
