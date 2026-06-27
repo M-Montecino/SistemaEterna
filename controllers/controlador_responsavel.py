@@ -54,6 +54,7 @@ class ControladorResponsavel:
     def cadastrar_responsavel(self):
         try:
             dados = self.__tela_responsavel.pegar_dados_responsavel()
+            if dados is None: return
             self.__validar_dados_responsavel(dados)
 
             if Responsavel.buscar_por_cpf(dados['cpf']):
@@ -84,6 +85,7 @@ class ControladorResponsavel:
     def alterar_responsavel(self):
         try:
             cpf = self.__tela_responsavel.alterar_responsavel()
+            if cpf is None: return
             if not validar_cpf(cpf):
                 raise ValueError("CPF inválido.")
 
@@ -97,6 +99,7 @@ class ControladorResponsavel:
             novos_dados = (
                 self.__tela_responsavel.pega_novos_dados_responsavel()
             )
+            if novos_dados is None: return
 
             dados_finais = {
                 'cpf': cpf,
@@ -129,6 +132,7 @@ class ControladorResponsavel:
     def excluir_responsavel(self):
         try:
             cpf = self.__tela_responsavel.excluir_responsavel()
+            if cpf is None: return
             validar_cpf(cpf)
 
             responsavel = Responsavel.buscar_por_cpf(cpf)
@@ -164,6 +168,7 @@ class ControladorResponsavel:
     def buscar_responsavel(self):
         try:
             cpf = self.__tela_responsavel.buscar_responsavel()
+            if cpf is None: return
             validar_cpf(cpf)
 
             responsavel = Responsavel.buscar_por_cpf(cpf)            

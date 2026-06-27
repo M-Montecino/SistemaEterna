@@ -89,33 +89,35 @@ class TelaManutencao:
 
     #Auxiliar de Cadastro
     def pega_dados_manutencao(self):
-        codigo = int(
-            simpledialog.askstring(
-                "Cadastro",
-                "Digite o código:"
-            )
+        codigo = simpledialog.askinteger(
+            "Cadastro",
+            "Digite o código:"
         )
+        if codigo is None: return None
 
-        tumulo = int(simpledialog.askstring(
+        tumulo = simpledialog.askinteger(
             "Cadastro",
             "Digite o túmulo:"
         )
-        )
+        if tumulo is None: return None
 
         tipo = simpledialog.askstring(
             "Cadastro",
             "Tipo de serviço (Limpeza/Reparo/Outro):"
         )
+        if tipo is None: return None
 
         data_str = simpledialog.askstring(
             "Cadastro",
             "Digite a data (dd/mm/aaaa):"
         )
+        if data_str is None: return None
 
         cpf = simpledialog.askstring(
             "Cadastro",
             "Digite o CPF:"
         )
+        if cpf is None: return None
 
         data = datetime.strptime(data_str, "%d/%m/%Y")
 
@@ -129,11 +131,9 @@ class TelaManutencao:
 
     #Auxiliar de alteração
     def alterar_manutencao(self):
-        return int(
-            simpledialog.askstring(
-                "Alterar",
-                "Digite o código da manutenção:"
-            )
+        return simpledialog.askinteger(
+            "Alterar",
+            "Digite o código da manutenção:"
         )
     
     def pega_novos_dados_manutencao(self):
@@ -141,19 +141,26 @@ class TelaManutencao:
             "Alterar",
             "Novo túmulo (vazio para manter):"
         )
+        if tumulo is None: return None
+
         tipo = simpledialog.askstring(
             "Alterar",
             "Novo tipo (Limpeza/Reparo/Outro):"
         )
+        if tipo is None: return None
+
         data_str = simpledialog.askstring(
             "Alterar",
             "Nova data (dd/mm/aaaa):"
         )
+        if data_str is None: return None
+
         data = None
         cpf = simpledialog.askstring(
             "Alterar",
             "Novo CPF:"
         )
+        if cpf is None: return None
 
         if data_str:
             data = datetime.strptime(
@@ -162,7 +169,7 @@ class TelaManutencao:
             )
 
         return {
-            "tumulo": tumulo if tumulo else None,
+            "tumulo": int(tumulo) if tumulo else None,
             "tipo_servico": tipo if tipo else None,
             "data": data,
             "cpf_responsavel":
@@ -171,20 +178,16 @@ class TelaManutencao:
 
     #Auxiliar de Exclusão
     def excluir_manutencao(self):
-        return int(
-            simpledialog.askstring(
-                "Excluir",
-                "Digite o código:"
-            )
+        return simpledialog.askinteger(
+            "Excluir",
+            "Digite o código:"
         )
     
     #Auxiliar de Busca
     def buscar_manutencao(self):
-        return int(
-            simpledialog.askstring(
-                "Buscar",
-                "Digite o código:"
-            )
+        return simpledialog.askinteger(
+            "Buscar",
+            "Digite o código:"
         )
 
     #Funções de navegção

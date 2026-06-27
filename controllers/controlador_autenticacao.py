@@ -62,12 +62,12 @@ class ControladorAutenticacao:
             elif opcao == 1:
                 dados = self.__tela_login.pega_dados_login()
 
-            cpf = dados.get("cpf", "")
-            senha = dados.get("senha", "")
+                cpf = dados.get("cpf", "")
+                senha = dados.get("senha", "")
 
-            if self.autenticar(cpf, senha):
-                self.__tela_login.root.withdraw()
-                break
+                if self.autenticar(cpf, senha):
+                    self.__tela_login.root.withdraw()
+                    break
 
     def eh_admin(self) -> bool:
         return self.__usuario_logado is not None and self.__usuario_logado.cargo == Cargo.Gestor

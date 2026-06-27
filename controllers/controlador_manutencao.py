@@ -72,6 +72,7 @@ class ControladorManutencao:
     def cadastrar_manutencao(self):
         try:
             dados = self.__tela_manutencao.pega_dados_manutencao()
+            if dados is None: return
             self.__validar_dados_manutencao(dados)
 
             if Manutencao.buscar_por_codigo(dados['codigo']):
@@ -101,6 +102,7 @@ class ControladorManutencao:
     def alterar_manutencao(self):
         try:
             codigo = self.__tela_manutencao.alterar_manutencao()
+            if codigo is None: return
             self.__validar_codigo(codigo)
 
             manutencao = Manutencao.buscar_por_codigo(codigo)
@@ -113,6 +115,7 @@ class ControladorManutencao:
             novos_dados = (
             self.__tela_manutencao.pega_novos_dados_manutencao()
             )
+            if novos_dados is None: return
 
             dados_finais = {
             'codigo': codigo,
@@ -143,6 +146,7 @@ class ControladorManutencao:
     def excluir_manutencao(self):
         try:
             codigo = self.__tela_manutencao.excluir_manutencao()
+            if codigo is None: return
             self.__validar_codigo(codigo)
 
             manutencao = Manutencao.buscar_por_codigo(codigo)
@@ -174,6 +178,7 @@ class ControladorManutencao:
     def buscar_manutencao(self):
         try:
             codigo = self.__tela_manutencao.buscar_manutencao()
+            if codigo is None: return
             self.__validar_codigo(codigo)
             
             manutencao = Manutencao.buscar_por_codigo(codigo)

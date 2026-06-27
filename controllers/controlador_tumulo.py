@@ -81,6 +81,7 @@ class ControladorTumulo:
     def cadastrar_tumulo(self):
         try:
             dados = self.__tela_tumulo.pega_dados_tumulo()
+            if dados is None: return
             self.__validar_dados_tumulo(dados)
 
             if Tumulo.buscar_por_codigo(dados['codigo']):
@@ -114,7 +115,9 @@ class ControladorTumulo:
 
     def alterar_tumulo(self):
         try:
-            codigo = int(self.__tela_tumulo.alterar_tumulo())
+            codigo = self.__tela_tumulo.alterar_tumulo()
+            if codigo is None: return
+            codigo = int(codigo)
             self.__validar_numeros(codigo)
 
             tumulo = Tumulo.buscar_por_codigo(codigo)
@@ -127,6 +130,7 @@ class ControladorTumulo:
             novos_dados = (
                 self.__tela_tumulo.pega_novos_dados_tumulo()
             )
+            if novos_dados is None: return
 
 
             dados_finais = {
@@ -160,7 +164,9 @@ class ControladorTumulo:
 
     def excluir_tumulo(self):
         try:
-            codigo = int(self.__tela_tumulo.excluir_tumulo())
+            codigo = self.__tela_tumulo.excluir_tumulo()
+            if codigo is None: return
+            codigo = int(codigo)
             self.__validar_numeros(codigo)
 
             tumulo = Tumulo.buscar_por_codigo(codigo)
@@ -191,7 +197,9 @@ class ControladorTumulo:
 
     def buscar_tumulo(self):
         try:
-            codigo = int(self.__tela_tumulo.excluir_tumulo())
+            codigo = self.__tela_tumulo.excluir_tumulo()
+            if codigo is None: return
+            codigo = int(codigo)
             self.__validar_numeros(codigo)
 
             tumulo = Tumulo.buscar_por_codigo(codigo)
