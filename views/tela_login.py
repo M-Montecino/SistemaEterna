@@ -10,48 +10,87 @@ class TelaLogin:
             self.__root.transient(master)
 
         self.__root.title("Login")
-        self.__root.geometry("320x220")
+        self.__root.geometry("360x340")
         self.__root.resizable(False, False)
         self.__root.protocol("WM_DELETE_WINDOW", self.__fechar_janela)
 
         if master is not None:
             self.__root.withdraw()
 
+        cor_fundo = "#f4f6f9"
+        cor_botao = "#68bced"
+        cor_botao_voltar = "#777777"
+        cor_texto_escuro = "#1f2937"
+        cor_texto_secundario = "#6b7280"
+
+        self.__root.configure(bg=cor_fundo)
+
         self.__cpf_var = tk.StringVar()
         self.__senha_var = tk.StringVar()
         self.__opcao = None
 
+        frame_principal = tk.Frame(self.__root, bg=cor_fundo)
+        frame_principal.pack(fill="both", expand=True, padx=24, pady=24)
+
         titulo = tk.Label(
-            self.__root,
+            frame_principal,
             text="LOGIN",
-            font=("Arial", 16, "bold")
+            font=("Segoe UI", 20, "bold"),
+            bg=cor_fundo,
+            fg=cor_texto_escuro
         )
-        titulo.pack(pady=10)
+        titulo.pack(pady=(0, 4))
 
-        frame_campos = tk.Frame(self.__root)
-        frame_campos.pack(pady=5, padx=20, fill="x")
+        subtitulo = tk.Label(
+            frame_principal,
+            text="Acesse o sistema",
+            font=("Segoe UI", 10),
+            bg=cor_fundo,
+            fg=cor_texto_secundario
+        )
+        subtitulo.pack(pady=(0, 18))
 
-        label_cpf = tk.Label(frame_campos, text="CPF:", anchor="w")
+        frame_campos = tk.Frame(frame_principal, bg=cor_fundo)
+        frame_campos.pack(fill="x")
+
+        label_cpf = tk.Label(frame_campos, text="CPF:", anchor="w", bg=cor_fundo, fg=cor_texto_escuro)
         label_cpf.pack(fill="x")
-        entrada_cpf = tk.Entry(frame_campos, textvariable=self.__cpf_var)
-        entrada_cpf.pack(fill="x", pady=5)
+        entrada_cpf = tk.Entry(
+            frame_campos,
+            textvariable=self.__cpf_var,
+            relief="solid",
+            bd=1,
+            width=30
+        )
+        entrada_cpf.pack(fill="x", pady=(4, 8))
 
-        label_senha = tk.Label(frame_campos, text="Senha:", anchor="w")
+        label_senha = tk.Label(frame_campos, text="Senha:", anchor="w", bg=cor_fundo, fg=cor_texto_escuro)
         label_senha.pack(fill="x")
         entrada_senha = tk.Entry(
             frame_campos,
             textvariable=self.__senha_var,
-            show="*"
+            show="*",
+            relief="solid",
+            bd=1,
+            width=30
         )
-        entrada_senha.pack(fill="x", pady=5)
+        entrada_senha.pack(fill="x", pady=(4, 12))
 
-        frame_botoes = tk.Frame(self.__root)
-        frame_botoes.pack(pady=15)
+        frame_botoes = tk.Frame(frame_principal, bg=cor_fundo)
+        frame_botoes.pack(pady=8)
 
         botao_login = tk.Button(
             frame_botoes,
             text="Entrar",
-            width=12,
+            width=14,
+            height=2,
+            bg=cor_botao,
+            fg="white",
+            activebackground=cor_botao,
+            activeforeground="white",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
             command=self.__realizar_login
         )
         botao_login.pack(side="left", padx=5)
@@ -59,10 +98,27 @@ class TelaLogin:
         botao_cancelar = tk.Button(
             frame_botoes,
             text="Cancelar",
-            width=12,
+            width=14,
+            height=2,
+            bg=cor_botao_voltar,
+            fg="white",
+            activebackground=cor_botao_voltar,
+            activeforeground="white",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
             command=self.__cancelar
         )
         botao_cancelar.pack(side="left", padx=5)
+
+        rodape = tk.Label(
+            frame_principal,
+            text="Sistema de Gerenciamento de Cemitério",
+            font=("Segoe UI", 8),
+            bg=cor_fundo,
+            fg="#9ca3af"
+        )
+        rodape.pack(pady=(16, 0))
 
     def __realizar_login(self):
         self.__opcao = 1

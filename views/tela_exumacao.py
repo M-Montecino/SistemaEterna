@@ -13,6 +13,18 @@ class TelaExumacao:
         self.__root.transient(master)
         self.__root.withdraw()
 
+        cor_fundo = "#f4f6f9"
+        cor_botao = "#68bced"
+        cor_botao_voltar = "#777777"
+        cor_texto_escuro = "#1f2937"
+        cor_texto_secundario = "#6b7280"
+        self.__root.configure(bg=cor_fundo)
+        self.__cor_fundo = cor_fundo
+        self.__cor_botao = cor_botao
+        self.__cor_botao_voltar = cor_botao_voltar
+        self.__cor_texto_escuro = cor_texto_escuro
+        self.__cor_texto_secundario = cor_texto_secundario
+
         self.__evento = None
         self.__codigo_exumacao_selecionada = None
         self.__manter_foco_busca = False
@@ -20,29 +32,59 @@ class TelaExumacao:
         self.__montar_tela_principal()
 
     def __montar_tela_principal(self):
-        cabecalho = tk.Frame(self.__root)
-        cabecalho.pack(fill="x", padx=12, pady=(12, 6))
+        cabecalho = tk.Frame(self.__root, bg=self.__cor_fundo)
+        cabecalho.pack(fill="x", padx=12, pady=(12, 8))
 
         titulo = tk.Label(
             cabecalho,
             text="Gerenciamento de exumações",
-            font=("Arial", 14, "bold")
+            font=("Segoe UI", 18, "bold"),
+            bg=self.__cor_fundo,
+            fg=self.__cor_texto_escuro
         )
         titulo.pack(side="left")
+
+        subtitulo = tk.Label(
+            cabecalho,
+            text="Controle e consulta das exumações",
+            font=("Segoe UI", 10),
+            bg=self.__cor_fundo,
+            fg=self.__cor_texto_secundario
+        )
+        subtitulo.pack(side="left", padx=(10, 0), pady=(4, 0))
 
         botao_novo = tk.Button(
             cabecalho,
             text="Nova Exumação",
-            width=18,
+            width=16,
+            height=2,
+            bg=self.__cor_botao,
+            fg="white",
+            activebackground=self.__cor_botao,
+            activeforeground="white",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
             command=lambda: self.__selecionar_evento("cadastrar")
         )
         botao_novo.pack(side="right")
 
-        frame_busca = tk.LabelFrame(self.__root, text="Buscar")
+        frame_busca = tk.LabelFrame(
+            self.__root,
+            text="Buscar",
+            bg=self.__cor_fundo,
+            fg=self.__cor_texto_escuro,
+            padx=8,
+            pady=8
+        )
         frame_busca.pack(fill="x", padx=12, pady=6)
 
-        self.__entrada_busca = tk.Entry(frame_busca)
-        self.__entrada_busca.pack(side="left", fill="x", expand=True, padx=8, pady=8)
+        self.__entrada_busca = tk.Entry(
+            frame_busca,
+            relief="solid",
+            bd=1
+        )
+        self.__entrada_busca.pack(side="left", fill="x", expand=True, padx=4, pady=4)
         self.__entrada_busca.bind(
             "<KeyRelease>",
             self.__acionar_filtro_busca
@@ -52,21 +94,28 @@ class TelaExumacao:
             frame_busca,
             text="Limpar",
             width=10,
+            bg=self.__cor_botao_voltar,
+            fg="white",
+            activebackground=self.__cor_botao_voltar,
+            activeforeground="white",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
             command=self.__acionar_limpar_busca
         )
-        botao_limpar.pack(side="left", padx=(0, 8), pady=8)
+        botao_limpar.pack(side="left", padx=(4, 0), pady=4)
 
-        frame_lista = tk.Frame(self.__root)
+        frame_lista = tk.Frame(self.__root, bg=self.__cor_fundo)
         frame_lista.pack(fill="both", expand=True, padx=12, pady=6)
 
-        self.__canvas = tk.Canvas(frame_lista, highlightthickness=0)
+        self.__canvas = tk.Canvas(frame_lista, highlightthickness=0, bg=self.__cor_fundo)
         self.__barra_rolagem = tk.Scrollbar(
             frame_lista,
             orient="vertical",
             command=self.__canvas.yview
         )
 
-        self.__frame_lista = tk.Frame(self.__canvas)
+        self.__frame_lista = tk.Frame(self.__canvas, bg=self.__cor_fundo)
         self.__janela_lista = self.__canvas.create_window(
             (0, 0),
             window=self.__frame_lista,
@@ -91,13 +140,21 @@ class TelaExumacao:
             )
         )
 
-        rodape = tk.Frame(self.__root)
+        rodape = tk.Frame(self.__root, bg=self.__cor_fundo)
         rodape.pack(fill="x", padx=12, pady=(6, 12))
 
         botao_voltar = tk.Button(
             rodape,
             text="Voltar ao Menu",
             width=16,
+            height=2,
+            bg=self.__cor_botao_voltar,
+            fg="white",
+            activebackground=self.__cor_botao_voltar,
+            activeforeground="white",
+            relief="flat",
+            bd=0,
+            cursor="hand2",
             command=self.__fechar_janela
         )
         botao_voltar.pack(side="right")
@@ -136,7 +193,9 @@ class TelaExumacao:
                 anchor="w",
                 relief="ridge",
                 padx=4,
-                pady=4
+                pady=4,
+                bg="#e5e7eb",
+                fg=self.__cor_texto_escuro
             )
             label.grid(row=0, column=coluna, sticky="nsew")
 
@@ -180,14 +239,17 @@ class TelaExumacao:
                     padx=4,
                     pady=4,
                     wraplength=300 if coluna in (1, 4) else 0,
-                    justify="left"
+                    justify="left",
+                    bg="white",
+                    fg=self.__cor_texto_escuro
                 )
                 label.grid(row=linha, column=coluna, sticky="nsew")
 
             frame_acoes = tk.Frame(
                 self.__frame_lista,
                 relief="groove",
-                borderwidth=1
+                borderwidth=1,
+                bg="white"
             )
             frame_acoes.grid(row=linha, column=5, sticky="nsew")
 

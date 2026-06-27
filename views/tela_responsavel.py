@@ -3,30 +3,48 @@ from tkinter import simpledialog, messagebox
 
 
 class TelaResponsavel:
-
     def __init__(self, master=None):
         self.__root = tk.Toplevel(master)
         self.__root.title("Responsáveis")
-        self.__root.geometry("350x450")
+        self.__root.geometry("400x600")
         self.__root.resizable(False, False)
-
-        self.__root.protocol(
-            "WM_DELETE_WINDOW",
-            self.__fechar_janela
-        )
-
+        self.__root.protocol("WM_DELETE_WINDOW", self.__fechar_janela)
         self.__root.transient(master)
         self.__root.withdraw()
 
         self.__opcao = None
 
+        # Cores
+        COR_FUNDO = "#f4f6f9"
+        COR_BOTAO = "#68bced"
+        COR_BOTAO_VOLTAR = "#777777"
+        COR_TEXTO = "white"
+        
+        self.__root.configure(bg=COR_FUNDO)
+
+    #Títulos
         titulo = tk.Label(
             self.__root,
-            text="RESPONSÁVEIS",
-            font=("Arial", 16, "bold")
+            text="RESPONSÁVEL",
+            font=("Segoe UI", 20, "bold"),
+            bg=COR_FUNDO,
+            fg="#1f2937"
         )
-        titulo.pack(pady=10)
+        titulo.pack(pady=(25, 5))
 
+        subtitulo = tk.Label(
+            self.__root,
+            text="Selecione uma opção",
+            font=("Segoe UI", 10),
+            bg=COR_FUNDO,
+            fg="#6b7280"
+        )
+        subtitulo.pack(pady=(0, 20))
+
+        frame = tk.Frame(self.__root, bg=COR_FUNDO)
+        frame.pack(fill="both", expand=True)
+
+    #Botões
         botoes = [
             ("Cadastrar Responsável", 1),
             ("Alterar Responsável", 2),
@@ -37,15 +55,38 @@ class TelaResponsavel:
         ]
 
         for texto, valor in botoes:
-            tk.Button(
-                self.__root,
-                text=texto,
-                width=25,
-                height=2,
-                command=lambda v=valor:
-                    self.__selecionar_opcao(v)
-            ).pack(pady=5)
 
+            cor = COR_BOTAO if valor != 0 else COR_BOTAO_VOLTAR
+
+            botao = tk.Button(
+                frame,
+                text=texto,
+                font=("Segoe UI", 11, "bold"),
+                width=28,
+                height=2,
+                bg=cor,
+                fg=COR_TEXTO,
+                activebackground=COR_BOTAO,
+                activeforeground="white",
+                relief="flat",
+                bd=0,
+                cursor="hand2",
+                command=lambda v=valor: self.__selecionar_opcao(v)
+            )
+
+            botao.pack(pady=7)
+#Rodapé
+
+        rodape = tk.Label(
+        self.__root,
+        text="Sistema de Gerenciamento de Cemitério",
+        font=("Segoe UI", 8),
+        bg=COR_FUNDO,
+        fg="#9ca3af"
+        )
+        rodape.pack(pady=(15, 10))
+
+#Funções
     def pegar_dados_responsavel(self):
         janela = tk.Toplevel(self.__root)
         janela.title("Cadastro de Responsável")
