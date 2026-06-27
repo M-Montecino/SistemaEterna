@@ -142,6 +142,7 @@ class ControladorSepultamento:
     def cadastrar_sepultamento(self):
         try:
             dados = self.__tela_sepultamento.pega_dados_sepultamento()
+            if dados is None: return
             self.__validar_dados_sepultamento(dados)
 
             self.__validar_responsavel_sem_concessao_vencida(
@@ -198,6 +199,7 @@ class ControladorSepultamento:
     def alterar_sepultamento(self):
         try:
             cpf = self.__tela_sepultamento.pega_cpf_alteracao()
+            if cpf is None: return
             cpf = limpar_cpf(cpf)
             if not validar_cpf(cpf):
                 raise ValueError("CPF inválido.")
@@ -212,6 +214,7 @@ class ControladorSepultamento:
 
 
             novos = self.__tela_sepultamento.pega_novos_dados_sepultamento()
+            if novos is None: return
             f = sepultamento.falecido
             c = sepultamento.concessao
 
@@ -267,6 +270,7 @@ class ControladorSepultamento:
     def excluir_sepultamento(self):
         try:
             cpf = self.__tela_sepultamento.pega_cpf_exclusao()
+            if cpf is None: return
             cpf = limpar_cpf(cpf)
             if not validar_cpf(cpf):
                 raise ValueError("CPF inválido.")
@@ -292,7 +296,9 @@ class ControladorSepultamento:
 
     def buscar_sepultamento(self):
         try:
-            cpf = limpar_cpf(self.__tela_sepultamento.pega_cpf_alteracao())
+            cpf = self.__tela_sepultamento.pega_cpf_alteracao()
+            if cpf is None: return
+            cpf = limpar_cpf(cpf)
             if not validar_cpf(cpf):
                 raise ValueError("CPF inválido.")
 

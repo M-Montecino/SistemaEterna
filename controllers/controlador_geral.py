@@ -127,7 +127,13 @@ class ControladorGeral:
                 opcao_escolhida = self.__tela_menu.tela_opcoes()
                 funcao_escolhida = lista_opcoes.get(opcao_escolhida)
                 if funcao_escolhida:
+                    if opcao_escolhida not in (0, 7):
+                        self.__tela_menu.root.withdraw()
+                        
                     funcao_escolhida()
+
+                    if opcao_escolhida not in (0, 7):
+                        self.__tela_menu.root.deiconify()
                 else:
                     self.__tela_menu.mostra_mensagem(
                         "Opção inválida. Tente novamente.")
