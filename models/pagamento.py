@@ -8,12 +8,17 @@ class TipoPagamento(Enum):
     Pix = 3
 
 class Pagamento:
-    def __init__(self, valor: float, data_pagamento, tipo_pagamento):
+    def __init__(self, valor: float, data_pagamento, tipo_pagamento, id = None):
         self.__valor = valor
         self.__data_pagamento = data_pagamento
         self.__tipo_pagamento = tipo_pagamento
+        self.__id = id
 
 #properties
+    @property
+    def id(self):
+        return self.__id
+    
     @property
     def valor(self) -> float:
         return self.__valor
@@ -92,8 +97,8 @@ class Pagamento:
     def _row_para_objeto(row):
         from datetime import datetime
         return Pagamento(
-            id = row["id"],
             valor = row["valor"],
             data_pagamento = datetime.strptime(row["data_pagamento"], "%Y-%m-%d"),
-            tipo_pagamento = row["tipo_pagamento"]
+            tipo_pagamento = TipoPagamento(int(row["tipo_pagamento"])),
+            id = row["id"]
         )

@@ -115,10 +115,11 @@ class Falecido:
 
 #buscas
     @staticmethod
-    def buscar_por_codigo(cpf: int):
+    def buscar_por_cpf(cpf: int):
         db = Database.get_instance()
         row = db.coneccao.execute(
-            "SELECT * FROM falecidos WHERE cpf = ?", (cpf)
+            "SELECT * FROM falecidos WHERE cpf = ?",
+            (cpf,)
         ).fetchone()
         return Falecido._row_para_objeto(row) if row else None
     

@@ -176,7 +176,7 @@ class Sepultamento:
             tumulo = row["tumulo"],
             valor = concessao.pagamento.valor,
             data_pagamento = concessao.pagamento.data_pagamento,
-            tipo_pagamento = concessao.pagamento.tipo_pagamento,
+            tipo_pagamento = concessao.pagamento.tipo_pagamento.name,
             id=concessao.id,
             responsavel = concessao.responsavel,
             responsavel2 = concessao.responsavel2,
