@@ -37,14 +37,16 @@ class ControladorAutenticacao:
         usuario = self.__controlador_usuario.buscar_por_cpf(cpf)
 
         if usuario is None:
-            return "cpf_invalido"
-
+            self.__tela_login.mostra_mensagem("Usuário não encontrado.")
+            return False
         if not self.__verificar_senha(usuario, senha):
-            return "senha_invalida"
+            self.__tela_login.mostra_mensagem("Senha incorreta.")
+            return False
 
         self.__usuario_logado = usuario
-
-        return "sucesso"
+        
+        self.__tela_login.mostra_mensagem(f"Bem-vindo, {usuario.nome}!")
+        return True
 
     def iniciar(self):
         if self.__tela_login is None:
@@ -63,29 +65,9 @@ class ControladorAutenticacao:
             cpf = dados.get("cpf", "")
             senha = dados.get("senha", "")
 
-            resultado = self.autenticar(cpf, senha)
-
-            match resultado:
-                case "cpf_invalido":
-                    self.__tela_login.mostra_mensagem(
-                        "CPF inválido. Tente novamente."
-                    )
-                    continue
-
-                case "senha_invalida":
-                    self.__tela_login.mostra_mensagem(
-                        "Senha inválida. Tente novamente."
-                    )
-                    continue
-
-                case "sucesso":
-                    self.__tela_login.mostra_mensagem(
-                        "Login efetuado com sucesso!"
-                    )
-
-            self.__tela_login.root.withdraw()
-
-            break
+            if self.autenticar(cpf, senha):
+                self.__tela_login.root.withdraw()
+                break
 
     def eh_admin(self) -> bool:
         return self.__usuario_logado is not None and self.__usuario_logado.cargo == Cargo.Gestor
