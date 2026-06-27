@@ -51,7 +51,7 @@ class Pagamento:
         """, (
             self.__valor,
             self.__data_pagamento.strftime("%Y-%m-%d"),
-            self.__tipo_pagamento
+            self.__tipo_pagamento.value
         ))
         db.coneccao.commit()
         self.__id = cursor.lastrowid
@@ -65,7 +65,7 @@ class Pagamento:
         """, (
             self.__valor,
             self.__data_pagamento.strftime("%Y-%m-%d"),
-            self.__tipo_pagamento,
+            self.__tipo_pagamento.value,
             self.__id
         ))
         db.coneccao.commit()

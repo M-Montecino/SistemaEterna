@@ -145,3 +145,16 @@ class Concessao:
             data_fim = datetime.strptime(row["data_fim"],    "%Y-%m-%d"),
             status = StatusConcessao[row["status"]]
         )
+    @staticmethod
+    def possui_concessao_vencida(cpf):
+        db = Database.get_instance()
+
+        row = db.coneccao.execute("""
+            SELECT 1
+            FROM concessoes
+            WHERE (responsavel = ? OR responsavel2 = ?)
+            AND status = 'VENCIDA'
+            LIMIT 1
+        """, (cpf, cpf)).fetchone()
+
+        return row is not None
