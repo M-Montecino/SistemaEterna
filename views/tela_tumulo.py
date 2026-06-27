@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox, simpledialog
 from datetime import datetime
 
@@ -172,7 +173,7 @@ class TelaTumulo:
             text="Novo tipo (1-Cova / 2-Cripta / 3-Gaveteiro)"
         ).place(x=0, y=80)
 
-        tipo = ttk.Combobox(
+        tipo = tk.Combobox(
             janela,
             values=[1, 2, 3],
             state="readonly"
