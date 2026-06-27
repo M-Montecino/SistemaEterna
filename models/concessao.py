@@ -80,24 +80,6 @@ class Concessao:
                 SELECT MAX(id) as id
                 FROM pagamentos
             """).fetchone()["id"]
-        print("id_pagamento:", id_pagamento)
-        print("responsavel:", self.__responsavel)
-        print("responsavel2:", self.__responsavel2)
-
-        print(cursor.execute(
-            "SELECT * FROM pagamentos WHERE id = ?",
-            (id_pagamento,)
-        ).fetchone())
-
-        print(cursor.execute(
-            "SELECT * FROM responsaveis WHERE cpf = ?",
-            (self.__responsavel,)
-        ).fetchone())
-
-        print(cursor.execute(
-            "SELECT * FROM responsaveis WHERE cpf = ?",
-            (self.__responsavel2,)
-        ).fetchone())
         cursor.execute("""
             INSERT INTO concessoes
                 (id_pagamento, responsavel, responsavel2, data_inicio, data_fim, status)

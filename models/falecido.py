@@ -37,9 +37,7 @@ class Falecido:
 
     @property
     def cpf(self) -> str:
-        c = self.__cpf 
-        return f"{c[:3]}.{c[3:6]}.{c[6:9]}-{c[9:]}"
-
+        return self.__cpf
     @property
     def data_nascimento(self):
         return self.__data_nascimento
@@ -102,7 +100,8 @@ class Falecido:
                 self.__nome,
                 self.__data_falecimento.strftime("%Y-%m-%d"),
                 self.__data_falecimento.strftime("%Y-%m-%d"),
-                self.__causa_morte
+                self.__causa_morte,
+                self.__cpf
             ))
         db.coneccao.commit()
 

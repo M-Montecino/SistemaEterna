@@ -88,27 +88,26 @@ class Sepultamento:
 
 #persistência
     def cadastrar(self):
-        print("Cadastrando falecido")
         self.__falecido.cadastrar() 
-        print("Cadastrando concessão")
         self.__concessao.cadastrar()
-        print("Inserindo sepultamento")
         db     = Database.get_instance()
         cursor = db.coneccao.cursor()
+
         cursor.execute("""
-            INSERT INTO sepultamentos
-                (cpf_falecido, tumulo, id_concessao,
-                 data_sepultamento, observacoes, ativo)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            self.__falecido.cpf,
-            self.__tumulo,
-            self.__concessao.id,
-            self.__data_sepultamento.strftime("%Y-%m-%d"),
-            self.__observacoes,
-            int(self.__ativo)
+        INSERT INTO sepultamentos
+            (cpf_falecido, tumulo, id_concessao,
+            data_sepultamento, observacoes, ativo)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        self.__falecido.cpf,
+        self.__tumulo,
+        self.__concessao.id,
+        self.__data_sepultamento.strftime("%Y-%m-%d"),
+        self.__observacoes,
+        int(self.__ativo)
         ))
         db.coneccao.commit()
+
 
     def alterar(self):
         self.__falecido.alterar()
