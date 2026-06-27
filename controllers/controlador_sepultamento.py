@@ -208,10 +208,6 @@ class ControladorSepultamento:
             if not sepultamento:
                 self.__tela_sepultamento.mostra_mensagem("Sepultamento não encontrado.")
                 return
-            self.__controlador_geral.controlador_tumulo.validar_tumulo(
-                dados_finais['tumulo']
-            )
-
 
             novos = self.__tela_sepultamento.pega_novos_dados_sepultamento()
             if novos is None: return
@@ -236,7 +232,9 @@ class ControladorSepultamento:
                 'data_sepultamento': novos['data_sepultamento'] or sepultamento.data_sepultamento,
                 'observacoes': novos['observacoes'] or sepultamento.observacoes,
             }
-
+            self.__controlador_geral.controlador_tumulo.validar_tumulo(
+                dados_finais['tumulo']
+            )
             self.__validar_dados_sepultamento(dados_finais)
 
             #atualizando dados
