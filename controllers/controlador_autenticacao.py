@@ -33,6 +33,19 @@ class ControladorAutenticacao:
         return senha_hash.hex() == hash_hex
 
     def autenticar(self, cpf: str, senha: str) -> str:
+                
+        usuario = self.__controlador_usuario.buscar_por_cpf(cpf)
+
+        if usuario is None:
+            self.__tela_login.mostra_mensagem("Usuário não encontrado.")
+            return False
+        if not self.__verificar_senha(usuario, senha):
+            self.__tela_login.mostra_mensagem("Senha incorreta.")
+            return False
+
+        self.__usuario_logado = usuario
+        
+        self.__tela_login.mostra_mensagem(f"Bem-vindo, {usuario.nome}!")
         return True
 
     def iniciar(self):
