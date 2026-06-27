@@ -1,6 +1,12 @@
 import re
 import tkinter as tk
 
+def centralizar(janela):
+    janela.update_idletasks()
+    x = (janela.winfo_screenwidth() // 2) - (janela.winfo_width() // 2)
+    y = (janela.winfo_screenheight() // 2) - (janela.winfo_height() // 2)
+    janela.geometry(f"+{x}+{y}")
+
 def validar_cpf(cpf: str) -> bool:
     cpf = re.sub(r'\D', '', cpf) #se ñ é digito = vazio
 

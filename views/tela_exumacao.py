@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from datetime import datetime
+from utils.funcoesAuxiliares import centralizar
 
 
 class TelaExumacao:
@@ -8,9 +9,9 @@ class TelaExumacao:
         self.__root = tk.Toplevel(master)
         self.__root.title("Gerenciamento de Exumações")
         self.__root.geometry("920x560")
+        centralizar(self.__root)
         self.__root.minsize(820, 480)
         self.__root.protocol("WM_DELETE_WINDOW", self.__fechar_janela)
-        self.__root.transient(master)
         self.__root.withdraw()
 
         cor_fundo = "#f4f6f9"

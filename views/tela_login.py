@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from utils.funcoesAuxiliares import centralizar
 
 class TelaLogin:
     def __init__(self, master=None):
@@ -11,6 +12,7 @@ class TelaLogin:
 
         self.__root.title("Login")
         self.__root.geometry("360x340")
+        centralizar(self.__root)
         self.__root.resizable(False, False)
         self.__root.protocol("WM_DELETE_WINDOW", self.__fechar_janela)
 

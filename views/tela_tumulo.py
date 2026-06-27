@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox, simpledialog
 from datetime import datetime
+from utils.funcoesAuxiliares import centralizar
 
 
 class TelaTumulo:
@@ -9,9 +10,9 @@ class TelaTumulo:
         self.__root = tk.Toplevel(master)
         self.__root.title("Túmulos")
         self.__root.geometry("400x600")
+        centralizar(self.__root)
         self.__root.resizable(False, False)
         self.__root.protocol("WM_DELETE_WINDOW",self.__fechar_janela)
-        self.__root.transient(master)
         self.__root.withdraw()
 
         self.__opcao = None
