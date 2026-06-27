@@ -56,7 +56,8 @@ class TelaMenu:
             ("Responsável", 4),
             ("Usuário", 5),
             ("Exumação", 6),
-            ("Logout", 7),
+            ("Relatório Gerencial", 7),
+            ("Logout", 8),
             ("Encerrar Sistema", 0)
         ]
 
@@ -100,6 +101,52 @@ class TelaMenu:
     def __fechar_janela(self):
         self.__opcao = 0
         self.__root.quit()
+        
+    def mostra_relatorio_gerencial(self, dados):
+        janela = tk.Toplevel(self.__root)
+        janela.title("Relatório Gerencial")
+        janela.geometry("520x520")
+        janela.resizable(False, False)
+
+        titulo = tk.Label(
+            janela,
+            text="RELATÓRIO GERENCIAL",
+            font=("Segoe UI", 16, "bold")
+        )
+        titulo.pack(pady=15)
+
+        texto = (
+            f"Total de túmulos cadastrados: {dados['total_tumulos_cadastrados']}\n"
+            f"Total de túmulos vazios: {dados['total_tumulos_vazios']}\n"
+            f"Total de túmulos parcialmente ocupados: {dados['total_tumulos_parcialmente_ocupados']}\n"
+            f"Total de túmulos lotados: {dados['total_tumulos_lotados']}\n\n"
+
+            f"Capacidade total do cemitério: {dados['capacidade_total_cemiterio']}\n"
+            f"Total de vagas ocupadas: {dados['total_vagas_ocupadas']}\n"
+            f"Total de vagas livres: {dados['total_vagas_livres']}\n\n"
+
+            f"Total de sepultamentos ativos: {dados['total_sepultamentos_ativos']}\n"
+            f"Total de exumações realizadas: {dados['total_exumacoes_realizadas']}\n\n"
+
+            f"Total de usuários gestores: {dados['total_usuarios_gestores']}\n"
+            f"Total de usuários secretários: {dados['total_usuarios_secretarios']}"
+        )
+
+        label = tk.Label(
+            janela,
+            text=texto,
+            font=("Segoe UI", 11),
+            justify="left",
+            anchor="w"
+        )
+        label.pack(padx=30, pady=10, anchor="w")
+
+        tk.Button(
+            janela,
+            text="Fechar",
+            width=20,
+            command=janela.destroy
+        ).pack(pady=20)
 
     def tela_opcoes(self):
         self.__opcao = None
