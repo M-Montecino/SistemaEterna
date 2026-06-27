@@ -1,7 +1,7 @@
 from models.sepultamento import Sepultamento
 from models.pagamento import TipoPagamento
-from models.concessao import StatusConcessao
-from utils.funcoesAuxiliares import validar_cpf, formatar_cpf
+from models.concessao import *
+from utils.funcoesAuxiliares import validar_cpf, limpar_cpf
 from views.tela_sepultamento import TelaSepultamento
 from datetime import datetime
 
@@ -83,21 +83,27 @@ class ControladorSepultamento:
             raise ValueError("Data inválida.")
 
     def __validar_dados_sepultamento(self, dados):
+        dados["cpf_falecido"] = limpar_cpf(dados["cpf_falecido"])
         if not validar_cpf(dados['cpf_falecido']):
             raise ValueError("CPF do falecido inválido.")
         self.__validar_nome(dados['nome_falecido'])
         self.__validar_data(dados['data_nascimento'])
         self.__validar_data(dados['data_falecimento'])
         self.__validar_texto(dados['causa_morte'])
-        self.__controlador_geral.controlador_tumulo.validar_tumulo((dados['tumulo']))
+        self.__controlador_geral.controlador_tumulo.validar_tumulo(dados['tumulo'])
         self.__validar_valor_pagamento(dados['valor'])
         self.__validar_data(dados['data_pagamento'])
         dados['tipo_pagamento']  = self.__converter_tipo_pagamento(dados['tipo_pagamento'])
+        dados["responsavel"] = limpar_cpf(dados["responsavel"])
+
+        if dados["responsavel2"]:
+            dados["responsavel2"] = limpar_cpf(dados["responsavel2"])
         self.__validar_data(dados['data_inicio_cons'])
         self.__validar_data(dados['data_final_cons'])
         dados['status'] = self.__converter_status_concessao(dados['status'])
         self.__validar_data(dados['data_sepultamento'])
         self.__validar_texto(dados['observacoes'])
+
 
         if dados['data_nascimento'] > dados['data_falecimento']:
             raise ValueError("Nascimento não pode ser posterior ao falecimento.")
@@ -126,7 +132,12 @@ class ControladorSepultamento:
             "Fim concessão": c.data_fim.strftime("%d/%m/%Y"),
             "Status concessão": c.status.name,
         }
-    
+    def __validar_responsavel_sem_concessao_vencida(self, cpf):
+        if Concessao.possui_concessao_vencida(cpf):
+            raise ValueError(
+                "O responsável possui concessões vencidas e deve renová-las antes de realizar novos sepultamentos."
+            )
+
     #metodos principais
     def cadastrar_sepultamento(self):
         try:
@@ -134,9 +145,23 @@ class ControladorSepultamento:
             if dados is None: return
             self.__validar_dados_sepultamento(dados)
 
+            self.__validar_responsavel_sem_concessao_vencida(
+                dados['responsavel']
+            )
+
+            if dados['responsavel2']:
+                self.__validar_responsavel_sem_concessao_vencida(
+                dados['responsavel2']
+    )
+
             if Sepultamento.buscar_por_cpf(dados['cpf_falecido']):
                 self.__tela_sepultamento.mostra_mensagem("CPF já cadastrado.")
                 return
+
+            
+            self.__controlador_geral.controlador_tumulo.validar_tumulo(
+                    dados['tumulo']
+)
             
             novo = Sepultamento(
                 dados['cpf_falecido'],
@@ -174,6 +199,7 @@ class ControladorSepultamento:
         try:
             cpf = self.__tela_sepultamento.pega_cpf_alteracao()
             if cpf is None: return
+            cpf = limpar_cpf(cpf)
             if not validar_cpf(cpf):
                 raise ValueError("CPF inválido.")
 
@@ -244,6 +270,7 @@ class ControladorSepultamento:
         try:
             cpf = self.__tela_sepultamento.pega_cpf_exclusao()
             if cpf is None: return
+            cpf = limpar_cpf(cpf)
             if not validar_cpf(cpf):
                 raise ValueError("CPF inválido.")
 
@@ -270,6 +297,7 @@ class ControladorSepultamento:
         try:
             cpf = self.__tela_sepultamento.pega_cpf_alteracao()
             if cpf is None: return
+            cpf = limpar_cpf(cpf)
             if not validar_cpf(cpf):
                 raise ValueError("CPF inválido.")
 
@@ -318,5 +346,6 @@ class ControladorSepultamento:
                 self.__tela_sepultamento.mostra_mensagem( f"Erro: {str(erro)}")
 
     def validar_sepultamento(self, cpf):
+        cpf = limpar_cpf(cpf)
         if not Sepultamento.buscar_por_cpf(cpf):
             raise ValueError("Esse sepultamento não existe.")
