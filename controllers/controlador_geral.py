@@ -1,5 +1,9 @@
 from views.tela_menu import TelaMenu
 
+from models.tumulo import Tumulo
+from models.exumacao import Exumacao
+from models.usuario import Usuario, Cargo
+
 from controllers.controlador_usuario import ControladorUsuario
 from controllers.controlador_autenticacao import ControladorAutenticacao
 from controllers.controlador_manutencao import ControladorManutencao
@@ -81,6 +85,74 @@ class ControladorGeral:
 
     def abre_exumacao(self):
         self.__controlador_exumacao.abre_tela()
+        
+    def __gerar_dados_relatorio_gerencial(self):
+        ocupacao_tumulos = Tumulo.buscar_dados_ocupacao()
+
+        total_tumulos_cadastrados = len(ocupacao_tumulos)
+        total_tumulos_vazios = 0
+        total_tumulos_parcialmente_ocupados = 0
+        total_tumulos_lotados = 0
+
+        capacidade_total_cemiterio = 0
+        total_vagas_ocupadas = 0
+        total_vagas_livres = 0
+
+        for item in ocupacao_tumulos:
+            capacidade = item["capacidade"]
+            ocupados = item["ocupados"]
+            vagas_livres = item["vagas_livres"]
+
+            capacidade_total_cemiterio += capacidade
+            total_vagas_ocupadas += ocupados
+            total_vagas_livres += vagas_livres
+
+            if ocupados == 0:
+                total_tumulos_vazios += 1
+            elif ocupados >= capacidade:
+                total_tumulos_lotados += 1
+            else:
+                total_tumulos_parcialmente_ocupados += 1
+
+        exumacoes = Exumacao.buscar_todos()
+
+        usuarios = [
+            usuario for usuario in Usuario.buscar_todos()
+            if usuario.cpf != "00000000000"
+        ]
+
+        total_usuarios_gestores = 0
+        total_usuarios_secretarios = 0
+
+        for usuario in usuarios:
+            if usuario.cargo == Cargo.Gestor:
+                total_usuarios_gestores += 1
+            elif usuario.cargo == Cargo.Secretario:
+                total_usuarios_secretarios += 1
+
+        return {
+            "total_tumulos_cadastrados": total_tumulos_cadastrados,
+            "total_tumulos_vazios": total_tumulos_vazios,
+            "total_tumulos_parcialmente_ocupados": total_tumulos_parcialmente_ocupados,
+            "total_tumulos_lotados": total_tumulos_lotados,
+            "capacidade_total_cemiterio": capacidade_total_cemiterio,
+            "total_vagas_ocupadas": total_vagas_ocupadas,
+            "total_vagas_livres": total_vagas_livres,
+            "total_sepultamentos_ativos": total_vagas_ocupadas,
+            "total_exumacoes_realizadas": len(exumacoes),
+            "total_usuarios_gestores": total_usuarios_gestores,
+            "total_usuarios_secretarios": total_usuarios_secretarios
+        }
+        
+    def abre_relatorio_gerencial(self):
+        if not self.__controlador_autenticacao.eh_admin():
+            self.__tela_menu.mostra_mensagem(
+                "Acesso negado: apenas gestores podem visualizar o relatório gerencial."
+            )
+            return
+
+        dados = self.__gerar_dados_relatorio_gerencial()
+        self.__tela_menu.mostra_relatorio_gerencial(dados)
 
     def logout(self):
         if self.__controlador_autenticacao is not None:
@@ -118,7 +190,8 @@ class ControladorGeral:
             4: self.abre_responsavel,
             5: self.abre_usuario,
             6: self.abre_exumacao,
-            7: self.logout,
+            7: self.abre_relatorio_gerencial,
+            8: self.logout,
             0: self.encerra_sistema
         }
 
@@ -127,12 +200,12 @@ class ControladorGeral:
                 opcao_escolhida = self.__tela_menu.tela_opcoes()
                 funcao_escolhida = lista_opcoes.get(opcao_escolhida)
                 if funcao_escolhida:
-                    if opcao_escolhida not in (0, 7):
+                    if opcao_escolhida not in (0, 8):
                         self.__tela_menu.root.withdraw()
                         
                     funcao_escolhida()
 
-                    if opcao_escolhida not in (0, 7):
+                    if opcao_escolhida not in (0, 8):
                         self.__tela_menu.root.deiconify()
                 else:
                     self.__tela_menu.mostra_mensagem(
