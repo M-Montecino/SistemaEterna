@@ -47,21 +47,5 @@ def mascara_data(event):
     event.widget.insert(0, texto[:10])
 
 
-def formatar_cpf(cpf: str):
-
-    if cpf:
-
-        cpf_numeros = ''.join(
-            filter(str.isdigit, cpf)
-        )[:11]
-
-        if len(cpf_numeros) == 11:
-
-            return (
-                f"{cpf_numeros[:3]}."
-                f"{cpf_numeros[3:6]}."
-                f"{cpf_numeros[6:9]}-"
-                f"{cpf_numeros[9:]}"
-            )
-
-    return cpf
+def limpar_cpf(cpf: str):
+    return ''.join(filter(str.isdigit, cpf))
