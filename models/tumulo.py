@@ -131,6 +131,62 @@ class Tumulo:
         rows = db.coneccao.execute("SELECT * FROM tumulos").fetchall()
         return [Tumulo._row_para_objeto(r) for r in rows]
     
+#relatorio
+    @staticmethod
+    def buscar_dados_ocupacao():
+        db = Database.get_instance()
+        rows = db.coneccao.execute(
+            '''
+            SELECT
+                t.codigo AS codigo_tumulo,
+                t.setor,
+                t.numero,
+                t.tipo,
+                t.capacidade,
+                COUNT(s.cpf_falecido) AS ocupados,
+                t.capacidade - COUNT(s.cpf_falecido) AS vagas_livres,
+                CASE
+                    WHEN COUNT(s.cpf_falecido) = 0 THEN 'Vazio'
+                    WHEN COUNT(s.cpf_falecido) >= t.capacidade THEN 'Lotado'
+                    ELSE 'Disponível'
+                END AS status
+            FROM tumulos t
+            LEFT JOIN sepultamentos s
+                ON s.tumulo = t.codigo
+                AND s.ativo = 1
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM exumacoes e
+                    WHERE e.sepultamento = s.cpf_falecido
+                )
+            GROUP BY
+                t.codigo,
+                t.setor,
+                t.numero,
+                t.tipo,
+                t.capacidade
+            ORDER BY
+                t.setor,
+                t.numero;
+            '''
+            ).fetchall()
+        
+        relatorio = []
+
+        for row in rows:
+            relatorio.append({
+                "codigo": row["codigo_tumulo"],
+                "setor": row["setor"],
+                "numero": row["numero"],
+                "tipo": TipoTumulo(int(row["tipo"])).name,
+                "capacidade": row["capacidade"],
+                "ocupados": row["ocupados"],
+                "vagas_livres": row["vagas_livres"],
+                "status": row["status"]
+            })
+
+        return relatorio
+    
 #auxiliar
     @staticmethod
     def _row_para_objeto(row):

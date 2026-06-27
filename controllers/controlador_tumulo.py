@@ -215,6 +215,17 @@ class ControladorTumulo:
             self.__tela_tumulo.mostra_mensagem(
                 f"Erro ao buscar túmulo: {str(erro)}"
             )
+            
+    def gerar_relatorio_ocupacao(self):
+        relatorio = Tumulo.buscar_dados_ocupacao()
+
+        if not relatorio:
+            self.__tela_tumulo.mostra_mensagem(
+                "Nenhum túmulo cadastrado para gerar relatório."
+            )
+            return
+
+        self.__tela_tumulo.mostra_relatorio_ocupacao(relatorio)
 
     def retomar_menu(self):
         return
@@ -229,6 +240,7 @@ class ControladorTumulo:
             3: self.excluir_tumulo,
             4: self.listar_tumulos,
             5: self.buscar_tumulo,
+            6: self.gerar_relatorio_ocupacao,
             0: self.retomar_menu
         }
     

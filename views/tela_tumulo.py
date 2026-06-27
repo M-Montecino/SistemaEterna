@@ -54,6 +54,7 @@ class TelaTumulo:
             ("Excluir Túmulo", 3),
             ("Listar Túmulos", 4),
             ("Buscar Túmulo", 5),
+            ("Relatório de Ocupação", 6),
             ("Voltar ao Menu", 0)
         ]
 
@@ -245,6 +246,70 @@ class TelaTumulo:
             "Buscar",
             "Código do túmulo:"
         )
+    
+    def mostra_relatorio_ocupacao(self, relatorio):
+        janela = tk.Toplevel(self.__root)
+        janela.title("Relatório de Ocupação dos Túmulos")
+        janela.geometry("850x400")
+
+        colunas = (
+            "codigo",
+            "setor",
+            "numero",
+            "tipo",
+            "capacidade",
+            "ocupados",
+            "vagas_livres",
+            "status"
+        )
+
+        tabela = ttk.Treeview(
+            janela,
+            columns=colunas,
+            show="headings"
+        )
+
+        tabela.heading("codigo", text="Código")
+        tabela.heading("setor", text="Setor")
+        tabela.heading("numero", text="Número")
+        tabela.heading("tipo", text="Tipo")
+        tabela.heading("capacidade", text="Capacidade")
+        tabela.heading("ocupados", text="Ocupados")
+        tabela.heading("vagas_livres", text="Vagas Livres")
+        tabela.heading("status", text="Status")
+
+        tabela.column("codigo", width=80, anchor="center")
+        tabela.column("setor", width=80, anchor="center")
+        tabela.column("numero", width=80, anchor="center")
+        tabela.column("tipo", width=120, anchor="center")
+        tabela.column("capacidade", width=100, anchor="center")
+        tabela.column("ocupados", width=100, anchor="center")
+        tabela.column("vagas_livres", width=120, anchor="center")
+        tabela.column("status", width=120, anchor="center")
+
+        for item in relatorio:
+            tabela.insert(
+                "",
+                "end",
+                values=(
+                    item["codigo"],
+                    item["setor"],
+                    item["numero"],
+                    item["tipo"],
+                    item["capacidade"],
+                    item["ocupados"],
+                    item["vagas_livres"],
+                    item["status"]
+                )
+            )
+
+        tabela.pack(fill="both", expand=True, padx=10, pady=10)
+
+        tk.Button(
+            janela,
+            text="Fechar",
+            command=janela.destroy
+        ).pack(pady=10)
 
     def __selecionar_opcao(self, valor):
         self.__opcao = valor
