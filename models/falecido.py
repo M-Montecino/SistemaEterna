@@ -88,7 +88,7 @@ class Falecido:
             self.__data_falecimento.strftime("%Y-%m-%d"),
             self.__causa_morte
             ))
-        db.connecao.commit()
+        db.coneccao.commit()
 
     def alterar(self):
         db = Database.get_instance()
