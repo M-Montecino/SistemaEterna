@@ -1,8 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox
 from datetime import datetime
-from utils.funcoesAuxiliares import centralizar
+from utils.funcoesAuxiliares import (
+    centralizar,
+    criar_botao_confirmacao,
+    criar_entrada_estilizada,
+    criar_popup_modal,
+    pedir_dado,
+)
 
 
 class TelaTumulo:
@@ -92,159 +98,119 @@ class TelaTumulo:
 
 #funções
     def pega_dados_tumulo(self):
-        janela = tk.Toplevel(self.__root)
-        janela.title("Cadastro de Túmulo")
-        janela.geometry("450x300")
+        janela, container = criar_popup_modal(
+            self.__root,
+            "Cadastro de Túmulo",
+            "Preencha os dados do túmulo",
+            largura=460,
+            altura=400
+        )
+
+        codigo = criar_entrada_estilizada(container, "Código")
+        setor = criar_entrada_estilizada(container, "Setor")
+        numero = criar_entrada_estilizada(container, "Número")
+        tk.Label(container, text="Tipo (1-Cova / 2-Cripta / 3-Gaveteiro)", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
+        tipo = ttk.Combobox(container, values=[1, 2, 3], state="readonly", width=28)
+        tipo.set(1)
+        tipo.pack(fill="x", pady=(2, 8))
+        capacidade = criar_entrada_estilizada(container, "Capacidade")
 
         dados = None
 
-        tk.Label(janela, text="Código").place(x=0, y=0)
-        codigo = tk.Entry(janela)
-        codigo.place(x=150, y=0)
-
-        tk.Label(janela, text="Setor").place(x=0, y=40)
-        setor = tk.Entry(janela)
-        setor.place(x=150, y=40)
-
-        tk.Label(janela, text="Número").place(x=0, y=80)
-        numero = tk.Entry(janela)
-        numero.place(x=150, y=80)
-
-        tk.Label(
-            janela,
-            text="Tipo (1-Cova / 2-Cripta / 3-Gaveteiro)"
-        ).place(x=0, y=120)
-
-        tipo = ttk.Combobox(
-            janela,
-            values=[1, 2, 3],
-            state="readonly"
-        )
-
-        tipo.place(x=260, y=120)
-
-        tk.Label(janela, text="Capacidade").place(x=0, y=160)
-        capacidade = tk.Entry(janela)
-        capacidade.place(x=150, y=160)
-
         def confirmar():
             nonlocal dados
-
-            dados = {
-                "codigo": int(codigo.get()),
-                "setor": setor.get(),
-                "numero": int(numero.get()),
-                "tipo": int(tipo.get()),
-                "capacidade": int(capacidade.get())
-            }
-
+            try:
+                dados = {
+                    "codigo": int(codigo.get().strip()) if codigo.get().strip() else None,
+                    "setor": setor.get().strip() or None,
+                    "numero": int(numero.get().strip()) if numero.get().strip() else None,
+                    "tipo": int(tipo.get()) if tipo.get() else None,
+                    "capacidade": int(capacidade.get().strip()) if capacidade.get().strip() else None,
+                }
+            except ValueError:
+                dados = {
+                    "codigo": None,
+                    "setor": setor.get().strip() or None,
+                    "numero": None,
+                    "tipo": None,
+                    "capacidade": None,
+                }
             janela.destroy()
 
-        tk.Button(
-            janela,
-            text="Confirmar",
-            command=confirmar
-        ).place(x=150, y=220)
-
-        janela.protocol(
-            "WM_DELETE_WINDOW",
-            lambda: janela.destroy()
-        )
-
+        criar_botao_confirmacao(container, confirmar)
+        janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
+        janela.bind("<Return>", lambda event: confirmar())
         janela.wait_window()
 
         return dados
 
     def pega_novos_dados_tumulo(self):
-        janela = tk.Toplevel(self.__root)
-        janela.title("Alterar Túmulo")
-        janela.geometry("450x250")
+        janela, container = criar_popup_modal(
+            self.__root,
+            "Alterar Túmulo",
+            "Atualize apenas os campos desejados",
+            largura=460,
+            altura=360
+        )
 
         dados = {}
 
-        tk.Label(janela, text="Novo setor").place(x=0, y=0)
-        setor = tk.Entry(janela)
-        setor.place(x=150, y=0)
-
-        tk.Label(janela, text="Novo número").place(x=0, y=40)
-        numero = tk.Entry(janela)
-        numero.place(x=150, y=40)
-
-        tk.Label(
-            janela,
-            text="Novo tipo (1-Cova / 2-Cripta / 3-Gaveteiro)"
-        ).place(x=0, y=80)
-
-        tipo = tk.Combobox(
-            janela,
-            values=[1, 2, 3],
-            state="readonly"
-        )
-
-        tipo.place(x=260, y=80)
-
-        tk.Label(janela, text="Nova capacidade").place(x=0, y=120)
-        capacidade = tk.Entry(janela)
-        capacidade.place(x=150, y=120)
+        setor = criar_entrada_estilizada(container, "Novo setor")
+        numero = criar_entrada_estilizada(container, "Novo número")
+        tk.Label(container, text="Novo tipo (1-Cova / 2-Cripta / 3-Gaveteiro)", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
+        tipo = ttk.Combobox(container, values=[1, 2, 3], state="readonly", width=28)
+        tipo.set(1)
+        tipo.pack(fill="x", pady=(2, 8))
+        capacidade = criar_entrada_estilizada(container, "Nova capacidade")
 
         def confirmar():
-            dados["setor"] = (
-                setor.get()
-                if setor.get()
-                else None
-            )
+            valor_numero = numero.get().strip()
+            try:
+                numero_convertido = int(valor_numero) if valor_numero else None
+            except ValueError:
+                numero_convertido = None
 
-            dados["numero"] = (
-                int(numero.get())
-                if numero.get()
-                else None
-            )
+            valor_capacidade = capacidade.get().strip()
+            try:
+                capacidade_convertida = int(valor_capacidade) if valor_capacidade else None
+            except ValueError:
+                capacidade_convertida = None
 
-            dados["tipo"] = (
-                int(tipo.get())
-                if tipo.get()
-                else None
-            )
-
-            dados["capacidade"] = (
-                int(capacidade.get())
-                if capacidade.get()
-                else None
-            )
-
+            dados["setor"] = setor.get().strip() or None
+            dados["numero"] = numero_convertido
+            dados["tipo"] = int(tipo.get()) if tipo.get() else None
+            dados["capacidade"] = capacidade_convertida
             janela.destroy()
 
-        tk.Button(
-            janela,
-            text="Confirmar",
-            command=confirmar
-        ).place(x=150, y=180)
-
-        janela.protocol(
-            "WM_DELETE_WINDOW",
-            lambda: janela.destroy()
-        )
-
+        criar_botao_confirmacao(container, confirmar)
+        janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
+        janela.bind("<Return>", lambda event: confirmar())
         janela.wait_window()
 
         return dados
 
     def alterar_tumulo(self):
-        return simpledialog.askinteger(
-            "Alterar",
-            "Código do túmulo:"
+        return pedir_dado(
+            self.__root,
+            "Alterar Túmulo",
+            "Código do túmulo:",
+            tipo="inteiro"
         )
 
     def excluir_tumulo(self):
-        return simpledialog.askinteger(
-            "Excluir",
-            "Código do túmulo:"
+        return pedir_dado(
+            self.__root,
+            "Excluir Túmulo",
+            "Código do túmulo:",
+            tipo="inteiro"
         )
 
     def buscar_tumulo(self):
-        return simpledialog.askinteger(
-            "Buscar",
-            "Código do túmulo:"
+        return pedir_dado(
+            self.__root,
+            "Buscar Túmulo",
+            "Código do túmulo:",
+            tipo="inteiro"
         )
     
     def mostra_relatorio_ocupacao(self, relatorio):

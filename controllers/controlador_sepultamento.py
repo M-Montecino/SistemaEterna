@@ -115,23 +115,23 @@ class ControladorSepultamento:
     def __formatar_sepultamento(self, s: Sepultamento):
         f = s.falecido
         c = s.concessao
-        return {
-            "Falecido": f.nome,
-            "CPF": f.cpf,
-            "Nascimento": f.data_nascimento.strftime("%d/%m/%Y"),
-            "Falecimento": f.data_falecimento.strftime("%d/%m/%Y"),
-            "Causa da morte": f.causa_morte,
-            "Data sepultamento": s.data_sepultamento.strftime("%d/%m/%Y"),
-            "Observações": s.observacoes,
-            "Valor": c.pagamento.valor,
-            "Data pagamento": c.pagamento.data_pagamento.strftime("%d/%m/%Y"),
-            "Tipo de pagamento": c.pagamento.tipo_pagamento,
-            "Responsável 1": c.responsavel,
-            "Responsável 2": c.responsavel2,
-            "Início concessão": c.data_inicio.strftime("%d/%m/%Y"),
-            "Fim concessão": c.data_fim.strftime("%d/%m/%Y"),
-            "Status concessão": c.status.name,
-        }
+        return (
+            f"Falecido: {f.nome}\n"
+            f"CPF: {f.cpf}\n"
+            f"Nascimento: {f.data_nascimento.strftime('%d/%m/%Y')}\n"
+            f"Falecimento: {f.data_falecimento.strftime('%d/%m/%Y')}\n"
+            f"Causa da morte: {f.causa_morte}\n"
+            f"Data do sepultamento: {s.data_sepultamento.strftime('%d/%m/%Y')}\n"
+            f"Observações: {s.observacoes}\n"
+            f"Valor: {c.pagamento.valor}\n"
+            f"Data do pagamento: {c.pagamento.data_pagamento.strftime('%d/%m/%Y')}\n"
+            f"Tipo de pagamento: {c.pagamento.tipo_pagamento}\n"
+            f"Responsável 1: {c.responsavel}\n"
+            f"Responsável 2: {c.responsavel2}\n"
+            f"Início da concessão: {c.data_inicio.strftime('%d/%m/%Y')}\n"
+            f"Fim da concessão: {c.data_fim.strftime('%d/%m/%Y')}\n"
+            f"Status da concessão: {c.status.name}"
+        )
     def __validar_responsavel_sem_concessao_vencida(self, cpf):
         if Concessao.possui_concessao_vencida(cpf):
             raise ValueError(
@@ -375,8 +375,9 @@ class ControladorSepultamento:
         if not sepultamentos:
             self.__tela_sepultamento.mostra_mensagem("Nenhum sepultamento cadastrado.")
             return
-        for s in sepultamentos:
-            self.__tela_sepultamento.mostra_mensagem(self.__formatar_sepultamento(s))
+
+        texto = "\n\n".join(self.__formatar_sepultamento(s) for s in sepultamentos)
+        self.__tela_sepultamento.mostra_mensagem(texto)
 
     def buscar_sepultamento(self):
         try:

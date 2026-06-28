@@ -1,6 +1,13 @@
 import tkinter as tk
-from tkinter import simpledialog, messagebox
-from utils.funcoesAuxiliares import centralizar
+from tkinter import messagebox
+from utils.funcoesAuxiliares import (
+    centralizar,
+    criar_botao_confirmacao,
+    criar_entrada_estilizada,
+    criar_popup_modal,
+    mascara_data,
+    pedir_dado,
+)
 
 
 class TelaResponsavel:
@@ -89,161 +96,115 @@ class TelaResponsavel:
 
 #Funções
     def pegar_dados_responsavel(self):
-        janela = tk.Toplevel(self.__root)
-        janela.title("Cadastro de Responsável")
-        janela.geometry("450x360")
+        janela, container = criar_popup_modal(
+            self.__root,
+            "Cadastro de Responsável",
+            "Preencha os dados abaixo",
+            largura=460,
+            altura=600
+        )
+
+        nome = criar_entrada_estilizada(container, "Nome")
+        cpf = criar_entrada_estilizada(container, "CPF")
+        telefone = criar_entrada_estilizada(container, "Telefone")
+        cep = criar_entrada_estilizada(container, "CEP")
+        numero = criar_entrada_estilizada(container, "Número")
+        email = criar_entrada_estilizada(container, "Email")
+        data_nascimento = criar_entrada_estilizada(container, "Data de nascimento (DD/MM/AAAA)")
+        data_nascimento.bind("<KeyRelease>", mascara_data)
 
         dados = None
-
-        tk.Label(janela, text="Nome").place(x=0, y=0)
-        nome = tk.Entry(janela)
-        nome.place(x=150, y=0)
-
-        tk.Label(janela, text="CPF").place(x=0, y=40)
-        cpf = tk.Entry(janela)
-        cpf.place(x=150, y=40)
-
-        tk.Label(janela, text="Telefone").place(x=0, y=80)
-        telefone = tk.Entry(janela)
-        telefone.place(x=150, y=80)
-
-        tk.Label(janela, text="CEP").place(x=0, y=120)
-        cep = tk.Entry(janela)
-        cep.place(x=150, y=120)
-
-        tk.Label(janela, text="Número").place(x=0, y=160)
-        numero = tk.Entry(janela)
-        numero.place(x=150, y=160)
-
-        tk.Label(janela, text="Email").place(x=0, y=200)
-        email = tk.Entry(janela)
-        email.place(x=150, y=200)
-
-        tk.Label(janela, text="Data Nasc. (DD/MM/AAAA)").place(x=0, y=240)
-        data_nascimento = tk.Entry(janela)
-        data_nascimento.place(x=150, y=240)
 
         def confirmar():
             nonlocal dados
 
-            dados = {
-                "nome": nome.get(),
-                "cpf": cpf.get(),
-                "telefone": telefone.get(),
-                "cep": cep.get(),
-                "numero": int(numero.get()),
-                "email": email.get(),
-                "data_nascimento": data_nascimento.get()
-            }
+            valor_numero = numero.get().strip()
+            try:
+                numero_convertido = int(valor_numero) if valor_numero else None
+            except ValueError:
+                numero_convertido = None
 
+            dados = {
+                "nome": nome.get().strip() or None,
+                "cpf": cpf.get().strip() or None,
+                "telefone": telefone.get().strip() or None,
+                "cep": cep.get().strip() or None,
+                "numero": numero_convertido,
+                "email": email.get().strip() or None,
+                "data_nascimento": data_nascimento.get().strip() or None,
+            }
             janela.destroy()
 
-        tk.Button(
-            janela,
-            text="Confirmar",
-            command=confirmar
-        ).place(x=170, y=300)
-
-        janela.protocol(
-            "WM_DELETE_WINDOW",
-            lambda: janela.destroy()
-        )
-
+        criar_botao_confirmacao(container, confirmar)
+        janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
+        janela.bind("<Return>", lambda event: confirmar())
         janela.wait_window()
 
         return dados
 
     def pega_novos_dados_responsavel(self):
-        janela = tk.Toplevel(self.__root)
-        janela.title("Alterar Responsável")
-        janela.geometry("450x360")
+        janela, container = criar_popup_modal(
+            self.__root,
+            "Alterar Responsável",
+            "Atualize apenas os campos desejados",
+            largura=460,
+            altura=470
+        )
 
         dados = {}
 
-        tk.Label(janela, text="Novo nome").place(x=0, y=0)
-        nome = tk.Entry(janela)
-        nome.place(x=150, y=0)
-
-        tk.Label(janela, text="Novo telefone").place(x=0, y=40)
-        telefone = tk.Entry(janela)
-        telefone.place(x=150, y=40)
-
-        tk.Label(janela, text="Novo CEP").place(x=0, y=80)
-        cep = tk.Entry(janela)
-        cep.place(x=150, y=80)
-
-        tk.Label(janela, text="Novo número").place(x=0, y=120)
-        numero = tk.Entry(janela)
-        numero.place(x=150, y=120)
-
-        tk.Label(janela, text="Novo email").place(x=0, y=160)
-        email = tk.Entry(janela)
-        email.place(x=150, y=160)
-
-        tk.Label(janela, text="Nova Data Nasc.").place(x=0, y=200)
-        data_nascimento = tk.Entry(janela)
-        data_nascimento.place(x=150, y=200)
+        nome = criar_entrada_estilizada(container, "Novo nome")
+        telefone = criar_entrada_estilizada(container, "Novo telefone")
+        cep = criar_entrada_estilizada(container, "Novo CEP")
+        numero = criar_entrada_estilizada(container, "Novo número")
+        email = criar_entrada_estilizada(container, "Novo email")
+        data_nascimento = criar_entrada_estilizada(container, "Nova data de nascimento")
+        data_nascimento.bind("<KeyRelease>", mascara_data)
 
         def confirmar():
-            dados["nome"] = (
-                nome.get() if nome.get() else None
-            )
+            valor_numero = numero.get().strip()
+            try:
+                numero_convertido = int(valor_numero) if valor_numero else None
+            except ValueError:
+                numero_convertido = None
 
-            dados["telefone"] = (
-                telefone.get() if telefone.get() else None
-            )
-
-            dados["cep"] = (
-                cep.get() if cep.get() else None
-            )
-
-            dados["numero"] = (
-                int(numero.get())
-                if numero.get()
-                else None
-            )
-
-            dados["email"] = (
-                email.get() if email.get() else None
-            )
-
-            dados["data_nascimento"] = (
-                data_nascimento.get() if data_nascimento.get() else None
-            )
-
+            dados["nome"] = nome.get().strip() or None
+            dados["telefone"] = telefone.get().strip() or None
+            dados["cep"] = cep.get().strip() or None
+            dados["numero"] = numero_convertido
+            dados["email"] = email.get().strip() or None
+            dados["data_nascimento"] = data_nascimento.get().strip() or None
             janela.destroy()
 
-        tk.Button(
-            janela,
-            text="Confirmar",
-            command=confirmar
-        ).place(x=170, y=270)
-
-        janela.protocol(
-            "WM_DELETE_WINDOW",
-            lambda: janela.destroy()
-        )
-
+        criar_botao_confirmacao(container, confirmar)
+        janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
+        janela.bind("<Return>", lambda event: confirmar())
         janela.wait_window()
 
         return dados
 
     def alterar_responsavel(self):
-        return simpledialog.askstring(
-            "Alterar",
-            "CPF do responsável:"
+        return pedir_dado(
+            self.__root,
+            "Alterar Responsável",
+            "CPF do responsável:",
+            tipo="texto"
         )
 
     def excluir_responsavel(self):
-        return simpledialog.askstring(
-            "Excluir",
-            "CPF do responsável:"
+        return pedir_dado(
+            self.__root,
+            "Excluir Responsável",
+            "CPF do responsável:",
+            tipo="texto"
         )
 
     def buscar_responsavel(self):
-        return simpledialog.askstring(
-            "Buscar",
-            "CPF do responsável:"
+        return pedir_dado(
+            self.__root,
+            "Buscar Responsável",
+            "CPF do responsável:",
+            tipo="texto"
         )
 
     def __selecionar_opcao(self, valor):

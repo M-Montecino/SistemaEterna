@@ -1,7 +1,14 @@
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox
 from datetime import datetime
-from utils.funcoesAuxiliares import centralizar
+from utils.funcoesAuxiliares import (
+    centralizar,
+    criar_botao_confirmacao,
+    criar_entrada_estilizada,
+    criar_popup_modal,
+    mascara_data,
+    pedir_dado,
+)
 
 
 class TelaManutencao:
@@ -90,105 +97,110 @@ class TelaManutencao:
 
     #Auxiliar de Cadastro
     def pega_dados_manutencao(self):
-        codigo = simpledialog.askinteger(
-            "Cadastro",
-            "Digite o código:"
+        janela, container = criar_popup_modal(
+            self.__root,
+            "Cadastro de Manutenção",
+            "Informe os dados da manutenção",
+            largura=460,
+            altura=430
         )
-        if codigo is None: return None
 
-        tumulo = simpledialog.askinteger(
-            "Cadastro",
-            "Digite o túmulo:"
-        )
-        if tumulo is None: return None
+        codigo = criar_entrada_estilizada(container, "Código")
+        tumulo = criar_entrada_estilizada(container, "Túmulo")
+        tipo = criar_entrada_estilizada(container, "Tipo de serviço (Limpeza/Reparo/Outro)")
+        data_str = criar_entrada_estilizada(container, "Data (DD/MM/AAAA)")
+        data_str.bind("<KeyRelease>", mascara_data)
+        cpf = criar_entrada_estilizada(container, "CPF do responsável")
 
-        tipo = simpledialog.askstring(
-            "Cadastro",
-            "Tipo de serviço (Limpeza/Reparo/Outro):"
-        )
-        if tipo is None: return None
+        resultado = None
 
-        data_str = simpledialog.askstring(
-            "Cadastro",
-            "Digite a data (dd/mm/aaaa):"
-        )
-        if data_str is None: return None
+        def confirmar():
+            nonlocal resultado
+            try:
+                data = datetime.strptime(data_str.get().strip(), "%d/%m/%Y") if data_str.get().strip() else None
+            except ValueError:
+                data = None
 
-        cpf = simpledialog.askstring(
-            "Cadastro",
-            "Digite o CPF:"
-        )
-        if cpf is None: return None
+            resultado = {
+                "codigo": int(codigo.get().strip()) if codigo.get().strip() else None,
+                "tumulo": int(tumulo.get().strip()) if tumulo.get().strip() else None,
+                "tipo_servico": tipo.get().strip() or None,
+                "data": data,
+                "cpf_responsavel": cpf.get().strip() or None,
+            }
+            janela.destroy()
 
-        data = datetime.strptime(data_str, "%d/%m/%Y")
+        criar_botao_confirmacao(container, confirmar)
+        janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
+        janela.bind("<Return>", lambda event: confirmar())
+        janela.wait_window()
 
-        return {
-            "codigo": codigo,
-            "tumulo": tumulo,
-            "tipo_servico": tipo,
-            "data": data,
-            "cpf_responsavel": cpf
-        }
+        return resultado
 
     #Auxiliar de alteração
     def alterar_manutencao(self):
-        return simpledialog.askinteger(
-            "Alterar",
-            "Digite o código da manutenção:"
+        return pedir_dado(
+            self.__root,
+            "Alterar Manutenção",
+            "Digite o código da manutenção:",
+            tipo="inteiro"
         )
     
     def pega_novos_dados_manutencao(self):
-        tumulo = simpledialog.askstring(
-            "Alterar",
-            "Novo túmulo (vazio para manter):"
+        janela, container = criar_popup_modal(
+            self.__root,
+            "Alterar Manutenção",
+            "Atualize os dados da manutenção",
+            largura=460,
+            altura=430
         )
-        if tumulo is None: return None
 
-        tipo = simpledialog.askstring(
-            "Alterar",
-            "Novo tipo (Limpeza/Reparo/Outro):"
-        )
-        if tipo is None: return None
+        tumulo = criar_entrada_estilizada(container, "Novo túmulo")
+        tipo = criar_entrada_estilizada(container, "Novo tipo (Limpeza/Reparo/Outro)")
+        data_str = criar_entrada_estilizada(container, "Nova data (DD/MM/AAAA)")
+        data_str.bind("<KeyRelease>", mascara_data)
+        cpf = criar_entrada_estilizada(container, "Novo CPF")
 
-        data_str = simpledialog.askstring(
-            "Alterar",
-            "Nova data (dd/mm/aaaa):"
-        )
-        if data_str is None: return None
+        resultado = None
 
-        data = None
-        cpf = simpledialog.askstring(
-            "Alterar",
-            "Novo CPF:"
-        )
-        if cpf is None: return None
+        def confirmar():
+            nonlocal resultado
+            try:
+                data = datetime.strptime(data_str.get().strip(), "%d/%m/%Y") if data_str.get().strip() else None
+            except ValueError:
+                data = None
 
-        if data_str:
-            data = datetime.strptime(
-                data_str,
-                "%d/%m/%Y"
-            )
+            resultado = {
+                "tumulo": int(tumulo.get().strip()) if tumulo.get().strip() else None,
+                "tipo_servico": tipo.get().strip() or None,
+                "data": data,
+                "cpf_responsavel": cpf.get().strip() or None,
+            }
+            janela.destroy()
 
-        return {
-            "tumulo": int(tumulo) if tumulo else None,
-            "tipo_servico": tipo if tipo else None,
-            "data": data,
-            "cpf_responsavel":
-                cpf if cpf else None
-        }
+        criar_botao_confirmacao(container, confirmar)
+        janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
+        janela.bind("<Return>", lambda event: confirmar())
+        janela.wait_window()
+
+        return resultado
 
     #Auxiliar de Exclusão
     def excluir_manutencao(self):
-        return simpledialog.askinteger(
-            "Excluir",
-            "Digite o código:"
+        return pedir_dado(
+            self.__root,
+            "Excluir Manutenção",
+            "Digite o código:",
+            tipo="inteiro"
         )
     
     #Auxiliar de Busca
     def buscar_manutencao(self):
-        return simpledialog.askinteger(
-            "Buscar",
-            "Digite o código:"
+        return pedir_dado(
+            self.__root,
+            "Buscar Manutenção",
+            "Digite o código:",
+            tipo="inteiro"
         )
 
     #Funções de navegção

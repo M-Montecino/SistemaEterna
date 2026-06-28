@@ -41,15 +41,20 @@ class ControladorResponsavel:
             raise ValueError("Email inválido")
     
     def __formatar_responsavel(self, responsavel):
-        return {
-            'Nome: ': responsavel.nome,
-            'Cpf:': responsavel.cpf,
-            'Telefone: ': responsavel.telefone,
-            'Cep: ': responsavel.cep,
-            'Numero: ': responsavel.numero,
-            'Email: ': responsavel.email,
-            'Data de nascimento: ': responsavel.data_nascimento.strftime('%d/%m/%Y')
-        }
+        data_nascimento = (
+            responsavel.data_nascimento.strftime('%d/%m/%Y')
+            if responsavel.data_nascimento
+            else '-'
+        )
+        return (
+            f"Nome: {responsavel.nome}\n"
+            f"CPF: {responsavel.cpf}\n"
+            f"Telefone: {responsavel.telefone}\n"
+            f"CEP: {responsavel.cep}\n"
+            f"Número: {responsavel.numero}\n"
+            f"Email: {responsavel.email}\n"
+            f"Data de nascimento: {data_nascimento}"
+        )
     
 #Funções principais
     def cadastrar_responsavel(self):
@@ -160,14 +165,11 @@ class ControladorResponsavel:
         responsaveis = Responsavel.buscar_todos()
 
         if not responsaveis:
-            self.__tela_responsavel.mostra_mensagem(
-                "Nenhum responsável cadastrado."
-            )
-        
-        for responsavel in responsaveis:
-            self.__tela_responsavel.mostra_mensagem(
-                self.__formatar_responsavel(responsavel)
-            )
+            self.__tela_responsavel.mostra_mensagem("Nenhum responsável cadastrado.")
+            return
+
+        texto = "\n\n".join(self.__formatar_responsavel(r) for r in responsaveis)
+        self.__tela_responsavel.mostra_mensagem(texto)
 
     def buscar_responsavel(self):
         try:

@@ -201,14 +201,18 @@ class ControladorUsuario:
         if not usuarios:
             self.__tela_usuario.mostra_mensagem("Nenhum usuário cadastrado.")
             return
-        texto = ""
-        for u in usuarios:
-            texto += (
-                f"Nome: {u.nome}\nCPF: {u.cpf}\n"
-                f"Email: {u.email}\nCargo: {u.cargo.name}\n"
-                f"Data de nascimento: {u.data_nascimento.strftime('%d/%m/%Y')}\n\n"
-            )
-        self.__tela_usuario.mostra_mensagem(texto.strip())
+
+        texto = "\n\n".join(
+            "\n".join([
+                f"Nome: {u.nome}",
+                f"CPF: {u.cpf}",
+                f"Email: {u.email}",
+                f"Cargo: {u.cargo.name}",
+                f"Data de nascimento: {u.data_nascimento.strftime('%d/%m/%Y')}"
+            ])
+            for u in usuarios
+        )
+        self.__tela_usuario.mostra_mensagem(texto)
 
     def buscar_usuario_ui(self):
         cpf = self.__tela_usuario.pega_dados_busca()

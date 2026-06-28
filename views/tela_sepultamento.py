@@ -1,9 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
-from utils.funcoesAuxiliares import mascara_data
-from tkinter import (messagebox, simpledialog)
+from tkinter import messagebox
 from datetime import datetime
-from utils.funcoesAuxiliares import centralizar
+from utils.funcoesAuxiliares import (
+    centralizar,
+    criar_botao_confirmacao,
+    criar_entrada_estilizada,
+    criar_popup_modal,
+    mascara_data,
+    pedir_dado,
+)
 
 
 class TelaSepultamento:
@@ -12,8 +18,8 @@ class TelaSepultamento:
         self.__root.title("Sepultamento")
         self.__root.geometry("400x600")
         centralizar(self.__root)
-        self.__root.resizable(False,False)
-        self.__root.protocol("WM_DELETE_WINDOW",self.__fechar_janela)
+        self.__root.resizable(False, False)
+        self.__root.protocol("WM_DELETE_WINDOW", self.__fechar_janela)
         self.__root.withdraw()
 
         self.__opcao = None
@@ -92,314 +98,140 @@ class TelaSepultamento:
 
 #Funções
     def pega_dados_sepultamento(self):
-        janela_cadastro = tk.Toplevel(self.__root)
-        janela_cadastro.title('Cadastro')
-        janela_cadastro.geometry("500x550")
+        janela, container = criar_popup_modal(
+            self.__root,
+            "Cadastro de Sepultamento",
+            "Preencha os dados do sepultamento",
+            largura=520,
+            altura=640
+        )
 
         dados = None
 
-        tk.Label(janela_cadastro, text='CPF').place(x=0, y=0)
-        cpf_falecido = tk.Entry(janela_cadastro)
-        cpf_falecido.place(x=190, y=0)
-
-        tk.Label(janela_cadastro, text='Nome').place(x=0, y=30)
-        nome_falecido = tk.Entry(janela_cadastro, width=30)
-        nome_falecido.place(x=190, y=30)
-
-        tk.Label(
-            janela_cadastro,
-            text='Data nascimento (dd/mm/aaaa)'
-        ).place(x=0, y=60)
-        nascimento_str = tk.Entry(janela_cadastro)
-        nascimento_str.place(x=190, y=60)
+        cpf_falecido = criar_entrada_estilizada(container, "CPF do falecido")
+        nome_falecido = criar_entrada_estilizada(container, "Nome do falecido")
+        nascimento_str = criar_entrada_estilizada(container, "Data de nascimento (DD/MM/AAAA)")
         nascimento_str.bind("<KeyRelease>", mascara_data)
-
-        tk.Label(
-            janela_cadastro,
-            text='Data falecimento (dd/mm/aaaa)'
-        ).place(x=0, y=90)
-        falecimento_str = tk.Entry(janela_cadastro)
-        falecimento_str.place(x=190, y=90)
+        falecimento_str = criar_entrada_estilizada(container, "Data de falecimento (DD/MM/AAAA)")
         falecimento_str.bind("<KeyRelease>", mascara_data)
-
-
-        tk.Label(
-            janela_cadastro,
-            text='Causa morte'
-        ).place(x=0, y=120)
-        causa_morte = tk.Entry(janela_cadastro, width=30)
-        causa_morte.place(x=190, y=120)
-
-        tk.Label(
-            janela_cadastro,
-            text='Túmulo'
-        ).place(x=0, y=150)
-        tumulo = tk.Entry(janela_cadastro)
-        tumulo.place(x=190, y=150)
-
-        tk.Label(janela_cadastro,text='Valor pagamento').place(x=0, y=180)
-        valor = tk.Entry(janela_cadastro)
-        valor.place(x=190, y=180)
-
-        tk.Label(janela_cadastro,text='Data pagamento (dd/mm/aaaa)').place(x=0, y=210)
-        pagamento_str = tk.Entry(janela_cadastro)
-        pagamento_str.place(x=190, y=210)
+        causa_morte = criar_entrada_estilizada(container, "Causa da morte")
+        tumulo = criar_entrada_estilizada(container, "Túmulo")
+        valor = criar_entrada_estilizada(container, "Valor do pagamento")
+        pagamento_str = criar_entrada_estilizada(container, "Data do pagamento (DD/MM/AAAA)")
         pagamento_str.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(janela_cadastro,text='Tipo pagamento 1 - /Débito, 2 - /Crédito 3 - pix').place(x=0, y=240)
-        tipo_pagamento = ttk.Combobox(
-            janela_cadastro, values=[1 ,2 ,3], state = "readonly"
-        )
-        tipo_pagamento.place(x=260, y=240)
+        tk.Label(container, text="Tipo de pagamento", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
+        tipo_pagamento = ttk.Combobox(container, values=[1, 2, 3], state="readonly", width=28)
+        tipo_pagamento.set(1)
+        tipo_pagamento.pack(fill="x", pady=(2, 8))
 
-        tk.Label(janela_cadastro, text='Responsável 1').place(x=0, y=270)
-        responsavel = tk.Entry(janela_cadastro)
-        responsavel.place(x=190, y=270)
-
-        tk.Label(janela_cadastro,text='Responsável 2').place(x=0, y=300)
-        responsavel2 = tk.Entry(janela_cadastro)
-        responsavel2.place(x=190, y=300)
-
-        tk.Label(janela_cadastro,text='Início concessão (dd/mm/aaaa)').place(x=0, y=330)
-        inicio_cons_str = tk.Entry(janela_cadastro)
-        inicio_cons_str.place(x=190, y=330)
+        responsavel = criar_entrada_estilizada(container, "Responsável 1")
+        responsavel2 = criar_entrada_estilizada(container, "Responsável 2")
+        inicio_cons_str = criar_entrada_estilizada(container, "Início da concessão (DD/MM/AAAA)")
         inicio_cons_str.bind("<KeyRelease>", mascara_data)
-
-
-        tk.Label(janela_cadastro,text='Final concessão (dd/mm/aaaa)').place(x=0, y=360)
-        final_cons_str = tk.Entry(janela_cadastro)
-        final_cons_str.place(x=190, y=360)
+        final_cons_str = criar_entrada_estilizada(container, "Final da concessão (DD/MM/AAAA)")
         final_cons_str.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(janela_cadastro,text='Status (1-Ativa / 2-Carência / 3-Vencida)').place(x=0, y=390)
-        status = ttk.Combobox(
-            janela_cadastro, values=[1 ,2 ,3], state = "readonly"
-        )
-        status.place(x=270, y=390)
+        tk.Label(container, text="Status (1-Ativa / 2-Carência / 3-Vencida)", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
+        status = ttk.Combobox(container, values=[1, 2, 3], state="readonly", width=28)
+        status.set(1)
+        status.pack(fill="x", pady=(2, 8))
 
-        tk.Label(janela_cadastro,text='Data sepultamento (dd/mm/aaaa)').place(x=0, y=420)
-        sepultamento_str = tk.Entry(janela_cadastro)
-        sepultamento_str.place(x=190, y=420)
+        sepultamento_str = criar_entrada_estilizada(container, "Data do sepultamento (DD/MM/AAAA)")
         sepultamento_str.bind("<KeyRelease>", mascara_data)
-
-        tk.Label(janela_cadastro,text='Observações').place(x=0, y=450)
-        observacoes = tk.Entry(janela_cadastro,width=35)
-        observacoes.place(x=190, y=450)
-
-        
+        observacoes = criar_entrada_estilizada(container, "Observações")
 
         def confirmar():
             nonlocal dados
+            try:
+                dados = {
+                    "cpf_falecido": cpf_falecido.get().strip() or None,
+                    "nome_falecido": nome_falecido.get().strip() or None,
+                    "data_nascimento": datetime.strptime(nascimento_str.get(), "%d/%m/%Y") if nascimento_str.get() else None,
+                    "data_falecimento": datetime.strptime(falecimento_str.get(), "%d/%m/%Y") if falecimento_str.get() else None,
+                    "causa_morte": causa_morte.get().strip() or None,
+                    "tumulo": tumulo.get().strip() or None,
+                    "valor": float(valor.get().strip()) if valor.get().strip() else None,
+                    "data_pagamento": datetime.strptime(pagamento_str.get(), "%d/%m/%Y") if pagamento_str.get() else None,
+                    "tipo_pagamento": tipo_pagamento.get(),
+                    "responsavel": responsavel.get().strip() or None,
+                    "responsavel2": responsavel2.get().strip() or None,
+                    "data_inicio_cons": datetime.strptime(inicio_cons_str.get(), "%d/%m/%Y") if inicio_cons_str.get() else None,
+                    "data_final_cons": datetime.strptime(final_cons_str.get(), "%d/%m/%Y") if final_cons_str.get() else None,
+                    "status": int(status.get()) if status.get() else None,
+                    "data_sepultamento": datetime.strptime(sepultamento_str.get(), "%d/%m/%Y") if sepultamento_str.get() else None,
+                    "observacoes": observacoes.get().strip() or None,
+                }
+            except ValueError:
+                dados = None
+            janela.destroy()
 
-            dados = {
-                "cpf_falecido": cpf_falecido.get(),
-                "nome_falecido": nome_falecido.get(),
-
-                "data_nascimento": datetime.strptime(
-                    nascimento_str.get(),
-                    "%d/%m/%Y"
-                ),
-
-                "data_falecimento": datetime.strptime(
-                    falecimento_str.get(),
-                    "%d/%m/%Y"
-                ),
-
-                "causa_morte": causa_morte.get(),
-
-                "tumulo": tumulo.get(),
-
-                "valor": float(valor.get()),
-
-                "data_pagamento": datetime.strptime(
-                    pagamento_str.get(),
-                    "%d/%m/%Y"
-                ),
-
-                "tipo_pagamento": tipo_pagamento.get(),
-
-                "responsavel": responsavel.get(),
-
-                "responsavel2": responsavel2.get(),
-
-                "data_inicio_cons": datetime.strptime(
-                    inicio_cons_str.get(),
-                    "%d/%m/%Y"
-                ),
-
-                "data_final_cons": datetime.strptime(
-                    final_cons_str.get(),
-                    "%d/%m/%Y"
-                ),
-
-                "status": int(status.get()),
-
-                "data_sepultamento": datetime.strptime(
-                    sepultamento_str.get(),
-                    "%d/%m/%Y"
-                ),
-
-                "observacoes": observacoes.get()
-            }
-
-            janela_cadastro.destroy()
-
-        botao = tk.Button(
-            janela_cadastro,
-            text="Confirmar",
-            command=confirmar
-        )
-
-        botao.place(x=190, y=490)
-
-        def fechar():
-            janela_cadastro.destroy()
-
-        janela_cadastro.protocol(
-            "WM_DELETE_WINDOW",
-            fechar
-        )
-
-        janela_cadastro.wait_window()
+        criar_botao_confirmacao(container, confirmar)
+        janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
+        janela.bind("<Return>", lambda event: confirmar())
+        janela.wait_window()
 
         return dados
 
-    
-
     def pega_novos_dados_sepultamento(self):
-
-        janela = tk.Toplevel(self.__root)
-        janela.title("Alterar Sepultamento")
-        janela.geometry("500x350")
+        janela, container = criar_popup_modal(
+            self.__root,
+            "Alterar Sepultamento",
+            "Atualize apenas os campos desejados",
+            largura=460,
+            altura=420
+        )
 
         dados = {}
 
-        tk.Label(
-            janela,
-            text="Novo túmulo"
-        ).place(x=0, y=0)
-
-        tumulo = tk.Entry(janela)
-        tumulo.place(x=200, y=0)
-
-        tk.Label(
-            janela,
-            text="Nova data pagamento (dd/mm/aaaa)"
-        ).place(x=0, y=40)
-
-        data_pagamento = tk.Entry(janela)
-        data_pagamento.place(x=210, y=40)
+        tumulo = criar_entrada_estilizada(container, "Novo túmulo")
+        data_pagamento = criar_entrada_estilizada(container, "Nova data de pagamento (DD/MM/AAAA)")
         data_pagamento.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(
-            janela,
-            text="Novo tipo de pagamento"
-        ).place(x=0, y=80)
+        tk.Label(container, text="Novo tipo de pagamento", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
+        tipo_pagamento = ttk.Combobox(container, values=["Débito", "Crédito", "Pix"], state="readonly", width=28)
+        tipo_pagamento.pack(fill="x", pady=(2, 8))
 
-        tipo_pagamento = ttk.Combobox(
-            janela,
-            values=["Débito", "Crédito", "Pix"],
-            state="readonly",
-            width=15
-)
-        tipo_pagamento.place(x=210, y=80)
-
-        tk.Label(
-            janela,
-            text="Nova data final concessão (dd/mm/aaaa)"
-        ).place(x=0, y=120)
-
-        data_final = tk.Entry(janela)
-        data_final.place(x=230, y=120)
+        data_final = criar_entrada_estilizada(container, "Nova data final de concessão (DD/MM/AAAA)")
         data_final.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(
-            janela,
-            text="Novo status"
-        ).place(x=0, y=160)
+        tk.Label(container, text="Novo status", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
+        status = ttk.Combobox(container, values=["ATIVA", "CARENCIA", "VENCIDA"], state="readonly", width=28)
+        status.pack(fill="x", pady=(2, 8))
 
-        status = ttk.Combobox(
-            janela,
-            values=["ATIVA", "CARENCIA", "VENCIDA"],
-            state="readonly",
-            width=15
-        )
-        status.place(x=220, y=160)
-
-        tk.Label(
-            janela,
-            text="Novas observações"
-        ).place(x=0, y=200)
-
-        observacoes = tk.Entry(
-            janela,
-            width=35
-        )
-        observacoes.place(x=200, y=200)
+        observacoes = criar_entrada_estilizada(container, "Novas observações")
 
         def confirmar():
-
-            dados["tumulo"] = (
-                int(tumulo.get())
-                if tumulo.get()
-                else None
-            )
-
-            dados["data_pagamento"] = (
-                datetime.strptime(
-                    data_pagamento.get(),
-                    "%d/%m/%Y"
-                )
-                if data_pagamento.get()
-                else None
-            )
-
-            dados["tipo_pagamento"] = (
-                tipo_pagamento.get()
-                if tipo_pagamento.get()
-                else None
-            )
-
-            dados["data_final_cons"] = (
-                datetime.strptime(
-                    data_final.get(),
-                    "%d/%m/%Y"
-                )
-                if data_final.get()
-                else None
-            )
-
-            dados["status"] = (
-                status.get()
-                if status.get()
-                else None
-            )
-
-            dados["observacoes"] = (
-                observacoes.get()
-                if observacoes.get()
-                else None
-            )
-
+            dados["tumulo"] = int(tumulo.get().strip()) if tumulo.get().strip() else None
+            dados["data_pagamento"] = datetime.strptime(data_pagamento.get(), "%d/%m/%Y") if data_pagamento.get() else None
+            dados["tipo_pagamento"] = tipo_pagamento.get() if tipo_pagamento.get() else None
+            dados["data_final_cons"] = datetime.strptime(data_final.get(), "%d/%m/%Y") if data_final.get() else None
+            dados["status"] = status.get() if status.get() else None
+            dados["observacoes"] = observacoes.get().strip() or None
             janela.destroy()
 
-        tk.Button(
-            janela,
-            text="Confirmar",
-            command=confirmar
-        ).place(x=200, y=260)
-
+        criar_botao_confirmacao(container, confirmar)
+        janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
+        janela.bind("<Return>", lambda event: confirmar())
         janela.wait_window()
 
         return dados
 
     def pega_cpf_alteracao(self):
-        cpf = simpledialog.askstring("Alterar", "CPF do falecido:")
-        return cpf
+        return pedir_dado(
+            self.__root,
+            "Alterar Sepultamento",
+            "CPF do falecido:",
+            tipo="texto"
+        )
 
     def pega_cpf_exclusao(self):
-        cpf =  simpledialog.askstring("Excluir", "CPF do falecido:")
-        return cpf
+        return pedir_dado(
+            self.__root,
+            "Excluir Sepultamento",
+            "CPF do falecido:",
+            tipo="texto"
+        )
         
     def __selecionar_opcao(
         self, valor):

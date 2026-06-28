@@ -60,13 +60,14 @@ class ControladorManutencao:
             raise ValueError("CPF do responsável inválido.")
 
     def __formatar_manutencao(self, manutencao):
-        return {
-            "Código:": manutencao.codigo,
-            "Túmulo:": manutencao.tumulo,
-            "Tipo de Serviço:": manutencao.tipo_servico,
-            "Data:": manutencao.data.strftime("%d/%m/%Y"),
-            "CPF do Responsável:": manutencao.cpf_responsavel
-        }
+        data = manutencao.data.strftime("%d/%m/%Y") if manutencao.data else "-"
+        return (
+            f"Código: {manutencao.codigo}\n"
+            f"Túmulo: {manutencao.tumulo}\n"
+            f"Tipo de serviço: {manutencao.tipo_servico}\n"
+            f"Data: {data}\n"
+            f"CPF do responsável: {manutencao.cpf_responsavel}"
+        )
 
     #Funções principais
     def cadastrar_manutencao(self):
@@ -166,14 +167,11 @@ class ControladorManutencao:
         manutencoes = Manutencao.buscar_todos()
 
         if not manutencoes:
-            self.__tela_manutencao.mostra_mensagem(
-            "Nenhuma manutenção cadastrada")
+            self.__tela_manutencao.mostra_mensagem("Nenhuma manutenção cadastrada.")
             return
-        
-        for manutencao in manutencoes:
-            self.__tela_manutencao.mostra_mensagem(
-                self.__formatar_manutencao(manutencao)
-            )
+
+        texto = "\n\n".join(self.__formatar_manutencao(m) for m in manutencoes)
+        self.__tela_manutencao.mostra_mensagem(texto)
 
     def buscar_manutencao(self):
         try:

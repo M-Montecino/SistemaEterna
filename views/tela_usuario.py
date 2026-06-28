@@ -1,7 +1,14 @@
 from datetime import datetime
 import tkinter as tk
-from tkinter import messagebox, simpledialog
-from utils.funcoesAuxiliares import centralizar
+from tkinter import messagebox
+from utils.funcoesAuxiliares import (
+    centralizar,
+    criar_botao_confirmacao,
+    criar_entrada_estilizada,
+    criar_popup_modal,
+    mascara_data,
+    pedir_dado,
+)
 
 class TelaUsuario:
     def __init__(self, master=None):
@@ -105,92 +112,96 @@ class TelaUsuario:
         return self.__opcao
 
     def pega_dados_cadastro(self):
-        nome = simpledialog.askstring("Cadastro", "Nome:", parent=self.__root)
-        if nome is None:
-            return None
-
-        cargo = simpledialog.askstring(
-            "Cadastro",
-            "Cargo (1- Gestor, 2- Secretário):",
-            parent=self.__root
+        janela, container = criar_popup_modal(
+            self.__root,
+            "Cadastro de Usuário",
+            "Preencha os dados do novo usuário",
+            largura=460,
+            altura=480
         )
-        if cargo is None:
-            return None
 
-        email = simpledialog.askstring("Cadastro", "Email:", parent=self.__root)
-        if email is None:
-            return None
+        nome = criar_entrada_estilizada(container, "Nome")
+        cargo = criar_entrada_estilizada(container, "Cargo (1-Gestor / 2-Secretário)")
+        email = criar_entrada_estilizada(container, "Email")
+        cpf = criar_entrada_estilizada(container, "CPF")
+        data_nascimento = criar_entrada_estilizada(container, "Data de nascimento (DD/MM/AAAA)")
+        data_nascimento.bind("<KeyRelease>", mascara_data)
+        senha = criar_entrada_estilizada(container, "Senha", show="*")
 
-        cpf = simpledialog.askstring("Cadastro", "CPF:", parent=self.__root)
-        if cpf is None:
-            return None
+        resultado = None
 
-        data_nascimento = simpledialog.askstring(
-            "Cadastro",
-            "Data de nascimento (DD/MM/AAAA):",
-            parent=self.__root
-        )
-        if data_nascimento is None:
-            return None
+        def confirmar():
+            nonlocal resultado
+            resultado = {
+                "nome": nome.get().strip() or None,
+                "cargo": cargo.get().strip() or None,
+                "email": email.get().strip() or None,
+                "cpf": cpf.get().strip() or None,
+                "data_nascimento": data_nascimento.get().strip() or None,
+                "senha": senha.get().strip() or None,
+            }
+            janela.destroy()
 
-        senha = simpledialog.askstring(
-            "Cadastro",
-            "Senha:",
-            parent=self.__root,
-            show="*"
-        )
-        if senha is None:
-            return None
+        criar_botao_confirmacao(container, confirmar)
+        janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
+        janela.bind("<Return>", lambda event: confirmar())
+        janela.wait_window()
 
-        return {
-            "nome": nome,
-            "cargo": cargo,
-            "email": email,
-            "cpf": cpf,
-            "data_nascimento": data_nascimento,
-            "senha": senha
-        }
+        return resultado
 
     def pega_dados_busca(self):
-        cpf = simpledialog.askstring("Buscar", "CPF do usuário:", parent=self.__root)
-        return cpf
+        return pedir_dado(
+            self.__root,
+            "Buscar Usuário",
+            "CPF do usuário:",
+            tipo="texto"
+        )
 
     def pega_dados_exclusao(self):
-        cpf = simpledialog.askstring("Excluir", "CPF do usuário:", parent=self.__root)
-        return cpf
+        return pedir_dado(
+            self.__root,
+            "Excluir Usuário",
+            "CPF do usuário:",
+            tipo="texto"
+        )
 
     def pega_dados_alteracao(self):
-        cpf = simpledialog.askstring("Alterar", "CPF do usuário:", parent=self.__root)
-        if cpf is None:
-            return None
-
-        novo_nome = simpledialog.askstring("Alterar", "Novo nome:", parent=self.__root)
-        novo_email = simpledialog.askstring("Alterar", "Novo email:", parent=self.__root)
-        novo_cargo = simpledialog.askstring(
-            "Alterar",
-            "Novo cargo (1- Gestor, 2- Secretário):",
-            parent=self.__root
-        )
-        nova_senha = simpledialog.askstring(
-            "Alterar",
-            "Nova senha (vazio para manter):",
-            parent=self.__root,
-            show="*"
-        )
-        nova_data_nascimento = simpledialog.askstring(
-            "Alterar",
-            "Nova data de nascimento (DD/MM/AAAA, vazio para manter):",
-            parent=self.__root
+        janela, container = criar_popup_modal(
+            self.__root,
+            "Alterar Usuário",
+            "Atualize os dados do usuário",
+            largura=460,
+            altura=500
         )
 
-        return {
-            "cpf": cpf,
-            "nome": novo_nome,
-            "email": novo_email,
-            "cargo": novo_cargo,
-            "senha": nova_senha,
-            "data_nascimento": nova_data_nascimento
-        }
+        cpf = criar_entrada_estilizada(container, "CPF do usuário")
+        novo_nome = criar_entrada_estilizada(container, "Novo nome")
+        novo_email = criar_entrada_estilizada(container, "Novo email")
+        novo_cargo = criar_entrada_estilizada(container, "Novo cargo (1-Gestor / 2-Secretário)")
+        nova_senha = criar_entrada_estilizada(container, "Nova senha (vazio para manter)", show="*")
+        nova_data_nascimento = criar_entrada_estilizada(container, "Nova data de nascimento (DD/MM/AAAA)")
+        nova_data_nascimento.bind("<KeyRelease>", mascara_data)
+
+        resultado = None
+
+        def confirmar():
+            nonlocal resultado
+            resultado = {
+                "cpf": cpf.get().strip() or None,
+                "nome": novo_nome.get().strip() or None,
+                "email": novo_email.get().strip() or None,
+                "cargo": novo_cargo.get().strip() or None,
+                "senha": nova_senha.get().strip() or None,
+                "data_nascimento": nova_data_nascimento.get().strip() or None,
+            }
+            janela.destroy()
+
+        criar_botao_confirmacao(container, confirmar)
+        janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
+        janela.bind("<Return>", lambda event: confirmar())
+        janela.wait_window()
+
+        return resultado
 
     def mostra_mensagem(self, mensagem):
         messagebox.showinfo("Mensagem", mensagem, parent=self.__root)

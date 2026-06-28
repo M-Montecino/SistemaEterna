@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from datetime import datetime
-from utils.funcoesAuxiliares import centralizar
+from utils.funcoesAuxiliares import centralizar, mascara_data
 
 
 class TelaExumacao:
@@ -392,6 +392,7 @@ class TelaExumacao:
         tk.Label(frame, text="Data:").grid(row=2, column=0, sticky="w", pady=4)
         entrada_data = tk.Entry(frame, width=20)
         entrada_data.grid(row=2, column=1, sticky="w", pady=4)
+        entrada_data.bind("<KeyRelease>", mascara_data)
 
         if edicao and exumacao is not None:
             entrada_data.insert(0, exumacao.get("data", ""))

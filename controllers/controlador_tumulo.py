@@ -69,13 +69,13 @@ class ControladorTumulo:
             raise ValueError("Capacidade inválida para túmulo do tipo Cova. Deve ser 1.")
         
     def __formatar_tumulo(self, tumulo):
-        return {
-            "Código: ": tumulo.codigo,
-            "Setor: ": tumulo.setor,
-            "Número: ": tumulo.numero,
-            "Tipo: ": tumulo.tipo,
-            "Capacidade ": tumulo.capacidade
-        }
+        return (
+            f"Código: {tumulo.codigo}\n"
+            f"Setor: {tumulo.setor}\n"
+            f"Número: {tumulo.numero}\n"
+            f"Tipo: {tumulo.tipo.name if hasattr(tumulo.tipo, 'name') else tumulo.tipo}\n"
+            f"Capacidade: {tumulo.capacidade}"
+        )
     
 #Funções principais
     def cadastrar_tumulo(self):
@@ -186,14 +186,11 @@ class ControladorTumulo:
         tumulos = Tumulo.buscar_todos()
 
         if not tumulos:
-            self.__tela_tumulo.mostra_mensagem("" \
-            "Nenhum túmulo cadastrado")
+            self.__tela_tumulo.mostra_mensagem("Nenhum túmulo cadastrado.")
             return
-        
-        for tumulo in tumulos:
-            self.__tela_tumulo.mostra_mensagem(
-                self.__formatar_tumulo(tumulo)
-            )
+
+        texto = "\n\n".join(self.__formatar_tumulo(t) for t in tumulos)
+        self.__tela_tumulo.mostra_mensagem(texto)
 
     def buscar_tumulo(self):
         try:
