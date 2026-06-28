@@ -1,6 +1,7 @@
 from enum import Enum
 import hashlib
 import secrets
+from datetime import datetime
 from models.database import Database
 
 class Cargo(Enum):
@@ -16,12 +17,16 @@ class Usuario:
                  cargo: Cargo,
                  email: str,
                  cpf: str,
-                 senha: str):
+                 senha: str,
+                 data_nascimento
+                 ):
         self.nome = nome
         self.cargo = cargo
         self.email = email
         self.__cpf = self.__validar_cpf(cpf)
         self.senha = senha
+        self.data_nascimento = data_nascimento
+
 
 #validações
     def __validar_cpf(self, cpf: str) -> str:
@@ -35,6 +40,10 @@ class Usuario:
 
         if len(cpf_limpo) != 11:
             raise ValueError("CPF invalido")
+
+        from models.falecido import Falecido
+        if Falecido.buscar_por_cpf(cpf_limpo):
+            raise ValueError("CPF consta como falecido")
 
         return cpf_limpo
 
@@ -59,6 +68,24 @@ class Usuario:
             raise ValueError("Senha invalida")
 
         return senha.strip()
+
+    def __validar_data_nascimento(self, data_nascimento) -> datetime:
+        if isinstance(data_nascimento, datetime):
+            dt = data_nascimento
+        elif isinstance(data_nascimento, str):
+            try:
+                dt = datetime.strptime(data_nascimento, "%d/%m/%Y")
+            except ValueError as exc:
+                raise ValueError("Data de nascimento invalida") from exc
+        else:
+            raise ValueError("Data de nascimento invalida")
+
+        today = datetime.now()
+        idade = today.year - dt.year - ((today.month, today.day) < (dt.month, dt.day))
+        if idade < 18:
+            raise ValueError("O usuário deve ser maior de 18 anos.")
+
+        return dt
 
     def __proteger_senha(self, senha: str) -> str:
         senha = self.__validar_senha(senha)
@@ -104,6 +131,14 @@ class Usuario:
         return self.__cpf
 
     @property
+    def data_nascimento(self) -> datetime:
+        return self.__data_nascimento
+
+    @data_nascimento.setter
+    def data_nascimento(self, data_nascimento):
+        self.__data_nascimento = self.__validar_data_nascimento(data_nascimento)
+
+    @property
     def senha(self) -> str:
         return self.__senha
 
@@ -111,10 +146,11 @@ class Usuario:
     def senha(self, senha: str):
         self.__senha = self.__proteger_senha(senha)
 
-    def alterar_dados(self, nome: str, cargo: Cargo, email: str, senha: str = None):
+    def alterar_dados(self, nome: str, cargo: Cargo, email: str, senha: str = None, data_nascimento=None):
         self.nome  = nome
         self.cargo = cargo
         self.email = email
+        self.data_nascimento = data_nascimento
         if senha is not None and senha.strip():
             self.senha = senha
 
@@ -123,18 +159,18 @@ class Usuario:
         db     = Database.get_instance()
         cursor = db.coneccao.cursor()
         cursor.execute("""
-            INSERT INTO usuarios (cpf, nome, cargo, email, senha)
-            VALUES (?, ?, ?, ?, ?)
-        """, (self.__cpf, self.__nome, self.__cargo.name, self.__email, self.__senha))
+            INSERT INTO usuarios (cpf, nome, cargo, email, senha, data_nascimento)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (self.__cpf, self.__nome, self.__cargo.name, self.__email, self.__senha, self.__data_nascimento.strftime("%Y-%m-%d")))
         db.coneccao.commit()
 
     def alterar(self):
         db = Database.get_instance()
         db.coneccao.execute("""
             UPDATE usuarios
-            SET nome = ?, cargo = ?, email = ?, senha = ?
+            SET nome = ?, cargo = ?, email = ?, senha = ?, data_nascimento = ?
             WHERE cpf = ?
-        """, (self.__nome, self.__cargo.name, self.__email, self.__senha, self.__cpf))
+        """, (self.__nome, self.__cargo.name, self.__email, self.__senha, self.__data_nascimento.strftime("%Y-%m-%d"), self.__cpf))
         db.coneccao.commit()
 
     def deletar(self):
@@ -186,11 +222,11 @@ class Usuario:
 #auxiliar
     @staticmethod
     def _row_para_objeto(row) -> "Usuario":
-        """Reconstrói o objeto sem re-hashear a senha."""
         usuario = object.__new__(Usuario)
         usuario._Usuario__nome = row["nome"]
         usuario._Usuario__cpf = row["cpf"]
         usuario._Usuario__email = row["email"]
         usuario._Usuario__cargo = Cargo[row["cargo"]]
         usuario._Usuario__senha = row["senha"]
+        usuario._Usuario__data_nascimento = datetime.strptime(row["data_nascimento"], "%Y-%m-%d")
         return usuario

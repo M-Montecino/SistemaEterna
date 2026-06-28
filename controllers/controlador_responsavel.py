@@ -47,7 +47,8 @@ class ControladorResponsavel:
             'Telefone: ': responsavel.telefone,
             'Cep: ': responsavel.cep,
             'Numero: ': responsavel.numero,
-            'Email: ': responsavel.email
+            'Email: ': responsavel.email,
+            'Data de nascimento: ': responsavel.data_nascimento.strftime('%d/%m/%Y')
         }
     
 #Funções principais
@@ -69,7 +70,8 @@ class ControladorResponsavel:
                 dados['telefone'],
                 dados['cep'],
                 dados['numero'],
-                dados['email']
+                dados['email'],
+                dados['data_nascimento']
             )
 
             novo.cadastrar()
@@ -107,7 +109,8 @@ class ControladorResponsavel:
                 'telefone': novos_dados['telefone'] if novos_dados['telefone'] is not None else responsavel.telefone,
                 'cep': novos_dados['cep'] if novos_dados['cep'] is not None else responsavel.cep,
                 'numero': novos_dados['numero'] if novos_dados['numero'] is not None else responsavel.numero,
-                'email': novos_dados['email'] if novos_dados['email'] is not None else responsavel.email
+                'email': novos_dados['email'] if novos_dados['email'] is not None else responsavel.email,
+                'data_nascimento': novos_dados['data_nascimento'] if novos_dados['data_nascimento'] is not None else responsavel.data_nascimento
             }
 
             self.__validar_dados_responsavel(dados_finais)
@@ -118,6 +121,7 @@ class ControladorResponsavel:
             responsavel.cep = dados_finais['cep']
             responsavel.numero = dados_finais['numero']
             responsavel.email = dados_finais['email']
+            responsavel.data_nascimento = dados_finais['data_nascimento']
 
             responsavel.alterar()
             self.__tela_responsavel.mostra_mensagem(
@@ -218,7 +222,6 @@ class ControladorResponsavel:
                     f"Erro: {str(e)}")
                 
     def validar_responsavel(self, cpf):
-        validar_cpf(cpf)
         responsavel = Responsavel.buscar_por_cpf(cpf)
 
         if not responsavel:

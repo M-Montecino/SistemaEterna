@@ -1,5 +1,6 @@
 from utils.funcoesAuxiliares import *
 import re
+from datetime import datetime
 from models.database import Database
 
 class Responsavel:
@@ -9,18 +10,42 @@ class Responsavel:
         telefone: str,
         cep: str,
         numero: int,
-        email: str
+        email: str,
+        data_nascimento
     ) -> None:
         if not (isinstance(cpf, str) and validar_cpf(cpf)):
             raise ValueError("CPF inválido")
 
+        cpf_limpo = re.sub(r'\D', '', cpf)
+        from models.falecido import Falecido
+        if Falecido.buscar_por_cpf(cpf_limpo):
+            raise ValueError("CPF consta como falecido")
+
         self.nome = nome
-        self.__cpf = re.sub(r'\D', '', cpf)
+        self.__cpf = cpf_limpo
         self.telefone = telefone
         self.cep = cep
         self.numero = numero
         self.email = email
+        self.data_nascimento = data_nascimento
 
+    def __validar_data_nascimento(self, data_nascimento) -> datetime:
+        if isinstance(data_nascimento, datetime):
+            dt = data_nascimento
+        elif isinstance(data_nascimento, str):
+            try:
+                dt = datetime.strptime(data_nascimento, "%d/%m/%Y")
+            except ValueError as exc:
+                raise ValueError("Data de nascimento inválida") from exc
+        else:
+            raise ValueError("Data de nascimento inválida")
+
+        today = datetime.now()
+        idade = today.year - dt.year - ((today.month, today.day) < (dt.month, dt.day))
+        if idade < 18:
+            raise ValueError("O responsável deve ser maior de 18 anos.")
+
+        return dt
 
     @property
     def nome(self) -> str:
@@ -84,21 +109,30 @@ class Responsavel:
             self.__email = email
         else:
             raise ValueError("E-mail inválido")
+
+    @property
+    def data_nascimento(self) -> datetime:
+        return self.__data_nascimento
+
+    @data_nascimento.setter
+    def data_nascimento(self, data_nascimento):
+        self.__data_nascimento = self.__validar_data_nascimento(data_nascimento)
         
 #persistencia
     def cadastrar(self):
         db = Database.get_instance()
         cursor = db.coneccao.cursor()
         cursor.execute("""
-            INSERT INTO responsaveis (cpf, nome, telefone, cep, numero, email)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO responsaveis (cpf, nome, telefone, cep, numero, email, data_nascimento)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             self.__cpf,
             self.__nome,
             self.__telefone,
             self.__cep,
             self.__numero,
-            self.__email
+            self.__email,
+            self.__data_nascimento.strftime("%Y-%m-%d")
         ))
         db.coneccao.commit()
 
@@ -108,7 +142,7 @@ class Responsavel:
 
         cursor.execute("""
             UPDATE responsaveis
-            SET nome = ?, telefone = ?, cep = ?, numero = ?, email = ?
+            SET nome = ?, telefone = ?, cep = ?, numero = ?, email = ?, data_nascimento = ?
             WHERE cpf = ?
         """, (
             self.__nome,
@@ -116,6 +150,7 @@ class Responsavel:
             self.__cep,
             self.__numero,
             self.__email,
+            self.__data_nascimento.strftime("%Y-%m-%d"),
             self.__cpf
         ))
         db.coneccao.commit()
@@ -146,11 +181,12 @@ class Responsavel:
 #auxiliar
     @staticmethod
     def _row_para_objeto(row):
-        return Responsavel(
-            nome = row["nome"],
-            cpf = row["cpf"],
-            telefone = row["telefone"],
-            cep = row["cep"],
-            numero = row["numero"],
-            email = row["email"]
-        )
+        responsavel = object.__new__(Responsavel)
+        responsavel._Responsavel__nome = row["nome"]
+        responsavel._Responsavel__cpf = row["cpf"]
+        responsavel._Responsavel__telefone = row["telefone"]
+        responsavel._Responsavel__cep = row["cep"]
+        responsavel._Responsavel__numero = row["numero"]
+        responsavel._Responsavel__email = row["email"]
+        responsavel._Responsavel__data_nascimento = datetime.strptime(row["data_nascimento"], "%Y-%m-%d")
+        return responsavel

@@ -1,3 +1,4 @@
+from datetime import datetime
 import tkinter as tk
 from tkinter import messagebox, simpledialog
 from utils.funcoesAuxiliares import centralizar
@@ -124,6 +125,14 @@ class TelaUsuario:
         if cpf is None:
             return None
 
+        data_nascimento = simpledialog.askstring(
+            "Cadastro",
+            "Data de nascimento (DD/MM/AAAA):",
+            parent=self.__root
+        )
+        if data_nascimento is None:
+            return None
+
         senha = simpledialog.askstring(
             "Cadastro",
             "Senha:",
@@ -138,6 +147,7 @@ class TelaUsuario:
             "cargo": cargo,
             "email": email,
             "cpf": cpf,
+            "data_nascimento": data_nascimento,
             "senha": senha
         }
 
@@ -167,13 +177,19 @@ class TelaUsuario:
             parent=self.__root,
             show="*"
         )
+        nova_data_nascimento = simpledialog.askstring(
+            "Alterar",
+            "Nova data de nascimento (DD/MM/AAAA, vazio para manter):",
+            parent=self.__root
+        )
 
         return {
             "cpf": cpf,
             "nome": novo_nome,
             "email": novo_email,
             "cargo": novo_cargo,
-            "senha": nova_senha
+            "senha": nova_senha,
+            "data_nascimento": nova_data_nascimento
         }
 
     def mostra_mensagem(self, mensagem):

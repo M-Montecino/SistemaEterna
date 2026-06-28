@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from models.usuario import Cargo, Usuario
@@ -20,7 +21,8 @@ class ControladorUsuario:
                 cargo = Cargo.Gestor,
                 email = "admin@eterna.com",
                 cpf   = "000.000.000-00",
-                senha = "admin123"
+                senha = "admin123",
+                data_nascimento = datetime(1990, 1, 1)
             )
             admin.cadastrar()
 
@@ -42,6 +44,21 @@ class ControladorUsuario:
             return Cargo.Secretario
 
         raise ValueError("Cargo inválido. Digite 1 para Gestor ou 2 para Secretário.")
+
+    def __parse_data_nascimento(self, valor) -> datetime:
+        if valor in (None, ""):
+            return datetime.now()
+        if isinstance(valor, datetime):
+            return valor
+        if isinstance(valor, str):
+            valor = valor.strip()
+            if not valor:
+                return datetime.now()
+            try:
+                return datetime.strptime(valor, "%d/%m/%Y")
+            except ValueError as exc:
+                raise ValueError("Data de nascimento inválida. Use o formato DD/MM/AAAA.") from exc
+        raise ValueError("Data de nascimento inválida. Use o formato DD/MM/AAAA.")
 
 #metodos principais
     def buscar_por_cpf(self, cpf: str):
@@ -65,7 +82,7 @@ class ControladorUsuario:
     def listar_usuarios(self) -> list:
         return [u for u in Usuario.buscar_todos() if not self.__is_usuario_mestre(u)]
 
-    def cadastrar_usuario_dados(self, nome, cargo, email, cpf, senha, confirmar_senha) -> Usuario:
+    def cadastrar_usuario_dados(self, nome, cargo, email, cpf, senha, confirmar_senha, data_nascimento=None) -> Usuario:
         if senha != confirmar_senha:
             raise ValueError("As senhas não conferem.")
         if self.buscar_por_email(email):
@@ -73,11 +90,11 @@ class ControladorUsuario:
         if self.buscar_por_cpf(cpf):
             raise ValueError("Já existe usuário com esse CPF.")
 
-        usuario = Usuario(nome, cargo, email, cpf, senha)
+        usuario = Usuario(nome, cargo, email, cpf, senha, data_nascimento)
         usuario.cadastrar()
         return usuario
 
-    def alterar_usuario_dados(self, cpf, nome, cargo, email, senha=None, confirmar_senha=None) -> Usuario:
+    def alterar_usuario_dados(self, cpf, nome, cargo, email, senha=None, confirmar_senha=None, data_nascimento=None) -> Usuario:
         usuario = self.buscar_por_cpf(cpf)
         if not usuario:
             raise ValueError("Usuário não encontrado.")
@@ -91,9 +108,9 @@ class ControladorUsuario:
         if senha is not None or confirmar_senha is not None:
             if senha != confirmar_senha:
                 raise ValueError("As senhas não conferem.")
-            usuario.alterar_dados(nome, cargo, email, senha)
+            usuario.alterar_dados(nome, cargo, email, senha, data_nascimento)
         else:
-            usuario.alterar_dados(nome, cargo, email)
+            usuario.alterar_dados(nome, cargo, email, data_nascimento=data_nascimento)
 
         usuario.alterar()
         return usuario
@@ -138,7 +155,7 @@ class ControladorUsuario:
             cargo = self.__parse_cargo(dados["cargo"])
             self.cadastrar_usuario_dados(
                 dados["nome"], cargo, dados["email"],
-                dados["cpf"], dados["senha"], dados["senha"]
+                dados["cpf"], dados["senha"], dados["senha"], dados['data_nascimento']
             )
             self.__tela_usuario.mostra_mensagem("Usuário cadastrado com sucesso.")
         except ValueError as e:
@@ -155,12 +172,15 @@ class ControladorUsuario:
         try:
             cargo  = self.__parse_cargo(dados["cargo"]) if dados["cargo"] else usuario.cargo
             senha  = dados["senha"] or None
+            data_nascimento = self.__parse_data_nascimento(dados["data_nascimento"]) if dados.get("data_nascimento") else usuario.data_nascimento
             self.alterar_usuario_dados(
-                dados["cpf"],
-                dados["nome"]  or usuario.nome,
-                cargo,
-                dados["email"] or usuario.email,
-                senha, senha
+                cpf=dados["cpf"],
+                nome=dados["nome"] or usuario.nome,
+                cargo=cargo,
+                email=dados["email"] or usuario.email,
+                senha=senha,
+                confirmar_senha=senha,
+                data_nascimento=data_nascimento
             )
             self.__tela_usuario.mostra_mensagem("Usuário alterado com sucesso.")
         except ValueError as e:
@@ -185,7 +205,8 @@ class ControladorUsuario:
         for u in usuarios:
             texto += (
                 f"Nome: {u.nome}\nCPF: {u.cpf}\n"
-                f"Email: {u.email}\nCargo: {u.cargo.name}\n\n"
+                f"Email: {u.email}\nCargo: {u.cargo.name}\n"
+                f"Data de nascimento: {u.data_nascimento.strftime('%d/%m/%Y')}\n\n"
             )
         self.__tela_usuario.mostra_mensagem(texto.strip())
 
@@ -199,5 +220,6 @@ class ControladorUsuario:
             return
         self.__tela_usuario.mostra_mensagem(
             f"Nome: {usuario.nome}\nCPF: {usuario.cpf}\n"
-            f"Email: {usuario.email}\nCargo: {usuario.cargo.name}"
+            f"Email: {usuario.email}\nCargo: {usuario.cargo.name}\n"
+            f"Data de nascimento: {usuario.data_nascimento.strftime('%d/%m/%Y')}"
         )

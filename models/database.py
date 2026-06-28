@@ -31,9 +31,10 @@ class Database:
             cpf VARCHAR(11) PRIMARY KEY,
             nome TEXT NOT NULL,
             telefone VARCHAR(11) NOT NULL,
-            cep VARCHAR(8),
-            numero INTEGER,
-            email TEXT
+            cep VARCHAR(8) NOT NULL,
+            numero INTEGER NOT NULL,
+            email TEXT NOT NULL,
+            data_nascimento DATE NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS falecidos(
@@ -92,7 +93,8 @@ class Database:
             nome  TEXT NOT NULL,
             cargo TEXT NOT NULL,
             email TEXT NOT NULL,
-            senha TEXT NOT NULL
+            senha TEXT NOT NULL,
+            data_nascimento DATE NOT NULL
         );
         """)
         self._migrar_tabela_usuarios()

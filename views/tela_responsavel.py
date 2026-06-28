@@ -91,7 +91,7 @@ class TelaResponsavel:
     def pegar_dados_responsavel(self):
         janela = tk.Toplevel(self.__root)
         janela.title("Cadastro de Responsável")
-        janela.geometry("450x320")
+        janela.geometry("450x360")
 
         dados = None
 
@@ -119,6 +119,10 @@ class TelaResponsavel:
         email = tk.Entry(janela)
         email.place(x=150, y=200)
 
+        tk.Label(janela, text="Data Nasc. (DD/MM/AAAA)").place(x=0, y=240)
+        data_nascimento = tk.Entry(janela)
+        data_nascimento.place(x=150, y=240)
+
         def confirmar():
             nonlocal dados
 
@@ -128,7 +132,8 @@ class TelaResponsavel:
                 "telefone": telefone.get(),
                 "cep": cep.get(),
                 "numero": int(numero.get()),
-                "email": email.get()
+                "email": email.get(),
+                "data_nascimento": data_nascimento.get()
             }
 
             janela.destroy()
@@ -137,7 +142,7 @@ class TelaResponsavel:
             janela,
             text="Confirmar",
             command=confirmar
-        ).place(x=170, y=260)
+        ).place(x=170, y=300)
 
         janela.protocol(
             "WM_DELETE_WINDOW",
@@ -151,7 +156,7 @@ class TelaResponsavel:
     def pega_novos_dados_responsavel(self):
         janela = tk.Toplevel(self.__root)
         janela.title("Alterar Responsável")
-        janela.geometry("450x320")
+        janela.geometry("450x360")
 
         dados = {}
 
@@ -174,6 +179,10 @@ class TelaResponsavel:
         tk.Label(janela, text="Novo email").place(x=0, y=160)
         email = tk.Entry(janela)
         email.place(x=150, y=160)
+
+        tk.Label(janela, text="Nova Data Nasc.").place(x=0, y=200)
+        data_nascimento = tk.Entry(janela)
+        data_nascimento.place(x=150, y=200)
 
         def confirmar():
             dados["nome"] = (
@@ -198,13 +207,17 @@ class TelaResponsavel:
                 email.get() if email.get() else None
             )
 
+            dados["data_nascimento"] = (
+                data_nascimento.get() if data_nascimento.get() else None
+            )
+
             janela.destroy()
 
         tk.Button(
             janela,
             text="Confirmar",
             command=confirmar
-        ).place(x=170, y=230)
+        ).place(x=170, y=270)
 
         janela.protocol(
             "WM_DELETE_WINDOW",

@@ -11,7 +11,7 @@ class TelaMenu:
             self.__root.transient(master)
 
         self.__root.title("Sistema Eterna")
-        self.__root.geometry("400x700")
+        self.__root.geometry("400x800")
         centralizar(self.__root)
         self.__root.resizable(False, False)
         self.__root.protocol("WM_DELETE_WINDOW", self.__fechar_janela)
