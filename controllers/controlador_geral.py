@@ -114,7 +114,7 @@ class ControladorGeral:
             else:
                 total_tumulos_parcialmente_ocupados += 1
 
-        exumacoes = Exumacao.buscar_todos()
+        exumacoes = Exumacao.buscar_realizadas()
 
         usuarios = [
             usuario for usuario in Usuario.buscar_todos()

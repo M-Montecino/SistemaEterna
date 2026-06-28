@@ -158,6 +158,7 @@ class Tumulo:
                     SELECT 1
                     FROM exumacoes e
                     WHERE e.sepultamento = s.cpf_falecido
+                    AND date(e.data) <= date('now', 'localtime')
                 )
             GROUP BY
                 t.codigo,
@@ -169,8 +170,8 @@ class Tumulo:
                 t.setor,
                 t.numero;
             '''
-            ).fetchall()
-        
+        ).fetchall()
+
         relatorio = []
 
         for row in rows:
@@ -193,7 +194,9 @@ class Tumulo:
             SELECT COUNT(*) FROM sepultamentos s
             WHERE s.tumulo = ? AND s.ativo = 1
               AND NOT EXISTS (
-                  SELECT 1 FROM exumacoes e WHERE e.sepultamento = s.cpf_falecido
+                  SELECT 1 FROM exumacoes e 
+                  WHERE e.sepultamento = s.cpf_falecido
+                    AND date(e.data) <= date('now', 'localtime')
               )
         """, (self.__codigo,)).fetchone()[0]
         return ocupados >= self.__capacidade

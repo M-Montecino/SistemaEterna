@@ -319,12 +319,13 @@ class TelaExumacao:
             edicao=False
         )
 
-    def pega_novos_dados_exumacao(self, exumacao: dict):
+    def pega_novos_dados_exumacao(self, exumacao: dict, somente_observacoes=False):
         return self.__abre_formulario_exumacao(
             titulo="Alterar Exumação",
             sepultamentos_disponiveis=[],
             exumacao=exumacao,
-            edicao=True
+            edicao=True,
+            somente_observacoes=somente_observacoes
         )
 
     def __abre_formulario_exumacao(
@@ -332,7 +333,8 @@ class TelaExumacao:
         titulo: str,
         sepultamentos_disponiveis: list[dict],
         exumacao: dict | None,
-        edicao: bool
+        edicao: bool,
+        somente_observacoes: bool = False
     ):
         janela = tk.Toplevel(self.__root)
         janela.title(titulo)
@@ -414,12 +416,26 @@ class TelaExumacao:
 
         if edicao and exumacao is not None:
             texto_observacoes.insert("1.0", exumacao.get("observacoes", ""))
+            
+        if somente_observacoes:
+            entrada_data.configure(state="disabled")
+            entrada_destino.configure(state="disabled")
 
         frame_botoes = tk.Frame(frame)
         frame_botoes.grid(row=5, column=0, columnspan=3, sticky="e", pady=(18, 0))
 
         def salvar():
             try:
+                observacoes = texto_observacoes.get("1.0", tk.END).strip()
+
+                if somente_observacoes:
+                    resultado["dados"] = {
+                        "observacoes": observacoes
+                    }
+
+                    janela.destroy()
+                    return
+                
                 if edicao and exumacao is not None:
                     sepultamento = None
                 else:

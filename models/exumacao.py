@@ -5,14 +5,14 @@ class Exumacao:
     def __init__(self,
                  codigo: int,
                  data: datetime,
-                 sepultamento: int,
+                 sepultamento: str,
                  destino: str,
                  observacoes: str = ""):
         self.__codigo = codigo
-        self.__data = data
-        self.__sepultamento = sepultamento
-        self.__destino = destino
-        self.__observacoes = observacoes
+        self.data = data                      #passa pela validacao do setter
+        self.sepultamento = sepultamento      #passa pela validacao do setter
+        self.destino = destino                #passa pela validacao do setter
+        self.observacoes = observacoes        #passa pela validacao do setter
 
     def __validar_codigo(self, codigo: int) -> int:
         if not isinstance(codigo, int):
@@ -48,14 +48,14 @@ class Exumacao:
         self.__data = self.__validar_data(data)
 
     @property
-    def sepultamento(self) -> int:
+    def sepultamento(self) -> str:
         return self.__sepultamento
 
     @sepultamento.setter
-    def sepultamento(self, sepultamento: int):
-        if not isinstance(sepultamento, int):
-            raise ValueError("Sepultamento invalido.")
-        self.__sepultamento = sepultamento
+    def sepultamento(self, sepultamento: str):
+        if not isinstance(sepultamento, str) or sepultamento.strip() == "":
+            raise ValueError("Sepultamento inválido.")
+        self.__sepultamento = sepultamento.strip()
 
     @property
     def destino(self) -> str:
@@ -72,9 +72,12 @@ class Exumacao:
     @observacoes.setter
     def observacoes(self, observacoes: str):
         if observacoes is None:
-            observacoes = ""
+            self.__observacoes = ""
         else:
             self.__observacoes = str(observacoes).strip()
+            
+    def realizada(self):
+        return self.__data.date() <= datetime.now().date()
 
 #persistência
     def cadastrar(self):
@@ -104,6 +107,19 @@ class Exumacao:
             self.__sepultamento,
             self.__destino,
             self.__observacoes,
+            self.__codigo
+        ))
+        db.coneccao.commit()
+        
+    def alterar_observacoes(self):
+        db = Database.get_instance()
+        db.coneccao.execute("""
+            UPDATE exumacoes
+            SET observacoes = ?
+            WHERE codigo = ?
+        """, (
+            self.__observacoes,
+            self.__codigo
         ))
         db.coneccao.commit()
 
@@ -138,9 +154,20 @@ class Exumacao:
         rows = db.coneccao.execute("SELECT * FROM exumacoes").fetchall()
         return [Exumacao._row_para_objeto(r) for r in rows]
     
+    @staticmethod
+    def buscar_realizadas():
+        db = Database.get_instance()
+        rows = db.coneccao.execute("""
+            SELECT *
+            FROM exumacoes
+            WHERE date(data) <= date('now', 'localtime')
+        """).fetchall()
+
+        return [Exumacao._row_para_objeto(r) for r in rows]
+    
 #auxiliar
     @staticmethod
-    def _row_para_objetos(row):
+    def _row_para_objeto(row):
         return Exumacao(
             codigo = row['codigo'],
             data = datetime.strptime(row["data"], "%Y-%m-%d"),

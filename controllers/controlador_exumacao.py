@@ -66,7 +66,13 @@ class ControladorExumacao:
             return data.strftime("%d/%m/%Y")
         return str(data) if data is not None else ""
 
-    def __formatar_tumulo(self, tumulo: Tumulo) -> str:
+    def __formatar_tumulo(self, tumulo) -> str:
+        if isinstance(tumulo, int):
+            tumulo = Tumulo.buscar_por_codigo(tumulo)
+        
+        if tumulo is None:
+            return "Túmulo não encontrado"
+        
         return (
             f"Código {tumulo.codigo} | "
             f"Setor {tumulo.setor} | "
@@ -89,13 +95,23 @@ class ControladorExumacao:
         }
 
     def __formatar_exumacao_para_tela(self, exumacao: Exumacao) -> dict:
+        sepultamento = Sepultamento.buscar_por_cpf(exumacao.sepultamento)
+        
+        if sepultamento:
+            texto_sepultamento = self.__formatar_sepultamento_para_tela(
+                sepultamento
+            )["texto"]
+        else:
+            texto_sepultamento = f"CPF do falecido: {exumacao.sepultamento}"
+        
         return {
-            "codigo":        exumacao.codigo,
-            "data":          self.__formatar_data(exumacao.data),
-            "sepultamento":  self.__formatar_sepultamento_para_tela(exumacao.sepultamento)["texto"],
-            "destino":       exumacao.destino,
-            "observacoes":   exumacao.observacoes,
-            "objeto":        exumacao
+            "codigo": exumacao.codigo,
+            "data": self.__formatar_data(exumacao.data),
+            "sepultamento": texto_sepultamento,
+            "destino": exumacao.destino,
+            "observacoes": exumacao.observacoes,
+            "realizada": exumacao.realizada(),
+            "objeto": exumacao
         }
 
     def __texto_busca_exumacao(self, exumacao: Exumacao) -> str:
@@ -129,11 +145,13 @@ class ControladorExumacao:
                 return
 
             self.__validar_dados_exumacao(dados)
+            
+            sepultamento = dados["sepultamento"]
 
             nova = Exumacao(
                 codigo = None,   # banco gera
                 data = dados["data"],
-                sepultamento= dados["sepultamento"],
+                sepultamento= sepultamento.falecido.cpf,
                 destino = dados["destino"],
                 observacoes = dados.get("observacoes", "")
             )
@@ -153,25 +171,32 @@ class ControladorExumacao:
         try:
             codigo  = self.__tela_exumacao.pega_codigo_exumacao_selecionada()
             exumacao = Exumacao.buscar_por_codigo(codigo)
+            
             if not exumacao:
                 raise ValueError("Exumação não encontrada.")
+            
+            somente_observacoes = exumacao.realizada()
 
             novos = self.__tela_exumacao.pega_novos_dados_exumacao(
-                self.__formatar_exumacao_para_tela(exumacao)
+                self.__formatar_exumacao_para_tela(exumacao),
+                somente_observacoes
             )
 
             if novos is None:
-                return 
+                return
+            
+            if somente_observacoes:
+                exumacao.observacoes = novos.get("observacoes", "")
+                exumacao.alterar_observacoes()
+            else:
+                self.__validar_dados_exumacao(novos)
 
+                exumacao.data = novos["data"]
+                exumacao.destino = novos["destino"]
+                exumacao.observacoes = novos.get("observacoes", "")
 
-            self.__validar_dados_exumacao(novos)
-
-
-            exumacao.data       = novos["data"]
-            exumacao.destino    = novos["destino"]
-            exumacao.observacoes= novos.get("observacoes", "")
-
-            exumacao.alterar()
+                exumacao.alterar()
+            
             self.__tela_exumacao.mostra_mensagem(
                 "Exumação atualizada com sucesso."
             )
@@ -189,6 +214,12 @@ class ControladorExumacao:
 
             if not exumacao:
                 raise ValueError("Exumação não encontrada.")
+            
+            if exumacao.realizada():
+                raise ValueError(
+                    "Exumação já realizada não pode ser excluída. "
+                    "Apenas as observações podem ser alteradas."
+                )
 
             if not self.__tela_exumacao.confirma_exclusao_exumacao(
                 self.__formatar_exumacao_para_tela(exumacao)
