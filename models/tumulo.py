@@ -186,6 +186,17 @@ class Tumulo:
             })
 
         return relatorio
+
+    def esta_lotado(self) -> bool:
+        db = Database.get_instance()
+        ocupados = db.coneccao.execute("""
+            SELECT COUNT(*) FROM sepultamentos s
+            WHERE s.tumulo = ? AND s.ativo = 1
+              AND NOT EXISTS (
+                  SELECT 1 FROM exumacoes e WHERE e.sepultamento = s.cpf_falecido
+              )
+        """, (self.__codigo,)).fetchone()[0]
+        return ocupados >= self.__capacidade
     
 #auxiliar
     @staticmethod

@@ -264,3 +264,6 @@ class ControladorTumulo:
 
         if not tumulo:
             raise ValueError("Esse túmulo não existe")
+        
+        if tumulo.esta_lotado():
+            raise ValueError("Túmulo atingiu a capacidade máxima. Não é possível realizar novos sepultamentos.")
