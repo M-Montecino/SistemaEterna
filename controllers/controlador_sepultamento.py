@@ -47,7 +47,7 @@ class ControladorSepultamento:
                 except ValueError:
                     pass
             try:
-                return TipoPagamento[texto.upper()]
+                return TipoPagamento[texto]
             except KeyError:
                 raise ValueError("Tipo de pagamento inválido.")
         if isinstance(tipo, int):
@@ -199,68 +199,154 @@ class ControladorSepultamento:
     def alterar_sepultamento(self):
         try:
             cpf = self.__tela_sepultamento.pega_cpf_alteracao()
-            if cpf is None: return
+            if cpf is None:
+                return
+
             cpf = limpar_cpf(cpf)
+
             if not validar_cpf(cpf):
                 raise ValueError("CPF inválido.")
 
             sepultamento = Sepultamento.buscar_por_cpf(cpf)
+
             if not sepultamento:
-                self.__tela_sepultamento.mostra_mensagem("Sepultamento não encontrado.")
+                self.__tela_sepultamento.mostra_mensagem(
+                    "Sepultamento não encontrado."
+                )
                 return
 
             novos = self.__tela_sepultamento.pega_novos_dados_sepultamento()
-            if novos is None: return
-            f = sepultamento.falecido
+
+            if novos is None:
+                return
+
             c = sepultamento.concessao
 
+
+            # ===== TRATAMENTO DAS DATAS =====
+
+            data_pagamento = (
+                novos['data_pagamento']
+                if novos['data_pagamento']
+                else c.pagamento.data_pagamento
+            )
+
+            data_final_cons = (
+                novos['data_final_cons']
+                if novos['data_final_cons']
+                else c.data_fim
+            )
+
+
+            if isinstance(data_pagamento, str):
+                data_pagamento = datetime.strptime(
+                    data_pagamento,
+                    "%d/%m/%Y"
+                )
+
+
+            if isinstance(data_final_cons, str):
+                data_final_cons = datetime.strptime(
+                    data_final_cons,
+                    "%d/%m/%Y"
+                )
+
+
             dados_finais = {
-                'cpf_falecido': f.cpf,
-                'nome_falecido': novos['nome_falecido'] or f.nome,
-                'data_nascimento':novos['data_nascimento'] or f.data_nascimento,
-                'data_falecimento': novos['data_falecimento'] or f.data_falecimento,
-                'causa_morte': novos['causa_morte'] or f.causa_morte,
+
                 'tumulo': novos['tumulo'] or sepultamento.tumulo,
-                'valor': novos['valor'] or c.pagamento.valor,
-                'data_pagamento': novos['data_pagamento'] or c.pagamento.data_pagamento,
-                'tipo_pagamento': novos['tipo_pagamento'] or c.pagamento.tipo_pagamento,
-                'responsavel': novos['responsavel'] or c.responsavel,
-                'responsavel2': novos['responsavel2'] or c.responsavel2,
-                'data_inicio_cons': novos['data_inicio_cons'] or c.data_inicio,
-                'data_final_cons': novos['data_final_cons'] or c.data_fim,
-                'status': novos['status'] or c.status,
-                'data_sepultamento': novos['data_sepultamento'] or sepultamento.data_sepultamento,
-                'observacoes': novos['observacoes'] or sepultamento.observacoes,
+
+                'data_pagamento': data_pagamento,
+
+                'tipo_pagamento':
+                    novos['tipo_pagamento']
+                    or c.pagamento.tipo_pagamento,
+
+                'data_final_cons': data_final_cons,
+
+                'status':
+                    novos['status']
+                    or c.status,
+
+                'observacoes':
+                    novos['observacoes']
+                    or sepultamento.observacoes
             }
+
+
+            # ===== VALIDAÇÕES =====
+
             self.__controlador_geral.controlador_tumulo.validar_tumulo(
                 dados_finais['tumulo']
             )
-            self.__validar_dados_sepultamento(dados_finais)
 
-            #atualizando dados
-            f.nome = dados_finais['nome_falecido']
-            f.data_nascimento = dados_finais['data_nascimento']
-            f.data_falecimento = dados_finais['data_falecimento']
-            f.causa_morte = dados_finais['causa_morte']
+
+            self.__validar_data(
+                dados_finais["data_pagamento"]
+            )
+
+
+            dados_finais["tipo_pagamento"] = (
+                self.__converter_tipo_pagamento(
+                    dados_finais["tipo_pagamento"]
+                )
+            )
+
+
+            self.__validar_data(
+                dados_finais["data_final_cons"]
+            )
+
+
+            dados_finais["status"] = (
+                self.__converter_status_concessao(
+                    dados_finais["status"]
+                )
+            )
+
+
+            # ===== ATUALIZA OBJETOS =====
+
             sepultamento.tumulo = dados_finais['tumulo']
-            c.pagamento.valor = dados_finais['valor']
-            c.pagamento.data_pagamento = dados_finais['data_pagamento']
-            c.pagamento.tipo_pagamento = dados_finais['tipo_pagamento']
-            c.responsavel = dados_finais['responsavel']
-            c.responsavel2 = dados_finais['responsavel2']
-            c.data_inicio  = dados_finais['data_inicio_cons']
-            c.data_fim = dados_finais['data_final_cons']
-            c.status  = dados_finais['status']
-            sepultamento.data_sepultamento = dados_finais['data_sepultamento']
-            sepultamento.observacoes = dados_finais['observacoes']
 
+
+            c.pagamento.data_pagamento = (
+                dados_finais['data_pagamento']
+            )
+
+
+            c.pagamento.tipo_pagamento = (
+                dados_finais['tipo_pagamento']
+            )
+
+
+            c.data_fim = (
+                dados_finais['data_final_cons']
+            )
+
+
+            c.status = (
+                dados_finais['status']
+            )
+
+
+            sepultamento.observacoes = (
+                dados_finais['observacoes']
+            )
+
+
+            # ===== SALVA NO BANCO =====
 
             sepultamento.alterar()
+
+
             self.__tela_sepultamento.mostra_mensagem(
                 "Sepultamento alterado com sucesso."
-                )    
-            
+            )
+
+
         except ValueError as erro:
+
             self.__tela_sepultamento.mostra_mensagem(
                 f"Erro ao alterar sepultamento: {str(erro)}"
             )

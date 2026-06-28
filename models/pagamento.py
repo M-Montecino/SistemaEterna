@@ -65,10 +65,9 @@ class Pagamento:
         db = Database.get_instance()
         db.coneccao.execute("""
             UPDATE pagamentos
-            SET valor = ?, data_pagamento = ?, tipo_pagamento = ?
+            SET data_pagamento = ?, tipo_pagamento = ?
             WHERE id = ?
         """, (
-            self.__valor,
             self.__data_pagamento.strftime("%Y-%m-%d"),
             self.__tipo_pagamento.value,
             self.__id

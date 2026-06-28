@@ -10,8 +10,8 @@ class StatusConcessao(Enum):
 
 class Concessao:
     def __init__(self, valor, data_pagamento, tipo_pagamento, responsavel, responsavel2, data_inicio, data_fim, status, 
-    id=None):
-        self.pagamento = Pagamento(valor, data_pagamento, tipo_pagamento)
+    id=None, id_pagamento=None):
+        self.pagamento = Pagamento(valor, data_pagamento, tipo_pagamento, id_pagamento)
         self.__id = id
         self.__responsavel = responsavel
         self.__responsavel2 = responsavel2
@@ -76,10 +76,7 @@ class Concessao:
 
         db = Database.get_instance()
         cursor = db.coneccao.cursor()
-        id_pagamento = cursor.execute("""
-                SELECT MAX(id) as id
-                FROM pagamentos
-            """).fetchone()["id"]
+        id_pagamento = self.pagamento.id
         cursor.execute("""
             INSERT INTO concessoes
                 (id_pagamento, responsavel, responsavel2, data_inicio, data_fim, status)
@@ -101,12 +98,9 @@ class Concessao:
 
         db.coneccao.execute("""
             UPDATE concessoes
-            SET responsavel = ?, responsavel2 = ?,
-                data_inicio = ?, data_fim = ?, status = ?
+            SET data_inicio = ?, data_fim = ?, status = ?
             WHERE id = ?
         """, (
-            self.__responsavel,
-            self.__responsavel2,
             self.__data_inicio.strftime("%Y-%m-%d"),
             self.__data_fim.strftime("%Y-%m-%d"),
             self.__status.name,
@@ -143,15 +137,22 @@ class Concessao:
         pagamento = Pagamento.buscar_por_id(row["id_pagamento"])
 
         return Concessao(
-            id = row["id"],
-            valor = pagamento.valor,
-            data_pagamento = pagamento.data_pagamento,
-            tipo_pagamento = pagamento.tipo_pagamento,
-            responsavel = row["responsavel"],     
-            responsavel2 = row["responsavel2"],
-            data_inicio = datetime.strptime(row["data_inicio"], "%Y-%m-%d"),
-            data_fim = datetime.strptime(row["data_fim"],    "%Y-%m-%d"),
-            status = StatusConcessao[row["status"]]
+            id=row["id"],
+            id_pagamento=row["id_pagamento"],
+            valor=pagamento.valor,
+            data_pagamento=pagamento.data_pagamento,
+            tipo_pagamento=pagamento.tipo_pagamento,
+            responsavel=row["responsavel"],
+            responsavel2=row["responsavel2"],
+            data_inicio=datetime.strptime(
+                row["data_inicio"],
+                "%Y-%m-%d"
+            ),
+            data_fim=datetime.strptime(
+                row["data_fim"],
+                "%Y-%m-%d"
+            ),
+            status=StatusConcessao[row["status"]]
         )
     @staticmethod
     def possui_concessao_vencida(cpf):

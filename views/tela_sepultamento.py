@@ -270,90 +270,114 @@ class TelaSepultamento:
 
         janela = tk.Toplevel(self.__root)
         janela.title("Alterar Sepultamento")
-        janela.geometry("500x300")
+        janela.geometry("500x350")
 
         dados = {}
 
         tk.Label(
             janela,
-            text="Novo nome"
+            text="Novo túmulo"
         ).place(x=0, y=0)
 
-        nome = tk.Entry(
-            janela,
-            width=30
-        )
-
-        nome.place(x=190, y=0)
+        tumulo = tk.Entry(janela)
+        tumulo.place(x=200, y=0)
 
         tk.Label(
             janela,
-            text="Nova data nascimento (dd/mm/aaaa)"
+            text="Nova data pagamento (dd/mm/aaaa)"
         ).place(x=0, y=40)
 
-        nascimento = tk.Entry(janela)
-
-        nascimento.place(x=210, y=40)
-
-        nascimento.bind(
-            "<KeyRelease>",
-            mascara_data
-        )
+        data_pagamento = tk.Entry(janela)
+        data_pagamento.place(x=210, y=40)
+        data_pagamento.bind("<KeyRelease>", mascara_data)
 
         tk.Label(
             janela,
-            text="Nova data falecimento (dd/mm/aaaa)"
+            text="Novo tipo de pagamento"
         ).place(x=0, y=80)
 
-        falecimento = tk.Entry(janela)
-
-        falecimento.place(x=210, y=80)
-
-        falecimento.bind(
-            "<KeyRelease>",
-            mascara_data
-        )
+        tipo_pagamento = ttk.Combobox(
+            janela,
+            values=["Débito", "Crédito", "Pix"],
+            state="readonly",
+            width=15
+)
+        tipo_pagamento.place(x=210, y=80)
 
         tk.Label(
             janela,
-            text="Nova causa morte"
+            text="Nova data final concessão (dd/mm/aaaa)"
         ).place(x=0, y=120)
 
-        causa = tk.Entry(
-            janela,
-            width=30
-        )
+        data_final = tk.Entry(janela)
+        data_final.place(x=230, y=120)
+        data_final.bind("<KeyRelease>", mascara_data)
 
-        causa.place(x=190, y=120)
+        tk.Label(
+            janela,
+            text="Novo status"
+        ).place(x=0, y=160)
+
+        status = ttk.Combobox(
+            janela,
+            values=["ATIVA", "CARENCIA", "VENCIDA"],
+            state="readonly",
+            width=15
+        )
+        status.place(x=220, y=160)
+
+        tk.Label(
+            janela,
+            text="Novas observações"
+        ).place(x=0, y=200)
+
+        observacoes = tk.Entry(
+            janela,
+            width=35
+        )
+        observacoes.place(x=200, y=200)
 
         def confirmar():
-            dados['nome_falecido'] = (
-                nome.get()
-                if nome.get()
+
+            dados["tumulo"] = (
+                int(tumulo.get())
+                if tumulo.get()
                 else None
             )
 
-            dados['data_nascimento'] = (
+            dados["data_pagamento"] = (
                 datetime.strptime(
-                    nascimento.get(),
+                    data_pagamento.get(),
                     "%d/%m/%Y"
                 )
-                if nascimento.get()
+                if data_pagamento.get()
                 else None
             )
 
-            dados['data_falecimento'] = (
+            dados["tipo_pagamento"] = (
+                tipo_pagamento.get()
+                if tipo_pagamento.get()
+                else None
+            )
+
+            dados["data_final_cons"] = (
                 datetime.strptime(
-                    falecimento.get(),
+                    data_final.get(),
                     "%d/%m/%Y"
                 )
-                if falecimento.get()
+                if data_final.get()
                 else None
             )
 
-            dados['causa_morte'] = (
-                causa.get()
-                if causa.get()
+            dados["status"] = (
+                status.get()
+                if status.get()
+                else None
+            )
+
+            dados["observacoes"] = (
+                observacoes.get()
+                if observacoes.get()
                 else None
             )
 
@@ -363,7 +387,7 @@ class TelaSepultamento:
             janela,
             text="Confirmar",
             command=confirmar
-        ).place(x=190, y=180)
+        ).place(x=200, y=260)
 
         janela.wait_window()
 
