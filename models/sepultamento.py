@@ -143,7 +143,7 @@ class Sepultamento:
     def buscar_por_cpf(cpf: str):
         db  = Database.get_instance()
         row = db.coneccao.execute(
-            "SELECT * FROM sepultamentos WHERE cpf_falecido = ?", (cpf,)
+            "SELECT * FROM sepultamentos WHERE cpf_falecido = ? AND ativo = 1", (cpf,)
         ).fetchone()
         return Sepultamento._row_para_objeto(row) if row else None
 
