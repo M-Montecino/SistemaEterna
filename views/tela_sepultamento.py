@@ -97,49 +97,69 @@ class TelaSepultamento:
         rodape.pack(pady=(15, 10))
 
 #Funções
+    def __criar_area_scroll(self, container):
+        canvas = tk.Canvas(container, bg="#f4f6f9", highlightthickness=0)
+        barra = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=barra.set)
+
+        barra.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True)
+
+        frame = tk.Frame(canvas, bg="#f4f6f9")
+        item = canvas.create_window((0, 0), window=frame, anchor="nw")
+
+        def ajustar_scroll(event=None):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+            canvas.itemconfig(item, width=event.width if event else frame.winfo_width())
+
+        frame.bind("<Configure>", ajustar_scroll)
+        canvas.bind("<Configure>", ajustar_scroll)
+        return frame
+
     def pega_dados_sepultamento(self):
         janela, container = criar_popup_modal(
             self.__root,
             "Cadastro de Sepultamento",
             "Preencha os dados do sepultamento",
             largura=520,
-            altura=640
+            altura=760
         )
+        frame_form = self.__criar_area_scroll(container)
 
         dados = None
 
-        cpf_falecido = criar_entrada_estilizada(container, "CPF do falecido")
-        nome_falecido = criar_entrada_estilizada(container, "Nome do falecido")
-        nascimento_str = criar_entrada_estilizada(container, "Data de nascimento (DD/MM/AAAA)")
+        cpf_falecido = criar_entrada_estilizada(frame_form, "CPF do falecido")
+        nome_falecido = criar_entrada_estilizada(frame_form, "Nome do falecido")
+        nascimento_str = criar_entrada_estilizada(frame_form, "Data de nascimento (DD/MM/AAAA)")
         nascimento_str.bind("<KeyRelease>", mascara_data)
-        falecimento_str = criar_entrada_estilizada(container, "Data de falecimento (DD/MM/AAAA)")
+        falecimento_str = criar_entrada_estilizada(frame_form, "Data de falecimento (DD/MM/AAAA)")
         falecimento_str.bind("<KeyRelease>", mascara_data)
-        causa_morte = criar_entrada_estilizada(container, "Causa da morte")
-        tumulo = criar_entrada_estilizada(container, "Túmulo")
-        valor = criar_entrada_estilizada(container, "Valor do pagamento")
-        pagamento_str = criar_entrada_estilizada(container, "Data do pagamento (DD/MM/AAAA)")
+        causa_morte = criar_entrada_estilizada(frame_form, "Causa da morte")
+        tumulo = criar_entrada_estilizada(frame_form, "Túmulo")
+        valor = criar_entrada_estilizada(frame_form, "Valor do pagamento")
+        pagamento_str = criar_entrada_estilizada(frame_form, "Data do pagamento (DD/MM/AAAA)")
         pagamento_str.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(container, text="Tipo de pagamento", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
-        tipo_pagamento = ttk.Combobox(container, values=[1, 2, 3], state="readonly", width=28)
+        tk.Label(frame_form, text="Tipo de pagamento", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
+        tipo_pagamento = ttk.Combobox(frame_form, values=[1, 2, 3], state="readonly", width=28)
         tipo_pagamento.set(1)
-        tipo_pagamento.pack(fill="x", pady=(2, 8))
+        tipo_pagamento.pack(fill="x", pady=(2, 4))
 
-        responsavel = criar_entrada_estilizada(container, "Responsável 1")
-        responsavel2 = criar_entrada_estilizada(container, "Responsável 2")
-        inicio_cons_str = criar_entrada_estilizada(container, "Início da concessão (DD/MM/AAAA)")
+        responsavel = criar_entrada_estilizada(frame_form, "Responsável 1")
+        responsavel2 = criar_entrada_estilizada(frame_form, "Responsável 2")
+        inicio_cons_str = criar_entrada_estilizada(frame_form, "Início da concessão (DD/MM/AAAA)")
         inicio_cons_str.bind("<KeyRelease>", mascara_data)
-        final_cons_str = criar_entrada_estilizada(container, "Final da concessão (DD/MM/AAAA)")
+        final_cons_str = criar_entrada_estilizada(frame_form, "Final da concessão (DD/MM/AAAA)")
         final_cons_str.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(container, text="Status (1-Ativa / 2-Carência / 3-Vencida)", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
-        status = ttk.Combobox(container, values=[1, 2, 3], state="readonly", width=28)
+        tk.Label(frame_form, text="Status (1-Ativa / 2-Carência / 3-Vencida)", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
+        status = ttk.Combobox(frame_form, values=[1, 2, 3], state="readonly", width=28)
         status.set(1)
-        status.pack(fill="x", pady=(2, 8))
+        status.pack(fill="x", pady=(2, 4))
 
-        sepultamento_str = criar_entrada_estilizada(container, "Data do sepultamento (DD/MM/AAAA)")
+        sepultamento_str = criar_entrada_estilizada(frame_form, "Data do sepultamento (DD/MM/AAAA)")
         sepultamento_str.bind("<KeyRelease>", mascara_data)
-        observacoes = criar_entrada_estilizada(container, "Observações")
+        observacoes = criar_entrada_estilizada(frame_form, "Observações")
 
         def confirmar():
             nonlocal dados
@@ -166,7 +186,7 @@ class TelaSepultamento:
                 dados = None
             janela.destroy()
 
-        criar_botao_confirmacao(container, confirmar)
+        criar_botao_confirmacao(frame_form, confirmar)
         janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
         janela.bind("<Return>", lambda event: confirmar())
         janela.wait_window()
@@ -179,27 +199,28 @@ class TelaSepultamento:
             "Alterar Sepultamento",
             "Atualize apenas os campos desejados",
             largura=460,
-            altura=420
+            altura=620
         )
+        frame_form = self.__criar_area_scroll(container)
 
         dados = {}
 
-        tumulo = criar_entrada_estilizada(container, "Novo túmulo")
-        data_pagamento = criar_entrada_estilizada(container, "Nova data de pagamento (DD/MM/AAAA)")
+        tumulo = criar_entrada_estilizada(frame_form, "Novo túmulo")
+        data_pagamento = criar_entrada_estilizada(frame_form, "Nova data de pagamento (DD/MM/AAAA)")
         data_pagamento.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(container, text="Novo tipo de pagamento", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
-        tipo_pagamento = ttk.Combobox(container, values=["Débito", "Crédito", "Pix"], state="readonly", width=28)
-        tipo_pagamento.pack(fill="x", pady=(2, 8))
+        tk.Label(frame_form, text="Novo tipo de pagamento", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
+        tipo_pagamento = ttk.Combobox(frame_form, values=["Débito", "Crédito", "Pix"], state="readonly", width=28)
+        tipo_pagamento.pack(fill="x", pady=(2, 4))
 
-        data_final = criar_entrada_estilizada(container, "Nova data final de concessão (DD/MM/AAAA)")
+        data_final = criar_entrada_estilizada(frame_form, "Nova data final de concessão (DD/MM/AAAA)")
         data_final.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(container, text="Novo status", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
-        status = ttk.Combobox(container, values=["ATIVA", "CARENCIA", "VENCIDA"], state="readonly", width=28)
-        status.pack(fill="x", pady=(2, 8))
+        tk.Label(frame_form, text="Novo status", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
+        status = ttk.Combobox(frame_form, values=["ATIVA", "CARENCIA", "VENCIDA"], state="readonly", width=28)
+        status.pack(fill="x", pady=(2, 4))
 
-        observacoes = criar_entrada_estilizada(container, "Novas observações")
+        observacoes = criar_entrada_estilizada(frame_form, "Novas observações")
 
         def confirmar():
             dados["tumulo"] = int(tumulo.get().strip()) if tumulo.get().strip() else None
@@ -210,7 +231,7 @@ class TelaSepultamento:
             dados["observacoes"] = observacoes.get().strip() or None
             janela.destroy()
 
-        criar_botao_confirmacao(container, confirmar)
+        criar_botao_confirmacao(frame_form, confirmar)
         janela.protocol("WM_DELETE_WINDOW", lambda: janela.destroy())
         janela.bind("<Return>", lambda event: confirmar())
         janela.wait_window()

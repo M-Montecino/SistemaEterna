@@ -148,7 +148,7 @@ class TelaResponsavel:
             "Alterar Responsável",
             "Atualize apenas os campos desejados",
             largura=460,
-            altura=470
+            altura=500,
         )
 
         dados = {}

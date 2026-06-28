@@ -103,7 +103,7 @@ class TelaTumulo:
             "Cadastro de Túmulo",
             "Preencha os dados do túmulo",
             largura=460,
-            altura=400
+            altura=480
         )
 
         codigo = criar_entrada_estilizada(container, "Código")
@@ -150,7 +150,7 @@ class TelaTumulo:
             "Alterar Túmulo",
             "Atualize apenas os campos desejados",
             largura=460,
-            altura=360
+            altura=460
         )
 
         dados = {}

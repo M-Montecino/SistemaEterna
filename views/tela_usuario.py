@@ -117,7 +117,7 @@ class TelaUsuario:
             "Cadastro de Usuário",
             "Preencha os dados do novo usuário",
             largura=460,
-            altura=480
+            altura=540
         )
 
         nome = criar_entrada_estilizada(container, "Nome")
