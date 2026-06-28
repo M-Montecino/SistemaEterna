@@ -17,6 +17,7 @@ class Sepultamento:
         data_pagamento: datetime,
         tipo_pagamento,
         id,
+        id_pagamento,
         responsavel,
         responsavel2,
         data_inicio_cons: datetime,
@@ -33,7 +34,7 @@ class Sepultamento:
         self.__concessao = Concessao(
             valor, data_pagamento, tipo_pagamento,
             responsavel, responsavel2,
-            data_inicio_cons, data_final_cons, status, id
+            data_inicio_cons, data_final_cons, status, id, id_pagamento,
         )
         self.__data_sepultamento = data_sepultamento
         self.__observacoes = observacoes
@@ -110,20 +111,18 @@ class Sepultamento:
 
 
     def alterar(self):
-        self.__falecido.alterar()
         self.__concessao.alterar()
 
         db = Database.get_instance()
         db.coneccao.execute("""
             UPDATE sepultamentos
             SET tumulo = ?, data_sepultamento = ?,
-                observacoes = ?, ativo = ?
+                observacoes = ?
             WHERE cpf_falecido = ?
         """, (
             self.__tumulo,
             self.__data_sepultamento.strftime("%Y-%m-%d"),
             self.__observacoes,
-            int(self.__ativo),
             self.__falecido.cpf
         ))
         db.coneccao.commit()
@@ -178,6 +177,7 @@ class Sepultamento:
             data_pagamento = concessao.pagamento.data_pagamento,
             tipo_pagamento = concessao.pagamento.tipo_pagamento.name,
             id=concessao.id,
+            id_pagamento = concessao.pagamento.id,
             responsavel = concessao.responsavel,
             responsavel2 = concessao.responsavel2,
             data_inicio_cons = concessao.data_inicio,

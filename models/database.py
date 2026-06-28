@@ -64,7 +64,7 @@ class Database:
         );
 
         CREATE TABLE IF NOT EXISTS sepultamentos(
-            cpf_falecido VARCHAR(11) REFERENCES falecidos(cpf),
+            cpf_falecido VARCHAR(11) PRIMARY KEY REFERENCES falecidos(cpf),
             tumulo INTEGER REFERENCES tumulos(codigo),
             id_concessao INTEGER REFERENCES concessoes(id),
             data_sepultamento DATE NOT NULL,
@@ -97,6 +97,7 @@ class Database:
             data_nascimento DATE NOT NULL
         );
         """)
+        
         self._migrar_tabela_usuarios()
         self.coneccao.commit()
 
