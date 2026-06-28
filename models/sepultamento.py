@@ -85,7 +85,7 @@ class Sepultamento:
 
     def encerrar_sepultamento(self):
         self.__ativo = False
-        self.salvar()
+        self.alterar()
 
 #persistência
     def cadastrar(self):
@@ -143,6 +143,15 @@ class Sepultamento:
         db  = Database.get_instance()
         row = db.coneccao.execute(
             "SELECT * FROM sepultamentos WHERE cpf_falecido = ? AND ativo = 1", (cpf,)
+        ).fetchone()
+        return Sepultamento._row_para_objeto(row) if row else None
+    
+    @staticmethod
+    def buscar_por_cpf_incluindo_inativos(cpf: str):
+        db = Database.get_instance()
+        row = db.coneccao.execute(
+            "SELECT * FROM sepultamentos WHERE cpf_falecido = ?",
+            (cpf,)
         ).fetchone()
         return Sepultamento._row_para_objeto(row) if row else None
 

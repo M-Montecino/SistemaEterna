@@ -1,5 +1,6 @@
 from enum import Enum
 from models.database import Database
+from models.exumacao import Exumacao
 
 class TipoTumulo(Enum):
     Cova = 1
@@ -134,6 +135,8 @@ class Tumulo:
 #relatorio
     @staticmethod
     def buscar_dados_ocupacao():
+        Exumacao.sincronizar_sepultamentos_exumados()
+        
         db = Database.get_instance()
         rows = db.coneccao.execute(
             '''
@@ -189,6 +192,8 @@ class Tumulo:
         return relatorio
 
     def esta_lotado(self) -> bool:
+        Exumacao.sincronizar_sepultamentos_exumados()
+        
         db = Database.get_instance()
         ocupados = db.coneccao.execute("""
             SELECT COUNT(*) FROM sepultamentos s

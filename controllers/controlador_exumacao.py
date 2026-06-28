@@ -95,7 +95,7 @@ class ControladorExumacao:
         }
 
     def __formatar_exumacao_para_tela(self, exumacao: Exumacao) -> dict:
-        sepultamento = Sepultamento.buscar_por_cpf(exumacao.sepultamento)
+        sepultamento = Sepultamento.buscar_por_cpf_incluindo_inativos(exumacao.sepultamento)
         
         if sepultamento:
             texto_sepultamento = self.__formatar_sepultamento_para_tela(
@@ -157,6 +157,8 @@ class ControladorExumacao:
             )
 
             nova.cadastrar()
+            Exumacao.sincronizar_sepultamentos_exumados()
+            
             self.__tela_exumacao.mostra_mensagem(
                 "Exumação cadastrada com sucesso."
             )
@@ -196,6 +198,7 @@ class ControladorExumacao:
                 exumacao.observacoes = novos.get("observacoes", "")
 
                 exumacao.alterar()
+                Exumacao.sincronizar_sepultamentos_exumados()
             
             self.__tela_exumacao.mostra_mensagem(
                 "Exumação atualizada com sucesso."
@@ -268,6 +271,7 @@ class ControladorExumacao:
             "voltar": self.retomar_menu
         }
 
+        Exumacao.sincronizar_sepultamentos_exumados()
         self.filtrar_exumacoes()
 
         while True:

@@ -165,6 +165,23 @@ class Exumacao:
 
         return [Exumacao._row_para_objeto(r) for r in rows]
     
+    @staticmethod
+    def sincronizar_sepultamentos_exumados():   #atualiza sepultamentos inativos de acordo com a data da exumacao
+        db = Database.get_instance()
+
+        db.coneccao.execute("""
+            UPDATE sepultamentos
+            SET ativo = 0
+            WHERE ativo = 1
+            AND cpf_falecido IN (
+                SELECT sepultamento
+                FROM exumacoes
+                WHERE date(data) <= date('now', 'localtime')
+            )
+        """)
+
+        db.coneccao.commit()
+        
 #auxiliar
     @staticmethod
     def _row_para_objeto(row):

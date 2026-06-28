@@ -87,6 +87,8 @@ class ControladorGeral:
         self.__controlador_exumacao.abre_tela()
         
     def __gerar_dados_relatorio_gerencial(self):
+        Exumacao.sincronizar_sepultamentos_exumados()
+        
         ocupacao_tumulos = Tumulo.buscar_dados_ocupacao()
 
         total_tumulos_cadastrados = len(ocupacao_tumulos)
