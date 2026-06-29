@@ -140,7 +140,7 @@ class TelaSepultamento:
         pagamento_str = criar_entrada_estilizada(frame_form, "Data do pagamento (DD/MM/AAAA)")
         pagamento_str.bind("<KeyRelease>", mascara_data)
 
-        tk.Label(frame_form, text="Tipo de pagamento", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
+        tk.Label(frame_form, text="Tipo de pagamento (1-Débito / 2-Crédito / 3-Pix)", bg="#f4f6f9", fg="#1f2937").pack(anchor="w", pady=(8, 2))
         tipo_pagamento = ttk.Combobox(frame_form, values=[1, 2, 3], state="readonly", width=28)
         tipo_pagamento.set(1)
         tipo_pagamento.pack(fill="x", pady=(2, 4))
