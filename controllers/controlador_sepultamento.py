@@ -176,6 +176,7 @@ class ControladorSepultamento:
                 dados['data_pagamento'],
                 dados['tipo_pagamento'], 
                 None,
+                None,
                 dados['responsavel'],
                 dados['responsavel2'],   
                 dados['data_inicio_cons'],
