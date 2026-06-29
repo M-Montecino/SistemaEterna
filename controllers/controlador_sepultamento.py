@@ -138,11 +138,14 @@ class ControladorSepultamento:
                 "O responsável possui concessões vencidas e deve renová-las antes de realizar novos sepultamentos."
             )
 
-    #metodos principais
+    #metodos
     def cadastrar_sepultamento(self):
         try:
             dados = self.__tela_sepultamento.pega_dados_sepultamento()
-            if dados is None: return
+            if None in dados.values():
+                self.__tela_sepultamento.mostra_mensagem("Cadastro precisa de TODOS os dados.")
+                return
+
             self.__validar_dados_sepultamento(dados)
 
             self.__validar_responsavel_sem_concessao_vencida(
@@ -223,9 +226,6 @@ class ControladorSepultamento:
 
             c = sepultamento.concessao
 
-
-            # ===== TRATAMENTO DAS DATAS =====
-
             data_pagamento = (
                 novos['data_pagamento']
                 if novos['data_pagamento']
@@ -274,9 +274,6 @@ class ControladorSepultamento:
                     or sepultamento.observacoes
             }
 
-
-            # ===== VALIDAÇÕES =====
-
             if dados_finais['tumulo'] != sepultamento.tumulo:
                 self.__controlador_geral.controlador_tumulo.validar_tumulo(
                     dados_finais['tumulo']
@@ -306,9 +303,6 @@ class ControladorSepultamento:
                 )
             )
 
-
-            # ===== ATUALIZA OBJETOS =====
-
             sepultamento.tumulo = dados_finais['tumulo']
 
 
@@ -335,9 +329,6 @@ class ControladorSepultamento:
             sepultamento.observacoes = (
                 dados_finais['observacoes']
             )
-
-
-            # ===== SALVA NO BANCO =====
 
             sepultamento.alterar()
 
