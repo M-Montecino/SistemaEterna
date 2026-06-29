@@ -277,9 +277,10 @@ class ControladorSepultamento:
 
             # ===== VALIDAÇÕES =====
 
-            self.__controlador_geral.controlador_tumulo.validar_tumulo(
-                dados_finais['tumulo']
-            )
+            if dados_finais['tumulo'] != sepultamento.tumulo:
+                self.__controlador_geral.controlador_tumulo.validar_tumulo(
+                    dados_finais['tumulo']
+                )
 
 
             self.__validar_data(
