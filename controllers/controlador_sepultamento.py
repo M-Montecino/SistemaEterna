@@ -130,7 +130,8 @@ class ControladorSepultamento:
             f"Responsável 2: {c.responsavel2}\n"
             f"Início da concessão: {c.data_inicio.strftime('%d/%m/%Y')}\n"
             f"Fim da concessão: {c.data_fim.strftime('%d/%m/%Y')}\n"
-            f"Status da concessão: {c.status.name}"
+            f"Status da concessão: {c.status.name}\n"
+            f"Sepultamento: {'ativo' if s.ativo else 'inativo'}"
         )
     def __validar_responsavel_sem_concessao_vencida(self, cpf):
         if Concessao.possui_concessao_vencida(cpf):
