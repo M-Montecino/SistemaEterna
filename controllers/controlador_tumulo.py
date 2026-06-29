@@ -148,8 +148,6 @@ class ControladorTumulo:
             tumulo.setor = dados_finais['setor']
             tumulo.numero = dados_finais['numero']
             tumulo.tipo = tipo_tumulo
-            print(type(tipo_tumulo))
-            print(tipo_tumulo)
             tumulo.capacidade = dados_finais['capacidade']
 
             tumulo.alterar()
